@@ -1,0 +1,29 @@
+li {
+    list-style-type: none;
+}
+li span.section,
+li span.check  {
+    display: inline-block;
+    border-left: 0.8em #ddd solid;
+    padding-left: 0.5em;
+    margin: 2px 0;
+}
+
+.red > span.section,
+.red > span.check {
+    border-color: red
+}
+
+.green > span.section,
+.green > span.check {
+    border-color: green
+}
+
+.yellow > span.section,
+.yellow > span.check {
+    border-color: orange
+}
+
+.msg {
+    margin: 0 0 0 1em;
+}
