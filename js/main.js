@@ -240,13 +240,16 @@ function Checker(host, out_id) {
     }
 
     function worse_color(current_color, new_color) {
-        if (current_color == 'red') {
+        if (current_color == 'red' || new_color == 'red') {
             return 'red'
         }
-        if (new_color == 'green') {
-            return current_color
+        if (current_color == 'yellow' || new_color == 'yellow') {
+            return 'yellow'
         }
-        return new_color;
+        if (current_color == 'blue' || new_color == 'blue') {
+            return 'blue'
+        }
+        return 'green';
     }
 
     function get_url(path, params) {

@@ -28,6 +28,11 @@ li span.check  {
     border-color: orange
 }
 
+.blue > span.section,
+.blue > span.check {
+    border-color: blue
+}
+
 .msg {
     margin: 0 0 0 1em;
 }
