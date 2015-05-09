@@ -8,7 +8,6 @@ Checks
         name : "In-memory indices",
         color : "red",
         check : function(settings) {
-          var o = Checks.get_key(settings, "index.store.type");
           if (Checks.get_key(settings, "index.store.type").match(/ram|memory/)) {
             return "Indices with `index.store.type` of `ram` or `memory` "
               + "are no longer supported."

@@ -1,12 +1,30 @@
 "use strict";
 
+function forall(obj, f) {
+  if (obj.constructor === Array) {
+    for (var i = 0; i < obj.length; i++) {
+      var ret = f(obj[i]);
+      if (ret !== undefined) {
+        return ret;
+      }
+    }
+  } else {
+    var keys = Object.keys(obj).sort();
+    for (var i = 0; i < keys.length; i++) {
+      var ret = f(obj[keys[i]], keys[i]);
+      if (ret !== undefined) {
+        return ret;
+      }
+    }
+  }
+}
+
 var Checks = (function() {
   var registry = {
     "index.settings" : [],
     "index.segments" : [],
     "index.mappings" : [],
     "index.flat_mappings" : [],
-    "index.mappings.types" : [],
     "index.mappings.fields" : []
   };
 
@@ -90,46 +108,58 @@ function Checker(host, out_id) {
       log.log("No indices found");
       return;
     }
-    var index_phases = [ 'index.segments', 'index.settings', 'index.mappings',
-      'index.flat_mappings' ];
 
-    for (var i = 0; i < indices.length; i++) {
-      var index = indices[i];
+    forall(indices, function(index) {
       var index_color = 'green';
       log.start_section('Index: ' + index);
 
       /* index.* */
-      for (var j = 0; j < index_phases.length; j++) {
-        var phase = index_phases[j];
+      forall([ 'index.segments', 'index.settings', 'index.mappings',
+        'index.flat_mappings' ], function(phase) {
+
         var data = data_for_phase(phase, index);
         if (data) {
           var checks = Checks.checks_for_phase(phase);
           var color = run_checks(checks, data, index);
           index_color = worse_color(index_color, color);
         }
-      }
+      });
 
-      /* index.mappings.types */
-      var types_path = 'index.mappings.' + index + '.mappings';
-      var mappings = Checks.get_key(es_data, types_path);
-      for ( var type in mappings) {
-        data = data_for_phase(types_path, type);
-        if (data) {
-          var checks = Checks.checks_for_phase('index.mappings.types');
-          var color = run_checks(checks, data, type);
-          index_color = worse_color(index_color, color)
-        }
+      /* index.mappings.fields */
+      var mappings = Checks.get_key(es_data, 'index.flat_mappings.' + index);
+      if (mappings) {
+        var checks = Checks.checks_for_phase('index.mappings.fields');
+        forall(checks, function(check) {
+          var color = check_fields(check, mappings);
+          index_color = worse_color(index_color, color);
+        });
       }
-
       log.set_section_color(index_color);
       log.end_section();
-    }
+    });
+  }
+
+  function check_fields(check, mappings) {
+    var errors = [];
+    forall(mappings, function(type) {
+      if (type.hasOwnProperty('properties')) {
+        forall(type.properties, function(field) {
+          var msg = check.check(field);
+          if (msg) {
+            errors.push(msg)
+          }
+        })
+      }
+    });
+
+    var color = errors.length ? check.color : 'green';
+    log.result(color, check.name, errors.join("\n"));
+    return color;
   }
 
   function run_checks(checks, data, name) {
     var phase_color = 'green';
-    for (var i = 0; i < checks.length; i++) {
-      var check = checks[i];
+    forall(checks, function(check) {
       var msg = check.check(data, name);
       var color = 'green';
       if (msg) {
@@ -137,7 +167,7 @@ function Checker(host, out_id) {
         phase_color = worse_color(phase_color, color);
       }
       log.result(color, check.name, msg);
-    }
+    });
     return phase_color;
   }
 
@@ -320,10 +350,9 @@ function Checker(host, out_id) {
       if (msg) {
         start_section(check);
         msg = msg.replace(/`([^`]+)`/g, "<code>$1</code>");
-        var lines = msg.split(/\n/);
-        for (var i = 0; i < lines.length; i++) {
-          result(color, lines[i])
-        }
+        forall(msg.split(/\n/), function(line) {
+          result(color, line);
+        });
         set_section_color(color);
         end_section();
       } else {
