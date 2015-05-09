@@ -5,16 +5,15 @@ var Checks = (function() {
         "index.settings" : [],
         "index.segments" : [],
         "index.mappings" : [],
+        "index.flat_mappings" : [],
         "index.mappings.types" : [],
         "index.mappings.fields" : []
     };
 
-    function register(check) {
-        registry[check.phase].push({
-            name : check.name,
-            color : check.color,
-            check : check.check
-        });
+    function register(phase, checks) {
+        for (var i = 0; i < checks.length; i++) {
+            registry[phase].push(checks[i])
+        }
         return Checks;
     }
 
@@ -39,7 +38,21 @@ var Checks = (function() {
         return o == undefined ? "" : o;
     }
 
+    function check_types(msg, mappings, f) {
+        var errors = [];
+        for ( var type in mappings) {
+            if (f(type)) {
+                errors.push("`" + type + "`");
+            }
+        }
+        if (errors.length) {
+            return msg + ", in type" + (errors.length > 1 ? 's: ' : ': ')
+                + errors.join(", ");
+        }
+    }
+
     return {
+        check_types : check_types,
         checks_for_phase : checks_for_phase,
         get_key : get_key,
         register : register,
@@ -78,7 +91,7 @@ function Checker(host, out_id) {
             return;
         }
         var index_phases = [ 'index.segments', 'index.settings',
-                'index.mappings' ];
+            'index.mappings', 'index.flat_mappings' ];
 
         for (var i = 0; i < indices.length; i++) {
             var index = indices[i];
@@ -155,14 +168,15 @@ function Checker(host, out_id) {
                 index : {
                     segments : data[0].indices,
                     settings : data[1],
-                    mappings : flatten_mappings(data[2]),
+                    mappings : data[2],
+                    flat_mappings : flatten_mappings(data[2]),
                     warmers : data[3],
                     aliases : data[4]
                 },
                 cluster : {
                     settings : data[5]
                 }
-            }
+            };
         });
     }
 
@@ -201,13 +215,9 @@ function Checker(host, out_id) {
 
         for ( var index_name in mappings) {
             var index = mappings[index_name].mappings;
-            flat[index_name] = {
-                mappings : {}
-            };
+            flat[index_name] = {};
             for ( var type in index) {
-                flat[index_name].mappings[type] = flatten_type(
-                    type,
-                    index[type]);
+                flat[index_name][type] = flatten_type(type, index[type]);
             }
         }
 
@@ -307,6 +317,7 @@ function Checker(host, out_id) {
         }
 
         function result(color, check, msg) {
+            check = check.replace(/`([^`]+)`/g, "<code>$1</code>");
             if (msg) {
                 start_section(check);
                 msg = msg.replace(/`([^`]+)`/g, "<code>$1</code>");
