@@ -8,9 +8,9 @@ Checks.register(
     name : "Use of `index_name` or `path`",
     color : "blue",
     check : function(field) {
-      if (field.hasOwnProperty('path')) {
+      if ("path" in field) {
         return "Field " + field._name + " uses deprecated parameter `path`";
-      } else if (field.hasOwnProperty('index_name')) {
+      } else if ("index_name" in field) {
         return "Field " + field._name
           + " uses deprecated parameter `index_name`";
       }

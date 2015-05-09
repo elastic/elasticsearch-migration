@@ -142,7 +142,7 @@ function Checker(host, out_id) {
   function check_fields(check, mappings) {
     var errors = [];
     forall(mappings, function(type) {
-      if (type.hasOwnProperty('properties')) {
+      if ("properties" in type) {
         forall(type.properties, function(field) {
           var msg = check.check(field);
           if (msg) {
@@ -176,9 +176,10 @@ function Checker(host, out_id) {
     if (data == "") {
       return false
     }
-    ;
-    if (data.hasOwnProperty(phase.substr(6))) {
-      return data[phase.substr(6)];
+
+    var sub = phase.substr(6);
+    if (sub in data) {
+      return data[sub];
     }
     return data;
   }
@@ -220,11 +221,11 @@ function Checker(host, out_id) {
           var field = d[field_name];
           var path = prefix + field_name;
 
-          if (field.hasOwnProperty('properties')) {
+          if ("properties" in field) {
             flatten_fields(path + ".", field.properties);
             delete field.properties;
           }
-          if (field.hasOwnProperty('fields')) {
+          if ("fields" in field) {
             flatten_fields(path + ".", field.fields);
             delete field.fields;
           }
@@ -299,7 +300,7 @@ function Checker(host, out_id) {
           msg += '?' + jQuery.param(params);
         }
         msg += '].  REASON: ';
-        if (e.responseJSON && e.responseJSON.hasOwnProperty('error')) {
+        if (e.responseJSON && ("error" in e.responseJSON)) {
           msg += e.responseJSON.error;
         } else if (e.responseText) {
           msg += e.responseText;

@@ -25,7 +25,7 @@ Checks.register("index.flat_mappings", [
         for ( var key in d) {
           if (d[key] instanceof Object) {
             flatten(prefix + key + ".", d[key])
-          } else if (!safe.hasOwnProperty(prefix + key)) {
+          } else if ((prefix + key) in safe) {
             vals[prefix + key] = d[key];
           }
         }
@@ -36,7 +36,7 @@ Checks.register("index.flat_mappings", [
 
     function cmp_fields(first, second) {
       for ( var key in first) {
-        if (!second.hasOwnProperty(key) || first[key] !== second[key]) {
+        if (!(key in second) || first[key] !== second[key]) {
           return true;
         } else {
           delete second[key]
@@ -51,14 +51,13 @@ Checks.register("index.flat_mappings", [
     // Group all fields by name
     forall(mappings, function(type) {
       forall(type.properties, function(field, name) {
-        if (fields.hasOwnProperty(name)) {
+        if (name in fields) {
           fields[name].push(field);
         } else {
           fields[name] = [ field ];
         }
       })
     });
-
 
     forall(fields, function(others) {
       var first = others.shift();
