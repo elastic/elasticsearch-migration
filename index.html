@@ -15,7 +15,10 @@
                 var host = jQuery('#es_host').val();
                 var checker = new Checker(host,'#log');
                 checker.run();
-            })
+            });
+            jQuery('#hide_green').click(function(e) {
+                jQuery('#log').toggleClass('no_green');
+            });
         });
     -->
     </script>

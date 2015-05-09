@@ -14,6 +14,10 @@ li span.check  {
     border-color: red
 }
 
+.no_green li.green {
+    display: none
+}
+
 .green > span.section,
 .green > span.check {
     border-color: green
