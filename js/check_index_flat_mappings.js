@@ -91,10 +91,12 @@ Checks.register("index.flat_mappings", [
       var errors = [];
 
       for ( var type in mappings) {
-        if (!mappings[type].properties) { continue }
+        if (!mappings[type].properties) {
+          continue
+        }
 
         var field_names = Object.keys(mappings[type].properties).sort();
-        for ( var i=0; i < field_names.length; i++) {
+        for (var i = 0; i < field_names.length; i++) {
           var field = mappings[type].properties[field_names[i]];
           if (field.hasOwnProperty('path')) {
             errors.push("Field " + field._name

@@ -9,13 +9,14 @@ Checks
         name : "Field: `_id`",
         color : "blue",
         check : function(mappings) {
-          return Checks.check_types(
-            "The `_id` can no longer be configured in new indices. Importantly, it will not be possible to extract the `_id` value from a `path`",
-            mappings,
-            function(type) {
-              var conf = Checks.get_key(mappings[type], '_id');
-              return conf && Object.keys(conf).length;
-            });
+          return Checks
+            .check_types(
+              "The `_id` can no longer be configured in new indices. Importantly, it will not be possible to extract the `_id` value from a `path`",
+              mappings,
+              function(type) {
+                var conf = Checks.get_key(mappings[type], '_id');
+                return conf && Object.keys(conf).length;
+              });
         }
       },
 
