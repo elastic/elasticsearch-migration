@@ -25,6 +25,17 @@ Checks
               + "Remove the `index.mapping.allow_type_wrapper` setting.";
           }
         }
-      }
+      },
+
+      {
+        name : "Codec setting",
+        color : "red",
+        check : function(settings) {
+          if (Checks.get_key(settings, "index.codec")) {
+            return "Custom codecs can no longer be configured. Reindex without the `index.codec` setting.";
+          }
+        }
+      },
+
 
     ]);
