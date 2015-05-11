@@ -46,7 +46,7 @@ function Checker(host, out_id) {
 
   function check_indices() {
     var indices = Object.keys(es_data.index.aliases).sort();
-    if (indices.length == 0) {
+    if (indices.length === 0) {
       log.log("No indices found");
       return;
     }
@@ -84,7 +84,7 @@ function Checker(host, out_id) {
   function check_fields(check, mappings) {
     var errors = [];
     forall(mappings, function(type) {
-      if ("properties" in type) {
+      if (type.properties) {
         forall(type.properties, function(field) {
           var msg = check.check(field);
           if (msg) {
@@ -115,15 +115,12 @@ function Checker(host, out_id) {
 
   function data_for_phase(phase, name) {
     var data = Checks.get_key(es_data, phase + '.' + name);
-    if (data == "") {
+    if (data === "") {
       return false
     }
 
     var sub = phase.substr(6);
-    if (sub in data) {
-      return data[sub];
-    }
-    return data;
+    return data[sub] || data;
   }
 
   function load_es_data(version) {
@@ -161,11 +158,11 @@ function Checker(host, out_id) {
           var field = d[field_name];
           var path = prefix + field_name;
 
-          if ("properties" in field) {
+          if (field.properties) {
             flatten_fields(path + ".", field.properties);
             delete field.properties;
           }
-          if ("fields" in field) {
+          if (field.fields) {
             flatten_fields(path + ".", field.fields);
             delete field.fields;
           }
@@ -186,7 +183,7 @@ function Checker(host, out_id) {
     for ( var index_name in mappings) {
       var index = mappings[index_name];
       flat[index_name] = {};
-      var types = "mappings" in index ? index.mappings : index;
+      var types = index.mappings || index;
       for ( var type in types) {
         flat[index_name][type] = flatten_type(type, types[type]);
       }
@@ -253,13 +250,13 @@ function Checker(host, out_id) {
   }
 
   function worse_color(current_color, new_color) {
-    if (current_color == 'red' || new_color == 'red') {
+    if (current_color === 'red' || new_color === 'red') {
       return 'red'
     }
-    if (current_color == 'yellow' || new_color == 'yellow') {
+    if (current_color === 'yellow' || new_color === 'yellow') {
       return 'yellow'
     }
-    if (current_color == 'blue' || new_color == 'blue') {
+    if (current_color === 'blue' || new_color === 'blue') {
       return 'blue'
     }
     return 'green';
@@ -273,7 +270,7 @@ function Checker(host, out_id) {
           msg += '?' + jQuery.param(params);
         }
         msg += '].  REASON: ';
-        if (e.responseJSON && ("error" in e.responseJSON)) {
+        if (e.responseJSON && e.responseJSON.error) {
           msg += e.responseJSON.error;
         } else if (e.responseText) {
           msg += e.responseText;

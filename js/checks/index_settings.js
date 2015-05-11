@@ -19,7 +19,7 @@ Checks
         name : "Type wrapper setting",
         color : "red",
         check : function(settings) {
-          if (Checks.get_key(settings, "index.mapping.allow_type_wrapper") == 'true') {
+          if (Checks.get_key(settings, "index.mapping.allow_type_wrapper") === 'true') {
             return "The document `_source` field may no longer have "
               + "the type name as the root element. "
               + "Remove the `index.mapping.allow_type_wrapper` setting.";

@@ -25,10 +25,10 @@ Checks.register("index.flat_mappings", [
       function flatten(prefix, d) {
         for ( var key in d) {
           var name = prefix + key;
-          if (name in safe) {
+          if (safe[name]) {
             continue;
           }
-          if (d[key].constructor == Array) {
+          if (d[key].constructor === Array) {
             vals[name] = d[key].join(", ");
           } else if (d[key] instanceof Object) {
             flatten(name + ".", d[key])
@@ -63,7 +63,7 @@ Checks.register("index.flat_mappings", [
     // Group all fields by name
     forall(mappings, function(type) {
       forall(type.properties, function(field, name) {
-        if (name in fields) {
+        if (fields[name]) {
           fields[name].push(field);
         } else {
           fields[name] = [ field ];
@@ -81,7 +81,7 @@ Checks.register("index.flat_mappings", [
         if (keys) {
           conflicts.push("Mapping for field `" + first._name
             + "` conflicts with: `" + other._name + "`. Check parameter"
-            + (keys.length == 1 ? ': ' : 's: ') + keys.join(", "));
+            + (keys.length === 1 ? ': ' : 's: ') + keys.join(", "));
         }
       });
     });

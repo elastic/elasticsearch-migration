@@ -6,24 +6,24 @@ function Test_Checker(host, checks_out_id, test_out_id) {
 
   function run_check(name, check) {
     var el = jQuery(checks_out_id);
-    if ("index" in check) {
+    if (check.index) {
       el = el.find("span.index:contains('Index: " + check.index + "')")
         .parent();
-      if (el.length == 0) {
+      if (el.length === 0) {
         return "Couldn't find index `" + check.index + "`";
       }
     }
     el = el.find("span.check:contains('" + name + "')").parent();
-    if (el.length == 0) {
+    if (el.length === 0) {
       return 'Couldn\'t find check "' + name + '"';
     }
 
-    if ("msg" in check) {
+    if (check.msg) {
       if (el.hasClass('green')) {
         return 'Check should not be green';
       }
       el = el.find("span.msg");
-      if (el.length == 0) {
+      if (el.length === 0) {
         return "Couldn't find error msg";
       }
       if (!el.text().match(check.msg)) {
@@ -76,21 +76,21 @@ function Test_Checker(host, checks_out_id, test_out_id) {
   }
 
   function should_skip(test, version) {
-    if ("skip" in test) {
+    if (test.skip) {
       var skip = test.skip;
-      if ("lt" in skip && version.lt(skip.lt)) {
+      if (skip.lt && version.lt(skip.lt)) {
         return true
       }
       ;
-      if ("lte" in skip && version.lte(skip.lte)) {
+      if (skip.lte && version.lte(skip.lte)) {
         return true
       }
       ;
-      if ("gt" in skip && version.gt(skip.gt)) {
+      if (skip.gt && version.gt(skip.gt)) {
         return true
       }
       ;
-      if ("gte" in skip && version.gte(skip.gte)) {
+      if (skip.gte && version.gte(skip.gte)) {
         return true
       }
       ;
@@ -173,7 +173,7 @@ function Test_Checker(host, checks_out_id, test_out_id) {
           msg += " with body: " + JSON.stringify(body);
         }
         msg += " REASON: ";
-        if (e.responseJSON && ("error" in e.responseJSON)) {
+        if (e.responseJSON && e.responseJSON.error) {
           msg += e.responseJSON.error;
         } else if (e.responseText) {
           msg += e.responseText;

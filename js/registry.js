@@ -35,7 +35,7 @@ var Checks = (function() {
       }
     }
 
-    return o == undefined ? "" : o;
+    return o === undefined ? "" : o;
   }
 
   function check_types(msg, mappings, f) {
