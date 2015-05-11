@@ -40,11 +40,11 @@ var Checks = (function() {
 
   function check_types(msg, mappings, f) {
     var errors = [];
-    for ( var type in mappings) {
+    forall(mappings, function(foo, type) {
       if (f(type)) {
         errors.push("`" + type + "`");
       }
-    }
+    });
     if (errors.length) {
       return msg + ", in type" + (errors.length > 1 ? 's: ' : ': ')
         + errors.join(", ");

@@ -66,7 +66,7 @@ function Test_Checker(host, checks_out_id, test_out_id) {
     function next_step() {
       var step = setup.shift();
       if (step === undefined) {
-        return;
+        return send_request('GET', '/_cluster/health?wait_for_status=yellow');
       }
       return send_request(step[0], step[1], step[2])//
       .then(next_step);

@@ -337,7 +337,7 @@ Checks
           },
           {
             index : "bad",
-            msg : /analyzer.*have been removed.*in types: analyzer, search_analyzer, index_analyzer/
+            msg : /analyzer.*have been removed.*in types: analyzer, index_analyzer, search_analyzer/
           } ]
       }
 

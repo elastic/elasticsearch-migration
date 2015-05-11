@@ -131,7 +131,6 @@ function Checker(host, out_id) {
     get_url('/_segments'), //
     get_url('/_settings'), //
     get_url('/_mapping'), //
-    [],// TODO: get_url('/_warmers'), // not supported on 1.0.0
     get_url('/_aliases'), //
     get_url('/_cluster/settings') //
     ]).//
@@ -139,14 +138,13 @@ function Checker(host, out_id) {
       es_data = {
         index : {
           segments : data[0].indices,
-          settings : data[1],
+          settings : version.lt('1.*') ? unflatten_settings(data[1]) : data[1],
           mappings : data[2],
           flat_mappings : flatten_mappings(data[2]),
-          warmers : data[3],
-          aliases : data[4]
+          aliases : data[3]
         },
         cluster : {
-          settings : data[5]
+          settings : data[4]
         }
       };
     });
@@ -186,16 +184,42 @@ function Checker(host, out_id) {
     }
 
     for ( var index_name in mappings) {
-      var index = mappings[index_name].mappings;
+      var index = mappings[index_name];
       flat[index_name] = {};
-      for ( var type in index) {
-        flat[index_name][type] = flatten_type(type, index[type]);
+      var types = "mappings" in index ? index.mappings : index;
+      for ( var type in types) {
+        flat[index_name][type] = flatten_type(type, types[type]);
       }
     }
 
     return flat;
   }
 
+  function unflatten_settings(settings) {
+
+    function unflatten(current, parts, val) {
+      var next_part = parts.shift();
+      if (!parts.length) {
+        current[next_part] = val;
+      } else {
+        current[next_part] = current[next_part] || {};
+        unflatten(current[next_part], parts, val)
+      }
+    }
+
+    var new_settings = {};
+    forall(settings, function(index, name) {
+
+      var current = {};
+      forall(index.settings, function(val, setting) {
+        unflatten(current, setting.split(/\./), val);
+      });
+      new_settings[name] = {
+        settings : current
+      }
+    });
+    return new_settings;
+  }
 
   function check_version() {
     return get_version()
