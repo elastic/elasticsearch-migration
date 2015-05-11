@@ -1,3 +1,61 @@
+html, body, div, h1, ul, li, a {
+    font-family: 'Gibson-Regular', Arial, Helvetica, sans-serif;
+    font-weight: normal;
+}
+
+html {
+    font-size: 1.15em
+}
+
+h1 {
+    color: #2b4590;
+    text-align: center;
+}
+
+a, a:hover,a:visited {
+    color: #31beb1;
+}
+
+a {
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+
+
+div#body {
+    max-width: 800px;
+    margin: 20px auto;
+}
+
+form {
+    text-align: center;
+    border-top: 1px solid #ccc;
+    padding: 20px 0;
+}
+
+label,
+#es_host,button {
+    font-size: 1.1em;
+}
+
+#es_host {
+    width: 400px;
+}
+
+div#log_container {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin: 10px 0;
+}
+
+div#hide_green {
+    text-align: right;
+}
+
 li {
     list-style-type: none;
 }
@@ -28,8 +86,6 @@ li.blue > span {
     border-color: blue
 }
 
-#log, #temp {
-    border: 1px gray solid;
-    padding: 10px;
-    margin: 10px 0;
+p.error {
+    color: red;
 }

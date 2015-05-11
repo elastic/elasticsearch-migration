@@ -53,7 +53,7 @@ function Checker(host, out_id) {
 
     forall(indices, function(index) {
       var index_color = 'green';
-      log.start_section('index', 'Index: ' + index);
+      log.start_section('index', 'Index: `' + index + "`");
 
       /* index.* */
       forall([ 'index.segments', 'index.settings', 'index.mappings',

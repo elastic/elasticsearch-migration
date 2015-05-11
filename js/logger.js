@@ -5,6 +5,7 @@ function Logger(out_id) {
   var sections;
 
   function start_section(class_name, msg) {
+    msg = msg.replace(/`([^`]+)`/g, "<code>$1</code>");
     out.append('<li><span class="section ' + class_name + '">' + msg
       + '</span><ul></ul></li>');
     sections.push(out);
@@ -27,13 +28,15 @@ function Logger(out_id) {
     while (sections.length) {
       end_section()
     }
+    var msg;
     if (typeof e === "string") {
       console.log(e);
-      out.append('<p class="error">' + e + '</p>');
+      msg = e;
     } else {
       console.log(e.message, e.stack);
-      out.append('<p class="error">' + e.message + '</p>');
+      msg = e.message;
     }
+    out.append('<p class="error">ERROR: ' + msg + '</p>');
     throw (e);
   }
 
