@@ -2,14 +2,11 @@
 
 function Logger(out_id) {
   var out;
-  var sections = [];
+  var sections;
 
-  jQuery(out_id).html('<ul id="output"></ul>');
-  out = jQuery('#output');
-
-  function start_section(msg) {
-    out
-      .append('<li><span class="section msg">' + msg + '</span><ul></ul></li>');
+  function start_section(class_name, msg) {
+    out.append('<li><span class="section ' + class_name + '">' + msg
+      + '</span><ul></ul></li>');
     sections.push(out);
     out = out.find(':last');
   }
@@ -27,20 +24,33 @@ function Logger(out_id) {
   }
 
   function error(e) {
-    console.log(e.message, e.stack);
     while (sections.length) {
       end_section()
     }
-    out.append('<p class="error">' + e.message + '</p>');
+    if (typeof e === "string") {
+      console.log(e);
+      out.append('<p class="error">' + e + '</p>');
+    } else {
+      console.log(e.message, e.stack);
+      out.append('<p class="error">' + e.message + '</p>');
+    }
+    throw (e);
+  }
+
+  function clear() {
+    jQuery(out_id).html('<ul></ul>');
+    out = jQuery(out_id).find('ul');
+    sections = [];
   }
 
   function result(color, check, msg) {
     check = check.replace(/`([^`]+)`/g, "<code>$1</code>");
     if (msg) {
-      start_section(check);
+      start_section('check', check);
       msg = msg.replace(/`([^`]+)`/g, "<code>$1</code>");
       forall(msg.split(/\n/), function(line) {
-        result(color, line);
+        out.append('<li class="' + color + '"><span class="msg">' + line
+          + '</span></li>');
       });
       set_section_color(color);
       end_section();
@@ -50,7 +60,10 @@ function Logger(out_id) {
     }
   }
 
+  clear();
+
   return {
+    clear : clear,
     log : log,
     error : error,
     result : result,

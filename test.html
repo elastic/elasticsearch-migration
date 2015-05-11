@@ -16,6 +16,12 @@
     <script type="text/javascript" src="js/checks/index_flat_mappings.js"></script>
     <script type="text/javascript" src="js/checks/index_mappings_fields.js"></script>
 
+    <script type="text/javascript" src="js/tests/index_flat_mappings.js"></script>
+    <script type="text/javascript" src="js/tests/index_settings.js"></script>
+    <script type="text/javascript" src="js/tests/index_mappings.js"></script>
+    <script type="text/javascript" src="js/tests/index_mappings_fields.js"></script>
+    <script type="text/javascript" src="js/test.js"></script>
+
     <script type="text/javascript">
     <!--
         jQuery(function() {
@@ -23,8 +29,8 @@
             jQuery('#main_form').submit(function(e) {
                 e.preventDefault();
                 var host = jQuery('#es_host').val();
-                var checker = new Checker(host,'#log');
-                checker.run();
+                var tester = new Test_Checker(host,'#temp','#log');
+                tester.run();
             });
             jQuery('#hide_green').click(function(e) {
                 jQuery('#log').toggleClass('no_green');
@@ -34,10 +40,8 @@
     </script>
 </head>
 <body>
-    <h1>Elasticsearch Migration Checker</h1>
-    <p>
-        This plugin is intended to be run on Elasticsearch version 1.x
-    </p>
+    <h1>THIS TEST SUITE IS DESTRUCTIVE - YOU WILL LOSE ALL YOUR DATA</h1>
+
     <form id="main_form">
         <div>
         <label for="es_host">
@@ -54,6 +58,7 @@
         <input type="checkbox" name="hide_green" id="hide_green" />
     </form>
     <div id="log"></div>
+    <div id="temp"></div>
 </body>
 </html>
 

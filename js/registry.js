@@ -6,7 +6,8 @@ var Checks = (function() {
     "index.segments" : [],
     "index.mappings" : [],
     "index.flat_mappings" : [],
-    "index.mappings.fields" : []
+    "index.mappings.fields" : [],
+    "tests" : []
   };
 
   function register(phase, checks) {

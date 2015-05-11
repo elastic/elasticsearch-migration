@@ -26,15 +26,18 @@ function Checker(host, out_id) {
   var log;
 
   function run() {
-    log = new Logger(out_id);
+    this.log = new Logger(out_id);
+    log = this.log;
     log.log('Checking cluster at: ' + host);
 
-    check_version() //
+    return check_version() //
     .then(load_es_data) //
     .then(function() {
       return Promise.attempt(check_indices)
+    })//
+    .then(function() {
+      return Promise.attempt(finish)
     }) //
-    .then(finish) //
     .caught(log.error);
   }
 
@@ -51,7 +54,7 @@ function Checker(host, out_id) {
 
     forall(indices, function(index) {
       var index_color = 'green';
-      log.start_section('Index: ' + index);
+      log.start_section('index', 'Index: ' + index);
 
       /* index.* */
       forall([ 'index.segments', 'index.settings', 'index.mappings',
@@ -253,7 +256,8 @@ function Checker(host, out_id) {
   }
 
   return {
-    run : run
+    run : run,
+    log : log
   }
 };
 

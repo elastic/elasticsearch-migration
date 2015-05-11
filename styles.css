@@ -1,38 +1,35 @@
 li {
     list-style-type: none;
 }
-li span.section,
-li span.check  {
+li span  {
     display: inline-block;
     border-left: 0.8em #ddd solid;
     padding-left: 0.5em;
     margin: 2px 0;
 }
 
-.red > span.section,
-.red > span.check {
-    border-color: red
-}
-
 .no_green li.green {
     display: none
 }
 
-.green > span.section,
-.green > span.check {
+li.red > span {
+    border-color: red
+}
+
+li.green > span {
     border-color: green
 }
 
-.yellow > span.section,
-.yellow > span.check {
+li.yellow > span {
     border-color: orange
 }
 
-.blue > span.section,
-.blue > span.check {
+li.blue > span {
     border-color: blue
 }
 
-.msg {
-    margin: 0 0 0 1em;
+#log, #temp {
+    border: 1px gray solid;
+    padding: 10px;
+    margin: 10px 0;
 }

@@ -11,7 +11,7 @@ Checks
         check : function(mappings) {
           return Checks
             .check_types(
-              "The `_id` can no longer be configured in new indices. Importantly, it will not be possible to extract the `_id` value from a `path`",
+              "The `_id` field can no longer be configured in new indices. Importantly, it will not be possible to extract the `_id` value from a `path`",
               mappings,
               function(type) {
                 var conf = Checks.get_key(mappings[type], '_id');
@@ -87,6 +87,7 @@ Checks
               function(type) {
                 var conf = Checks.get_key(mappings[type], '_routing');
                 if (conf) {
+                  conf = JSON.parse(JSON.stringify(conf));
                   delete conf.required;
                   return Object.keys(conf).length;
                 }
@@ -105,6 +106,7 @@ Checks
               function(type) {
                 var conf = Checks.get_key(mappings[type], '_index');
                 if (conf) {
+                  conf = JSON.parse(JSON.stringify(conf));
                   delete conf.enabled;
                   return Object.keys(conf).length;
                 }
@@ -123,6 +125,7 @@ Checks
               function(type) {
                 var conf = Checks.get_key(mappings[type], '_size');
                 if (conf) {
+                  conf = JSON.parse(JSON.stringify(conf));
                   delete conf.enabled;
                   return Object.keys(conf).length;
                 }
