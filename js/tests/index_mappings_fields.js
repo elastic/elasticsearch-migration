@@ -98,6 +98,9 @@ Checks.register("tests", [
 
 {
   name : "Per-field postings format",
+  skip : {
+    gte : "1.4.*"
+  },
   setup : [
 
   [ "PUT", "/good", {

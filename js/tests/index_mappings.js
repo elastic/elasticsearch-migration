@@ -226,6 +226,9 @@ Checks
 
       {
         name : "Field: _index",
+        skip : {
+          lt : "1.4.*"
+        },
         setup : [
 
         [ "PUT", "/good", {
@@ -262,6 +265,9 @@ Checks
 
       {
         name : "Field: _size",
+        skip : {
+          lt : "1.4.*"
+        },
         setup : [
 
         [ "PUT", "/good", {

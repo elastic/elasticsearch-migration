@@ -72,6 +72,9 @@ Checks.register("tests",
 
 {
   name : "Codec setting",
+  skip : {
+    gte : "1.4.*"
+  },
   setup : [
 
   [ "PUT", "/good" ], [ "PUT", "/bad", {

@@ -75,6 +75,29 @@ function Test_Checker(host, checks_out_id, test_out_id) {
 
   }
 
+  function should_skip(test, version) {
+    if ("skip" in test) {
+      var skip = test.skip;
+      if ("lt" in skip && version.lt(skip.lt)) {
+        return true
+      }
+      ;
+      if ("lte" in skip && version.lte(skip.lte)) {
+        return true
+      }
+      ;
+      if ("gt" in skip && version.gt(skip.gt)) {
+        return true
+      }
+      ;
+      if ("gte" in skip && version.gte(skip.gte)) {
+        return true
+      }
+      ;
+      return false;
+    }
+  }
+
   function run() {
     var tests;
     var version;
@@ -85,6 +108,12 @@ function Test_Checker(host, checks_out_id, test_out_id) {
         return;
       }
       log.start_section('test', test.name);
+
+      if (should_skip(test, version)) {
+        log.result('gray', 'Skipped - unsupported version');
+        log.end_section();
+        return next_test();
+      }
 
       return send_request('DELETE', '/_all')//
       .caught(function(e) {
