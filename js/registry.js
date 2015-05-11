@@ -60,3 +60,53 @@ var Checks = (function() {
   };
 
 })();
+
+function ES_Version(v_string, snapshot) {
+  var parts = v_string.split('.');
+  this.major = parts[0];
+  this.minor = parts[1] || 0;
+  this.patch = parts[2] || 0;
+  this.snapshot = snapshot ? 1 : 0;
+
+  this.cmp = function(other) {
+    if (typeof other === "string") {
+      other = new ES_Version(other);
+    }
+    var keys = [ 'major', 'minor', 'patch', 'snapshot' ];
+    for (var i = 0; i < 4; i++) {
+      var key = keys[i];
+      if (this[key] === "*" || other[key] === "*") {
+        return 0;
+      }
+      if (this[key] === other[key]) {
+        continue;
+      }
+      return this[key] > other[key] ? 1 : -1
+    }
+    return 0;
+  }
+
+  this.lt = function(v) {
+    return this.cmp(v) === -1
+  }
+  this.lte = function(v) {
+    return this.cmp(v) !== 1
+  }
+
+  this.gt = function(v) {
+    return this.cmp(v) === 1
+  }
+  this.gte = function(v) {
+    return this.cmp(v) !== -1
+  }
+
+  this.matches = function(v) {
+    return this.cmp(v) === 0;
+  }
+  this.toString = function() {
+    return this.major + "." + this.minor + "." + this.patch
+      + (this.snapshot ? '-SNAPSHOT' : '')
+  }
+
+  return this;
+}

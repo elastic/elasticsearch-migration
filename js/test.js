@@ -77,6 +77,7 @@ function Test_Checker(host, checks_out_id, test_out_id) {
 
   function run() {
     var tests;
+    var version;
 
     function next_test() {
       var test = tests.shift();
@@ -113,10 +114,13 @@ function Test_Checker(host, checks_out_id, test_out_id) {
     log = new Logger(test_out_id);
     log.log('Testing cluster at: ' + host);
 
-    return Promise.attempt(next_test) //
-    .then(function() {
-      return Promise.attempt(finish)
+    return checker.version() //
+    .then(function(v) {
+      version = v;
+      log.log("Elasticsearch version " + v)
     }) //
+    .then(next_test)//
+    .then(finish) //
     .caught(log.error);
   }
 

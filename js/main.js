@@ -21,7 +21,6 @@ function forall(obj, f) {
 
 function Checker(host, out_id) {
 
-  var version;
   var es_data;
   var log;
 
@@ -127,7 +126,7 @@ function Checker(host, out_id) {
     return data;
   }
 
-  function load_es_data() {
+  function load_es_data(version) {
     return Promise.all([ //
     get_url('/_segments'), //
     get_url('/_settings'), //
@@ -197,20 +196,27 @@ function Checker(host, out_id) {
     return flat;
   }
 
+
   function check_version() {
+    return get_version()
+      .then(
+        function(version) {
+          if (version.gt('1.*') || version.lt('0.90.*')) {
+            throw ('This plugin only works on Elasticsearch versions 0.90.x - 1.x. '
+              + 'This node is version ' + version)
+          } else {
+            log.result('green', 'Elasticsearch version: ' + version);
+            return version;
+          }
+        });
+  }
+
+  function get_version() {
     return get_url('/').then(
       function(r) {
-        var parts = r.version.number.split('.');
-        var snapshot = Checks.get_key(r, "version.build_snapshot");
-        version = {
-          major : parts[0],
-          minor : parts[1],
-          patch : parts[2],
-          snapshot : snapshot
-        };
-        log.result('green', "Elasticsearch version: " + r.version.number
-          + (snapshot ? '.SNAPSHOT' : ''));
-        // TODO: Throw exception if wrong version
+        var snapshot = Checks.get_key(r, "version.build_snapshot")
+          || Checks.get_key(r, "version.snapshot_build");
+        return new ES_Version(r.version.number, snapshot);
       });
   }
 
@@ -257,7 +263,8 @@ function Checker(host, out_id) {
 
   return {
     run : run,
-    log : log
+    log : log,
+    version : get_version
   }
 };
 
