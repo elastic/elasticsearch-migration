@@ -68,50 +68,6 @@ Checks
         } ]
       },
 
-      /* _source field */
-
-      {
-        name : "Field: _source",
-        setup : [
-
-        [ "PUT", "/good", {
-          mappings : {
-            test : {}
-          }
-        } ],
-
-        [ "PUT", "/disable", {
-          mappings : {
-            test : {
-              _source : {
-                enabled : false
-              }
-            }
-          }
-        } ],
-
-        [ "PUT", "/exclude", {
-          mappings : {
-            test : {
-              _source : {
-                excludes : [ "foo" ]
-              }
-            }
-          }
-        } ],
-
-        ],
-
-        checks : [ {
-          index : "good"
-        }, {
-          index : "disable",
-          msg : /The _source field can no longer be disabled/
-        }, {
-          index : "exclude",
-          msg : /The _source field can no longer be disabled/
-        } ]
-      },
 
       /* _analyzer field */
 

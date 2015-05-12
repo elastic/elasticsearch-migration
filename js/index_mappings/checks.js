@@ -35,21 +35,6 @@ Checks
       },
 
       {
-        name : "Field: `_source`",
-        color : "blue",
-        check : function(mappings) {
-          return Checks
-            .check_types(
-              "The `_source` field can no longer be disabled, or have `includes` or `excludes` in new indices",
-              mappings,
-              function(type) {
-                var conf = Checks.get_key(mappings[type], '_source');
-                return conf && Object.keys(conf).length;
-              });
-        }
-      },
-
-      {
         name : "Field: `_analyzer`",
         color : "yellow",
         check : function(mappings) {
