@@ -2,6 +2,7 @@
 
 var Checks = (function() {
   var registry = {
+    "index": [],
     "index.settings" : [],
     "index.segments" : [],
     "index.mappings" : [],

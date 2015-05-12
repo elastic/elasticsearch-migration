@@ -2,7 +2,7 @@
 
 Checks
   .register(
-    "index.segments",
+    "index",
     [
 
     {

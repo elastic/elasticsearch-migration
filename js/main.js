@@ -56,7 +56,7 @@ function Checker(host, out_id) {
       log.start_section('index', 'Index: `' + index + "`");
 
       /* index.* */
-      forall([ 'index.segments', 'index.settings', 'index.mappings',
+      forall([ 'index', 'index.settings', 'index.mappings',
         'index.flat_mappings' ], function(phase) {
 
         var data = data_for_phase(phase, index);
