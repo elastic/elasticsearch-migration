@@ -2,7 +2,6 @@
 
 var Checks = (function() {
   var registry = {
-    "index": [],
     "index.settings" : [],
     "index.segments" : [],
     "index.mappings" : [],
@@ -52,8 +51,26 @@ var Checks = (function() {
     }
   }
 
+  function check_fields(mappings, f) {
+    var errors = [];
+    forall(mappings, function(type) {
+      if (type.properties) {
+        forall(type.properties, function(field) {
+          var msg = f(field);
+          if (msg) {
+            errors.push(msg)
+          }
+        })
+      }
+    });
+    if (errors.length) {
+      return errors.join("\n");
+    }
+  }
+
   return {
     check_types : check_types,
+    check_fields : check_fields,
     checks_for_phase : checks_for_phase,
     get_key : get_key,
     register : register,

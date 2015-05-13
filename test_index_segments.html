@@ -11,15 +11,7 @@
     <script type="text/javascript" src="js/logger.js"></script>
 
     <script type="text/javascript" src="js/index_segments/checks.js"></script>
-    <script type="text/javascript" src="js/index_settings/checks.js"></script>
-    <script type="text/javascript" src="js/index_mappings/checks.js"></script>
-    <script type="text/javascript" src="js/index_flat_mappings/checks.js"></script>
-    <script type="text/javascript" src="js/index_mappings_fields/checks.js"></script>
-
-    <script type="text/javascript" src="js/index_settings/tests.js"></script>
-    <script type="text/javascript" src="js/index_mappings/tests.js"></script>
-    <script type="text/javascript" src="js/index_flat_mappings/tests.js"></script>
-    <script type="text/javascript" src="js/index_mappings_fields/tests.js"></script>
+    <script type="text/javascript" src="js/index_segments/tests.js"></script>
 
     <script type="text/javascript" src="js/test.js"></script>
 
@@ -31,7 +23,7 @@
                 e.preventDefault();
                 var host = jQuery('#es_host').val();
                 jQuery('#log_container').attr('style','');
-                var tester = new Test_Checker(host,'#temp','#log');
+                var tester = new Test_Checker(host,'#temp','#log','no_delete');
                 tester.run();
             });
             jQuery('#hide_green').click(function(e) {
@@ -44,13 +36,24 @@
 <body>
 <div id="body">
     <h1>THIS TEST SUITE IS DESTRUCTIVE</h1>
-    <h1>YOU WILL LOSE ALL YOUR DATA</h1>
+    <h1>TEST INDEX SEGMENTS</h1>
+    <p>
+       In order to run this test, replace the <code>./data</code> directory with
+       the contents of the <code>ancient_segments_data.tar.gz</code> file, then
+       start Elasticsearch:
+    </p>
+    <pre>
+        cd elasticsearch
+        rm -Rf data
+        tar -xzf plugins/migration/_site/ancient_segments_data.tar.gz
+        ./bin/elasticsearch
+    </pre>
 
     <form id="main_form">
         <div>
         <input type="text" name="es_host" id="es_host" value="http://localhost:9200" />
         <button type="submit">
-            Lose your data now
+            Run index segments tests
         </button>
         </div>
     </form>

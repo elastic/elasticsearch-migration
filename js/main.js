@@ -45,6 +45,7 @@ function Checker(host, out_id) {
   }
 
   function check_indices() {
+
     var indices = Object.keys(es_data.index.aliases).sort();
     if (indices.length === 0) {
       log.log("No indices found");
@@ -53,74 +54,63 @@ function Checker(host, out_id) {
 
     forall(indices, function(index) {
       var index_color = 'green';
+      var index_phases = [ //
+      'index.segments', //
+      'index.settings', //
+      'index.mappings', //
+      'index.flat_mappings', //
+      'index.mappings.fields' //
+      ];
+
       log.start_section('index', 'Index: `' + index + "`");
 
-      /* index.* */
-      forall([ 'index', 'index.settings', 'index.mappings',
-        'index.flat_mappings' ], function(phase) {
-
+      forall(index_phases, function(phase) {
         var data = data_for_phase(phase, index);
         if (data) {
           var checks = Checks.checks_for_phase(phase);
-          var color = run_checks(checks, data, index);
-          index_color = worse_color(index_color, color);
+          forall(checks, function(check) {
+            var color = 'green';
+            var msg = check.check(data, name);
+            if (msg) {
+              color = check.color;
+              index_color = worse_color(index_color, check.color)
+            }
+            log.result(color, check.name, msg)
+          });
         }
       });
 
-      /* index.mappings.fields */
-      var mappings = Checks.get_key(es_data, 'index.flat_mappings.' + index);
-      if (mappings) {
-        var checks = Checks.checks_for_phase('index.mappings.fields');
-        forall(checks, function(check) {
-          var color = check_fields(check, mappings);
-          index_color = worse_color(index_color, color);
-        });
-      }
       log.set_section_color(index_color);
       log.end_section();
     });
   }
 
-  function check_fields(check, mappings) {
-    var errors = [];
-    forall(mappings, function(type) {
-      if (type.properties) {
-        forall(type.properties, function(field) {
-          var msg = check.check(field);
-          if (msg) {
-            errors.push(msg)
-          }
-        })
-      }
-    });
-
-    var color = errors.length ? check.color : 'green';
-    log.result(color, check.name, errors.join("\n"));
-    return color;
-  }
-
-  function run_checks(checks, data, name) {
-    var phase_color = 'green';
-    forall(checks, function(check) {
-      var msg = check.check(data, name);
-      var color = 'green';
-      if (msg) {
-        color = check.color;
-        phase_color = worse_color(phase_color, color);
-      }
-      log.result(color, check.name, msg);
-    });
-    return phase_color;
-  }
-
   function data_for_phase(phase, name) {
-    var data = Checks.get_key(es_data, phase + '.' + name);
-    if (data === "") {
-      return false
-    }
+    var data;
+    switch (phase) {
 
-    var sub = phase.substr(6);
-    return data[sub] || data;
+    case "index.segments":
+      return {
+        segments : Checks.get_key(es_data, "index.segments." + name),
+        settings : Checks.get_key(es_data, "index.settings." + name
+          + ".settings")
+      };
+
+    case "index.settings":
+      data = Checks.get_key(es_data, "index.settings." + name);
+      return data && (data.settings || data);
+
+    case "index.mappings":
+      data = Checks.get_key(es_data, "index.mappings." + name);
+      return data && (data.mappings || data);
+
+    case "index.flat_mappings":
+    case "index.mappings.fields":
+      return Checks.get_key(es_data, "index.flat_mappings." + name);
+
+    default:
+      throw ("Unknown phase: " + phase)
+    }
   }
 
   function load_es_data(version) {

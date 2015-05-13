@@ -1,6 +1,6 @@
 "use strict";
 
-function Test_Checker(host, checks_out_id, test_out_id) {
+function Test_Checker(host, checks_out_id, test_out_id, no_delete) {
   var log;
   var checker = new Checker(host, checks_out_id);
 
@@ -115,8 +115,13 @@ function Test_Checker(host, checks_out_id, test_out_id) {
         return next_test();
       }
 
-      return send_request('DELETE', '/_all')//
-      .caught(function(e) {
+      return Promise.attempt(function() {
+        if (no_delete) {
+          return;
+        } else {
+          return send_request('DELETE', '/_all')
+        }
+      }).caught(function(e) {
         if (!e.match(/IndexMissingException/)) {
           throw (e)
         }
