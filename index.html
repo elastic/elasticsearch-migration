@@ -23,8 +23,9 @@
             jQuery('#main_form').submit(function(e) {
                 e.preventDefault();
                 var host = jQuery('#es_host').val();
+                var indices = jQuery('#indices').val();
                 jQuery('#log_container').attr('style','');
-                var checker = new Checker(host,'#log');
+                var checker = new Checker(host,indices,'#log');
                 checker.run();
                 return false;
             });
@@ -37,7 +38,9 @@
 </head>
 <body>
 <div id="body">
-    <h1>Elasticsearch Migration Checker</h1>
+    <h1>
+        Elasticsearch Migration Checker
+    </h1>
     <div id="intro">
     <p>
         This plugin will help you to check whether you can upgrade
@@ -69,6 +72,7 @@
     <form id="main_form">
         <div>
         <input type="text" name="es_host" id="es_host" value="http://localhost:9200" />
+        <input type="text" name="indices" id="indices" placeholder="Index names: eg logstash-*" />
         <button type="submit">
             Run checks now
         </button>

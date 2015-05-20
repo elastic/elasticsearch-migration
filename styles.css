@@ -38,12 +38,12 @@ form {
 }
 
 label,
-#es_host,button {
+#indices,#es_host,button {
     font-size: 1.1em;
 }
 
-#es_host {
-    width: 400px;
+#indices,#es_host {
+    width: 300px;
 }
 
 div#log_container {
@@ -84,6 +84,14 @@ li.yellow > span {
 
 li.blue > span {
     border-color: blue
+}
+
+li > ul > li > ul {
+    padding-left: 0.8em;
+}
+
+span.msg {
+    border: none;
 }
 
 p.error {

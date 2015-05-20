@@ -19,7 +19,7 @@ function forall(obj, f) {
   }
 }
 
-function Checker(host, out_id) {
+function Checker(host, indices, out_id) {
 
   var es_data;
   var log;
@@ -113,12 +113,20 @@ function Checker(host, out_id) {
     }
   }
 
+  function build_url(action) {
+    if (!indices || indices === '*' || indices === '_all') {
+      return '/' + action;
+    } else {
+      return '/' + indices + '/' + action + '?expand_wildcards=open,closed'
+    }
+  }
   function load_es_data(version) {
+    indices = indices || '*';
     return Promise.all([ //
-    get_url('/_segments'), //
-    get_url('/_settings'), //
-    get_url('/_mapping'), //
-    get_url('/_aliases'), //
+    get_url(build_url('_segments')), //
+    get_url(build_url('_settings')), //
+    get_url(build_url('_mapping')), //
+    get_url(build_url('_aliases')), //
     get_url('/_cluster/settings') //
     ]).//
     then(function(data) {
