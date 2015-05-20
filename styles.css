@@ -52,7 +52,7 @@ div#log_container {
     margin: 10px 0;
 }
 
-div#hide_green {
+div#show_hide_green {
     text-align: right;
 }
 
@@ -66,7 +66,7 @@ li span  {
     margin: 2px 0;
 }
 
-.no_green li.green {
+.no_green li li.green {
     display: none
 }
 

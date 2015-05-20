@@ -34,7 +34,7 @@
                 var tester = new Test_Checker(host,'#temp','#log');
                 tester.run();
             });
-            jQuery('#hide_green').click(function(e) {
+            jQuery('#show_green').click(function(e) {
                 jQuery('#log').toggleClass('no_green');
             });
         });
@@ -55,11 +55,11 @@
         </div>
     </form>
     <div id="log_container" style="display:none">
-        <div id="hide_green">
-            <label for="hide_green">
-                Hide green results
+        <div id="show_hide_green">
+            <label for="show_green">
+                Show green results
             </label>
-            <input type="checkbox" name="hide_green" id="hide_green" />
+            <input type="checkbox" name="show_green" id="show_green" checked />
         </div>
         <div id="log"></div>
         <div id="temp"></div>
