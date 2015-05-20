@@ -1,0 +1,77 @@
+== Elasticsearch Migration Plugin
+
+This plugin will help you to check whether you can upgrade directly to
+Elasticsearch version 2.x, or whether you need to make changes to your data
+before doing so. It will run on Elasticsearch versions 0.90.x to 1.x.
+
+NOTE: Checks are limited only to data that is stored in the cluster, such as
+cluster and index settings, mappings, and segments. It does not take settings
+files or your use of the API into account. *You should still test your
+application thoroughly and backup your data before upgrading.*
+
+Each check is given a color, whose meaning is as follows:
+
+Green::  All OK.
+Blue::   An advisory note that something has changed. No action needed.
+Yellow:: You can upgrade directly, but you are using deprecated functionality which will not be
+         available in version 2.x.
+Red::    You cannot upgrade without fixing this problem.
+
+Read more about important changes in the
+http://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes.html[Breaking
+Changes] documentation online.
+
+=== Installation
+
+To install, run the following command in your Elasticsearch home directory:
+
+[source,sh]
+---------------
+./bin/plugin -i elastic/elasticsearch-migration
+---------------
+
+Then open the following URL in your browser: http://localhost:9200/_plugin/migration
+
+=== Checks performed
+
+This plugin will check each index for the following:
+
+* *Index segments*:
+** Segments created by Lucene 3, which cannot be read by Elasticsearch 2.x.
+** Indices created before 0.90 which no longer have Lucene 3 segments, but
+   which require a setting to mark them as 2.x compatible.
+
+* *Index settings*:
+** In memory indices, which are no longer supported.
+** The `index.mapping.allow_type_wrapper` setting.
+** Custom codecs
+
+* *Type mapping*:
+** Custom configured `_id` field.
+** Custom configured `_type` field.
+** Use of an `_analyer` field.
+** Use of the `_boost` field.
+** Custom configured `_routing` field.
+** Custom configured `_index` field.
+** Custom configured `_size` field.
+** Use of type-level default analyzer settings.
+
+* *Field mapping*:
+** Fields with the same name in different types with conflicting mappings.
+** Use of the `index_name` or `path` settings.
+** Boolean fields, whose field value has changed from `T`/`F` to `1`/`0`.
+** Custom postings formats.
+
+=== Test suite
+
+Two test suites are available:
+
+http://localhost:9200/_plugin/migration/test.html::
+
+Tests all checks except the index segments checks. No setup required.
+
+http://localhost:9200/_plugin/migration/test_index_segments.html::
+
+Tests the index segments checks.  Requires a pre-existing `data/` directory which is packaged
+with this plugin.  Follow the instructions on the test suite page.
+
