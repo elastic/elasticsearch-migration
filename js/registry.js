@@ -28,7 +28,8 @@ var Checks = (function() {
       }
       var matches = path.match(/^((?:\\.|[^.])+)\.?/);
       path = path.substring(matches[0].length);
-      var key = matches[1].replace('\\', '');
+
+      var key = matches[1].replace(/\\/g, '');
       if (o.hasOwnProperty(key)) {
         o = o[key]
       } else if (o.hasOwnProperty('.' + key)) {

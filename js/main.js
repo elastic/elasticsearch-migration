@@ -87,7 +87,7 @@ function Checker(host, indices, out_id) {
 
   function data_for_phase(phase, name) {
     var data;
-    name = name.replace('.','\\.');
+    name = name.replace(/\./g, '\\.');
     switch (phase) {
 
     case "index.segments":
