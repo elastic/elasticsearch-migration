@@ -7,17 +7,17 @@ Checks.register("tests",
   setup : [],
 
   checks : [ {
-    index : "closed_index",
+    index : "segments-closed_index",
     msg : /This index is closed/
   }, {
-    index : "old_segments",
+    index : "segments-old_segments",
     msg : /contains segments created before Lucene 4/
   }, {
-    index : "old_index",
+    index : "segments-old_index",
     msg : /needs to be marked as upgraded/
   }, {
-    index : "upgraded_index"
+    index : "segments-upgraded_index"
   }, {
-    index : "new_index"
+    index : "segments-new_index"
   }, ]
 } ]);

@@ -14,8 +14,8 @@ Checks
               return "Field `" + field._name
                 + "` uses deprecated parameter `path`.";
             } else if (field.index_name) {
-              return "Field " + field._name
-                + " uses deprecated parameter `index_name`";
+              return "Field `" + field._name
+                + "` uses deprecated parameter `index_name`";
             }
           });
         }
