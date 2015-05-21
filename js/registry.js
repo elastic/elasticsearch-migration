@@ -22,14 +22,17 @@ var Checks = (function() {
   }
 
   function get_key(o, path) {
-    var keys = path.split('.');
-    while (keys.length) {
+    while (path.length) {
       if (!o instanceof Object) {
         return "";
       }
-      var key = keys.shift();
+      var matches = path.match(/^((?:\\.|[^.])+)\.?/);
+      path = path.substring(matches[0].length);
+      var key = matches[1].replace('\\', '');
       if (o.hasOwnProperty(key)) {
         o = o[key]
+      } else if (o.hasOwnProperty('.' + key)) {
+        o = o['.' + key]
       } else {
         return "";
       }
