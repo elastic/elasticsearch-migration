@@ -1,99 +1,97 @@
 html, body, div, h1, ul, li, a {
-    font-family: 'Gibson-Regular', Arial, Helvetica, sans-serif;
-    font-weight: normal;
+  font-family: 'Gibson-Regular', Arial, Helvetica, sans-serif;
+  font-weight: normal;
 }
 
 html {
-    font-size: 1.15em
+  font-size: 1.15em
 }
 
 h1 {
-    color: #2b4590;
-    text-align: center;
+  color: #2b4590;
+  text-align: center;
 }
 
 a, a:hover,a:visited {
-    color: #31beb1;
+  color: #31beb1;
 }
 
 a {
-    text-decoration: none;
+  text-decoration: none;
 }
 
 a:hover {
-    text-decoration: underline;
+  text-decoration: underline;
 }
 
-
-
 div#body {
-    max-width: 800px;
-    margin: 20px auto;
+  max-width: 800px;
+  margin: 20px auto;
 }
 
 form {
-    text-align: center;
-    border-top: 1px solid #ccc;
-    padding: 20px 0;
+  text-align: center;
+  border-top: 1px solid #ccc;
+  padding: 20px 0;
 }
 
 label,
 #indices,#es_host,button {
-    font-size: 1.1em;
+  font-size: 1.1em;
 }
 
 #indices,#es_host {
-    width: 300px;
+  width: 300px;
 }
 
 div#log_container {
-    border: 1px solid #ccc;
-    padding: 10px;
-    margin: 10px 0;
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin: 10px 0;
 }
 
 div#show_hide_green {
-    text-align: right;
+  text-align: right;
 }
 
 li {
-    list-style-type: none;
+  list-style-type: none;
 }
 li span  {
-    display: inline-block;
-    border-left: 0.8em #ddd solid;
-    padding-left: 0.5em;
-    margin: 2px 0;
+  display: inline-block;
+  border-left: 0.8em #ddd solid;
+  padding-left: 0.5em;
+  margin: 2px 0;
 }
 
 .no_green li li.green {
-    display: none
+  display: none
 }
 
 li.red > span {
-    border-color: red
+  border-color: red
 }
 
 li.green > span {
-    border-color: green
+  border-color: green
 }
 
 li.yellow > span {
-    border-color: orange
+  border-color: orange
 }
 
 li.blue > span {
-    border-color: blue
+  border-color: blue
 }
 
 li > ul > li > ul {
-    padding-left: 0.8em;
+  padding-left: 0.8em;
 }
 
 span.msg {
-    border: none;
+  border: none;
 }
 
 p.error {
-    color: red;
+  color: red;
 }
