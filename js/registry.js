@@ -21,13 +21,16 @@ var Checks = (function() {
     return registry[phase];
   }
 
-  function get_key(o, path) {
+  function get_key(o, path, index) {
     var keys = path.split('.');
     while (keys.length) {
       if (!o instanceof Object) {
         return "";
       }
       var key = keys.shift();
+      if (key == "INDEXNAME") {
+        key = index;
+      }
       if (o.hasOwnProperty(key)) {
         o = o[key]
       } else {

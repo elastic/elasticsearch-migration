@@ -91,22 +91,21 @@ function Checker(host, indices, out_id) {
 
     case "index.segments":
       return {
-        segments : Checks.get_key(es_data, "index.segments." + name),
-        settings : Checks.get_key(es_data, "index.settings." + name
-          + ".settings")
+        segments : Checks.get_key(es_data, "index.segments.INDEXNAME", name),
+        settings : Checks.get_key(es_data, "index.settings.INDEXNAME.settings", name)
       };
 
     case "index.settings":
-      data = Checks.get_key(es_data, "index.settings." + name);
+      data = Checks.get_key(es_data, "index.settings.INDEXNAME", name);
       return data && (data.settings || data);
 
     case "index.mappings":
-      data = Checks.get_key(es_data, "index.mappings." + name);
+      data = Checks.get_key(es_data, "index.mappings.INDEXNAME", name);
       return data && (data.mappings || data);
 
     case "index.flat_mappings":
     case "index.mappings.fields":
-      return Checks.get_key(es_data, "index.flat_mappings." + name);
+      return Checks.get_key(es_data, "index.flat_mappings.INDEXNAME", name);
 
     default:
       throw ("Unknown phase: " + phase)
