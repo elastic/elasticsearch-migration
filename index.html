@@ -2,6 +2,7 @@
 <head>
     <title>Elasticsearch Migration Checker</title>
 
+    <link href="css/font-awesome.css" media="all" rel="stylesheet" />
     <link href="styles.css" media="all" rel="stylesheet" />
     <script type="text/javascript" src="js/bluebird/bluebird.min.js"></script>
     <script type="text/javascript" src="js/jquery/jquery-1.11.2.min.js"></script>
@@ -22,16 +23,24 @@
             jQuery('#es_host').val(location.protocol + '//' + location.host);
             jQuery('#main_form').submit(function(e) {
                 e.preventDefault();
-                var host = jQuery('#es_host').val();
-                var indices = jQuery('#indices').val();
-                jQuery('#log_container').attr('style','');
-                var checker = new Checker(host,indices,'#log');
-                checker.run();
+                run();
                 return false;
             });
             jQuery('#show_green').click(function(e) {
                 jQuery('#log').toggleClass('no_green');
             });
+        });
+        var run = function () {
+          var host = jQuery('#es_host').val();
+          var indices = jQuery('#indices').val();
+          jQuery('#log_container').attr('style','');
+          var checker = new Checker(host,indices,'#log');
+          checker.run();
+        };
+
+        jQuery(document).ready(function() {
+          run();
+          $('li:contains("Checking cluster")').css({fontSize: '80%', color: '#999'});
         });
     -->
     </script>
