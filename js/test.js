@@ -159,7 +159,7 @@ function Test_Checker(host, checks_out_id, test_out_id, no_delete) {
   }
 
   function finish() {
-    log.log('Done');
+    log.log('<span class="done"><i class="fa fa-check-circle"></i>All checks done</span>');
   }
 
   function send_request(method, path, body) {
