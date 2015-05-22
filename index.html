@@ -38,44 +38,41 @@
 </head>
 <body>
 <div id="body">
-    <h1>
-        Elasticsearch Migration Checker
-    </h1>
+    <h1>Elasticsearch Migration Checker</h1>
+
     <div id="intro">
-    <p>
-        This plugin will help you to check whether you can upgrade
-        directly to Elasticsearch version 2.x, or whether you need to
-        make changes to your data before doing so.  It will run on
-        Elasticsearch versions 0.90.x to 1.x.
-    </p>
-    <p>
-        <b>NOTE: </b> Checks are limited only to data that is stored in the cluster,
-        such as cluster and index settings, mappings, and segments.  It does not
-        take settings files or your use of the API into account.  You should still
-        test your application thoroughly and backup your data before upgrading.
-    </p>
-    <p>
-        Each check is given a color, whose meaning is as follows:
-        <ul>
-            <li class="green"><span>All OK</span>.</li>
-            <li class="blue"><span>An advisory note that something has changed. No action needed.</span></li>
-            <li class="yellow"><span>You can upgrade directly, but you are using deprecated functionality which will not be available in version 2.x.</span></li>
-            <li class="red"><span>You cannot upgrade without fixing this problem.</span></li>
-        </ul>
-    </p>
-    <p>
+      <p class="description">
+          This plugin will help you to check whether you can upgrade
+          directly to Elasticsearch version 2.x, or whether you need to
+          make changes to your data before doing so.  It will run on
+          Elasticsearch versions 0.90.x to 1.x.
+      </p>
+      <p class="link">
         Read more about important changes in the
-        <a href="http://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes.html">Breaking Changes</a>
+        <a href="http://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes.html"><em>Breaking Changes</em></a>
         documentation online.
-    </p>
+      </p>
+      <p class="note">
+          <strong>NOTE</strong> Checks are limited only to data that is stored in the cluster,
+          such as cluster and index settings, mappings, and segments.  It does not
+          take settings files or your use of the API into account.  You should still
+          test your application thoroughly and backup your data before upgrading.
+      </p>
+      <p class="explanation">
+          Each check is given a color:
+          <ul>
+              <li class="green"><i class="dot"></i><span>Everything is OK</span>.</li>
+              <li class="blue"><i class="dot"></i><span>An advisory note that something has changed. No action needed.</span></li>
+              <li class="yellow"><i class="dot"></i><span>You can upgrade directly, but you are using deprecated functionality which will not be available in version 2.x.</span></li>
+              <li class="red"><i class="dot"></i><span>You cannot upgrade without fixing this problem.</span></li>
+          </ul>
+      </p>
     </div>
     <form id="main_form">
         <div>
         <input type="text" name="es_host" id="es_host" value="http://localhost:9200" />
-        <input type="text" name="indices" id="indices" placeholder="Index names: eg logstash-*" />
-        <button type="submit">
-            Run checks now
-        </button>
+        <input type="text" name="indices" id="indices" placeholder="Filter indices: eg. logstash-*" />
+        <button type="submit">Run checks now</button>
         </div>
     </form>
     <div id="log_container" style="display:none">
