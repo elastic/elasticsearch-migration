@@ -41,7 +41,7 @@ function Checker(host, indices, out_id) {
   }
 
   function finish() {
-    log.log('Done');
+    log.log('<span class="done"><i class="fa fa-check-circle"></i>All checks done</span>');
   }
 
   function check_indices() {

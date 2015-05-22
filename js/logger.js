@@ -6,8 +6,11 @@ function Logger(out_id) {
 
   function start_section(class_name, msg) {
     msg = msg.replace(/`([^`]+)`/g, "<code>$1</code>");
-    out.append('<li><span class="section ' + class_name + '">' + msg
-      + '</span><ul></ul></li>');
+    out.append('<li class="section"><span class="section ' +
+               class_name +
+               '"><i class="dot"></i>' +
+               '<strong>' + msg + '</strong>' +
+               '</span><ul></ul></li>');
     sections.push(out);
     out = out.find(':last');
   }
@@ -36,7 +39,7 @@ function Logger(out_id) {
       console.log(e.message, e.stack);
       msg = e.message;
     }
-    out.append('<p class="error">ERROR: ' + msg + '</p>');
+    out.append('<p class="error"><i class="fa fa-exclamation-circle"></i>ERROR: ' + msg + '</p>');
     throw (e);
   }
 
@@ -52,13 +55,13 @@ function Logger(out_id) {
       start_section('check', check);
       msg = msg.replace(/`([^`]+)`/g, "<code>$1</code>");
       forall(msg.split(/\n/), function(line) {
-        out.append('<li class="' + color + '"><span class="msg">' + line
+        out.append('<li class="status ' + color + '"><i class="dot"></i><span class="msg">' + line
           + '</span></li>');
       });
       set_section_color(color);
       end_section();
     } else {
-      out.append('<li class="' + color + '"><span class="check">' + check
+      out.append('<li class="status ' + color + '"><i class="dot"></i><span class="check">' + check
         + '</span></li>');
     }
   }
