@@ -13,6 +13,7 @@ Checks.register("index.flat_mappings", [
       _name : true, // Contains the original name of the field, with type prefix
       "copy_to" : true,
       "dynamic" : true,
+      "enabled" : true,
       "format" : true,
       "ignore_above" : true,
       "include_in_all" : true,
