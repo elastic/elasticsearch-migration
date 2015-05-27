@@ -5,37 +5,37 @@ Checks
     "tests",
     [
 
-    /* Conflicting fields */
+    /* "Conflicting" fields */
 
     {
-      name : "Conflicting field mappings",
-      setup : [
+      "name" : "Conflicting field mappings",
+      "setup" : [
 
       [ "PUT", "/good", {
-        mappings : {
-          one : {
-            properties : {
-              aaa : {
-                type : "string"
+        "mappings" : {
+          "one" : {
+            "properties" : {
+              "aaa" : {
+                "type" : "string"
               },
-              bbb : {
-                properties : {
-                  ccc : {
-                    type : "string"
+              "bbb" : {
+                "properties" : {
+                  "ccc" : {
+                    "type" : "string"
                   }
                 }
               }
             }
           },
-          two : {
-            properties : {
-              aaa : {
-                type : "string"
+          "two" : {
+            "properties" : {
+              "aaa" : {
+                "type" : "string"
               },
-              bbb : {
-                properties : {
-                  ccc : {
-                    type : "string"
+              "bbb" : {
+                "properties" : {
+                  "ccc" : {
+                    "type" : "string"
                   }
 
                 }
@@ -46,44 +46,44 @@ Checks
       } ],
 
       [ "PUT", "/bad", {
-        mappings : {
-          one : {
-            properties : {
-              aaa : {
-                type : "string"
+        "mappings" : {
+          "one" : {
+            "properties" : {
+              "aaa" : {
+                "type" : "string"
               },
-              bbb : {
-                properties : {
-                  ccc : {
-                    type : "string"
+              "bbb" : {
+                "properties" : {
+                  "ccc" : {
+                    "type" : "string"
                   }
                 }
               },
-              ddd : {
-                type : "string",
-                fielddata : {
-                  format : "disabled"
+              "ddd" : {
+                "type" : "string",
+                "fielddata" : {
+                  "format" : "disabled"
                 }
               }
             }
           },
-          two : {
-            properties : {
-              aaa : {
-                type : "date"
+          "two" : {
+            "properties" : {
+              "aaa" : {
+                "type" : "date"
               },
-              bbb : {
-                properties : {
-                  ccc : {
-                    type : "date"
+              "bbb" : {
+                "properties" : {
+                  "ccc" : {
+                    "type" : "date"
                   }
 
                 }
               },
-              ddd : {
-                type : "string",
-                fielddata : {
-                  format : "lazy"
+              "ddd" : {
+                "type" : "string",
+                "fielddata" : {
+                  "format" : "lazy"
                 }
               }
             }
@@ -92,38 +92,38 @@ Checks
       } ],
 
       [ "PUT", "/safe", {
-        mappings : {
-          one : {
-            properties : {
-              aaa : {
-                type : "string"
+        "mappings" : {
+          "one" : {
+            "properties" : {
+              "aaa" : {
+                "type" : "string"
               },
-              bbb : {
-                dynamic : false,
-                properties : {
-                  ccc : {
-                    type : "date",
-                    copy_to : [ "foo" ]
+              "bbb" : {
+                "dynamic" : false,
+                "properties" : {
+                  "ccc" : {
+                    "type" : "date",
+                    "copy_to" : [ "foo" ]
                   }
                 }
               }
             }
           },
-          two : {
-            properties : {
-              aaa : {
-                type : "string",
-                ignore_above : 10,
-                null_value : "NULL"
+          "two" : {
+            "properties" : {
+              "aaa" : {
+                "type" : "string",
+                "ignore_above" : 10,
+                "null_value" : "NULL"
               },
-              bbb : {
-                dynamic : true,
-                properties : {
-                  ccc : {
-                    type : "date",
-                    copy_to : [ "bar" ],
-                    format : "YYYY/mm/dd",
-                    include_in_all : true
+              "bbb" : {
+                "dynamic" : true,
+                "properties" : {
+                  "ccc" : {
+                    "type" : "date",
+                    "copy_to" : [ "bar" ],
+                    "format" : "YYYY/mm/dd",
+                    "include_in_all" : true
                   }
 
                 }
@@ -135,22 +135,22 @@ Checks
 
       ],
 
-      checks : [
+      "checks" : [
         {
-          index : "good"
+          "index" : "good"
         },
         {
-          index : "bad",
-          msg : /Mapping for field one:aaa conflicts with: two:aaa. Check parameter: type/
+          "index" : "bad",
+          "msg" : /Mapping "for" field one:aaa "conflicts" with: two:aaa. "Check" parameter: type/
         },
         {
-          index : "bad",
-          msg : /Mapping for field one:bbb.ccc conflicts with: two:bbb.ccc. Check parameter: type/
+          "index" : "bad",
+          "msg" : /Mapping "for" field one:bbb.ccc "conflicts" with: two:bbb.ccc. "Check" parameter: type/
         },
         {
-          index : "bad",
-          msg : /Mapping for field one:ddd conflicts with: two:ddd. Check parameter: fielddata.format/
+          "index" : "bad",
+          "msg" : /Mapping "for" field one:ddd "conflicts" with: two:ddd. "Check" parameter: fielddata.format/
         }, {
-          index : "safe"
+          "index" : "safe"
         } ]
     } ]);
