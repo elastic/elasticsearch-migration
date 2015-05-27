@@ -21,7 +21,9 @@ Checks.register("index.flat_mappings", [
     };
 
     function flatten_fields(d) {
-      var vals = {};
+      var vals = {
+        type : "object" // default setting if not specified
+      };
 
       function flatten(prefix, d) {
         for ( var key in d) {
