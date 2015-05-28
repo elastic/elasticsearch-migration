@@ -1,24 +1,25 @@
 /* ----- General rules ----------------------------------------------------- */
 
 html, body, div, h1, ul, li, a {
-  font-family: Helvetica, sans-serif;
+  font-family: Helvetica, Arial, sans-serif;
   font-weight: normal;
+  line-height: 1.3em
 }
 
 body {
-  color: #222;
-  background: #fafafa;
+  color: #878787;
+  background: white;
   margin: 0;
   padding: 0;
 }
 
 h1 {
-  color: #fff;
-  font-size: 20px;
+  color: #222;
+  font-size: 48px;
   text-align: left;
-  border-radius: 0.5em;
-  background: #222 url('images/elastic_cluster_white.png') 10px 6px no-repeat;
-  padding: 0.25em 0.25em 0.27em 35px;
+  background: url('images/elastic.png') 10px 0px no-repeat;
+  padding: 0 0 0 90px;
+  line-height: 52px;
 }
 
 a, a:hover,a:visited {
@@ -39,9 +40,7 @@ i.dot {
   width: 0.75em;
   height: 0.75em;
   border-radius: 1em;
-  margin-right: 0.25em;
-  position: relative;
-  top: 0.1em;
+  margin-right: 0.8em;
 }
 
 i.fa {
@@ -51,49 +50,40 @@ i.fa {
 /* ----- Body and intro ---------------------------------------------------- */
 
 div#body {
-  max-width: 1000px;
+  max-width: 900px;
   margin: 20px auto;
 }
 
-#intro {
-  color: #444;
-  font-size: 90%;
-}
-
 #intro .note {
-  background: #ccc;
   padding: 1em;
   border-radius: 0.5em;
+  background: #fafafa;
 }
 
 #intro .note strong {
-  color: #999;
-  font-weight: 100;
+  color: #2b4590;
 }
 
 #intro .link {
-  color: #fff;
-  background: #1d6e63;
-  padding: 0.25em 1em;
+  font-size: 1.2em;
+  color: #2b4590;
+  background: #31beb1;
+  padding: 0.5em 1em;
   border-radius: 0.5em;
+  text-align: center;
 }
 
 #intro .link a {
   color: #fff;
 }
 
-#intro ul {
-  padding-left: 0.1em !important;
-}
-
 #intro ul i.dot {
-  margin-right: 0.4em;
+  margin-right: 0.5em;
 }
 
 /* ----- Form -------------------------------------------------------------- */
 
 #main_form {
-  font-size: 90%;
   padding-top: 1em;
   border-top: 1px solid #ccc;
 }
@@ -105,27 +95,33 @@ div#body {
   margin-right: 0;
   border: 1px solid #ccc;
   border-radius: 0.25em;
-  width: 40%;
+  width: 39%;
   top: -1px;
 }
 
 #main_form button[type=submit] {
-  background: #ccc;
-  font-size: 90%;
+  background: url("images/go.png") no-repeat right 50% #31beb1;
+  cursor: pointer;
+  border: none;
+  color: white;
   padding: 0.4em 1em;
   line-height: 1em;
   height: 2em;
-  border-radius: 0.5em;
-  position: relative;
-  bottom: 2px;
-  width: 19%;
+  border-radius: 35px;
+  margin-left: 1%;
+  width: 20%;
 }
+
+#main_form button[type=submit]:focus {
+    outline: none;
+}
+
 
 /* ----- Log --------------------------------------------------------------- */
 
 div#log_container {
   border: 1px solid #ececec;
-  background: #ececec;
+  background: #fafafa;
   padding: 10px;
   margin: 10px 0;
   border-radius: 0.5em;
@@ -140,36 +136,19 @@ div#show_hide_green {
   right: 10px;
 }
 
-span.icon {
-  background: #000;
-}
-
-.done {
-  color: #999;
-  background: #333;
-  font-size: 80%;
-  border-radius: 0.75em;
-  padding: 0.25em 0.5em 0.3em 0.5em;
-  width: 97%;
-  display: inline-block;
-}
-
 /* ----- Lists ------------------------------------------------------------- */
 
 ul {
-  padding-left: 1em !important;
+  padding-left: 0;
 }
 
 ul ul {
-  padding-left: 1em !important;
+  padding-left: 1em;
 }
 
 ul ul ul {
-  padding-left: 1.6em !important;
-}
-
-ul ul ul li .msg {
-  font-size: 90% !important;
+  margin: 0.5em 0;
+  padding-left: 1.6em;
 }
 
 ul ul ul li i.dot {
@@ -178,11 +157,11 @@ ul ul ul li i.dot {
 }
 
 #log > ul > li {
-  margin-bottom: 1em;
+  margin-bottom: 0.5em;
 }
 
 #log > ul > li > ul {
-  margin-top: 0.25em;
+  margin-top: 0.5em;
 }
 
 /* ----- List items -------------------------------------------------------- */
@@ -192,53 +171,90 @@ li {
   margin: 0 0 0.25em 0;
 }
 
-.no_green li li.green {
+.no_green li .green,
+.no_green li.section.green  {
   display: none
 }
 
-li.green i.dot {
-  background: #1cd804;
+#log > ul > li.status {
+    margin-left: 1em;
+}
+#log .header > span {
+  background: #666;
+  font-size: 1.2em;
+  color: white;
+  border-radius: 0.5em;
+  padding: 0.5em 0 0.5em 0.5em;
+  margin: 0.5em 0 0.5em 0.5em;
+  width: 97%;
+  display: inline-block;
+  box-sizing: border-box;
 }
 
-li.red i.dot {
+#log .header > span i:before {
+  content: "\f013";
+}
+
+#log .header > span.green i:before {
+  content: "\f00c";
+  color: #1cd804;;
+}
+
+#log .header > span.red i:before {
+  content: "\f00d";
+  color: #fc2e40;
+}
+
+#log .header > span.yellow i:before {
+  content: "\f00d";
+  color: #ffd218;
+}
+
+#log .header > span.blue i:before {
+  content: "\f00d";
+  color: #2a8fff;;
+}
+
+#log .header > span.error {
   background: #fc2e40;
 }
 
-li.yellow i.dot {
+#log .header > span.error i:before {
+  content: "\f071";
+}
+
+li.green > i.dot,
+li.green > span > i.dot {
+  background: #1cd804;
+}
+
+li.red > i.dot,
+li.red > span > i.dot {
+  background: #fc2e40;
+}
+
+li.yellow > i.dot,
+li.yellow > span > i.dot {
   background: #ffd218;
 }
 
-li.blue i.dot {
+li.blue > i.dot,
+li.blue > span > i.dot {
   background: #2a8fff;
-}
-
-li > ul > li > ul {
-  padding-left: 0.8em;
 }
 
 span.msg {
   border: none;
 }
 
-p.error {
-  color: #fff;
-  background: #fc2e40;
-  font-size: 110%;
-  border-radius: 0.75em;
-  padding: 0.25em 0.75em;
-  margin: 0.5em 1em 0.5em 1em;
-}
-
 #log > ul > li.section > span.section {
-  background: #666;
-  border-radius: 0.75em;
+  background: #ddd;
+  border-radius: 0.5em;
   padding: 0.35em 0.5em 0.25em 0.5em;
+  margin-left: 0.5em;
   width: 97%;
   display: inline-block;
-}
-
-#log > ul > li.section > span.section strong {
-  color: #fff;
+  box-sizing: border-box;
 }
 
 #log > ul > li.section.yellow > span.section i {
@@ -269,30 +285,24 @@ li.section strong {
   font-weight: normal;
 }
 
-li.section strong code {
-  color: #222;
-  font-size: 14px;
+li .check strong {
+  color: #555;
+}
+
+li code {
+  color: #555;
   font-family: Consolas, Menlo, 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', monospace;
-  font-weight: bold;
-  border-radius: 0.5em;
-  padding: 0.25em 0.5em;
 }
 
+li.section .test strong,
 li.section .index strong {
-  color: #999;
-  font-size: 12px;
-  font-weight: 100;
+  color: #333;
 }
 
+li.section .test strong code,
 li.section .index strong code {
-  font-size: 14px;
-}
-
-li.section .check strong {
-  font-weight: normal;
-  margin-left: 0.45em;
-  padding-top: 0.25em;
-  display: inline-block;
+  color: white;
+  padding: 0 0.5em;
 }
 
 li.section li.section li i {

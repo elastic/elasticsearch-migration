@@ -48,6 +48,10 @@ curl -XPUT "http://localhost:9200/segments-upgraded_index" -d'
   }
 }'
 
+echo ""
+echo "Create index: segments-red_index"
+curl -XPUT "http://localhost:9200/segments-red_index"
+
 sleep 2
 
 echo ""
@@ -73,6 +77,10 @@ echo ""
 echo "Stopping Elasticsearch 0.20.0"
 kill `cat pid`
 sleep 1
+
+echo ""
+echo "Removing shard for segments-red_index"
+rm -Rf data/elasticsearch/nodes/0/indices/segments-red_index/0
 
 echo ""
 echo "Starting Elasticsearch 0.90.0"

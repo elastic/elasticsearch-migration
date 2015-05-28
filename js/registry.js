@@ -11,9 +11,9 @@ var Checks = (function() {
   };
 
   function register(phase, checks) {
-    for (var i = 0; i < checks.length; i++) {
-      registry[phase].push(checks[i])
-    }
+    forall(checks, function(check) {
+      registry[phase].push(check)
+    });
     return Checks;
   }
 
@@ -42,43 +42,24 @@ var Checks = (function() {
     return o === undefined ? "" : o;
   }
 
-  function check_types(msg, mappings, f) {
-    var errors = [];
-    forall(mappings, function(foo, type) {
-      if (f(type)) {
-        errors.push("`" + type + "`");
-      }
-    });
-    if (errors.length) {
-      return msg + ", in type" + (errors.length > 1 ? 's: ' : ': ')
-        + errors.join(", ");
+  function worse_color(current_color, new_color) {
+    if (current_color === 'red' || new_color === 'red') {
+      return 'red'
     }
-  }
-
-  function check_fields(mappings, f) {
-    var errors = [];
-    forall(mappings, function(type) {
-      if (type.properties) {
-        forall(type.properties, function(field) {
-          var msg = f(field);
-          if (msg) {
-            errors.push(msg)
-          }
-        })
-      }
-    });
-    if (errors.length) {
-      return errors.join("\n");
+    if (current_color === 'yellow' || new_color === 'yellow') {
+      return 'yellow'
     }
+    if (current_color === 'blue' || new_color === 'blue') {
+      return 'blue'
+    }
+    return 'green';
   }
 
   return {
-    check_types : check_types,
-    check_fields : check_fields,
     checks_for_phase : checks_for_phase,
     get_key : get_key,
     register : register,
-    registry : registry
+    worse_color : worse_color
   };
 
 })();

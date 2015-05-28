@@ -25,31 +25,35 @@ function Checker(host, indices, out_id) {
   var log;
 
   function run() {
-    this.log = new Logger(out_id);
-    log = this.log;
-    log.log('Checking cluster at: ' + host);
+    log = this.log = new Logger(out_id);
+    log.header('Checking cluster at: ' + host);
 
     return check_version() //
     .then(load_es_data) //
-    .then(function() {
-      return Promise.attempt(check_indices)
-    })//
-    .then(function() {
-      return Promise.attempt(finish)
-    }) //
+    .then(check_indices)//
+    .then(finish) //
     .caught(log.error);
   }
 
-  function finish() {
-    log.log('<span class="done"><i class="fa fa-check-circle"></i>All checks done</span>');
+  function finish(color) {
+    if (color === 'green') {
+      log.header('All checks completed successfully.', color);
+    } else if (color === 'red') {
+      log.header(
+        'Checks completed. The cluster requires action before upgrading.',
+        color);
+    } else {
+      log.header('Some checks failed. Upgrade with caution.', color);
+    }
   }
 
   function check_indices() {
+    var global_color = 'green';
 
     var indices = Object.keys(es_data.index.aliases).sort();
     if (indices.length === 0) {
       log.log("No indices found");
-      return;
+      return global_color;
     }
 
     forall(indices, function(index) {
@@ -66,23 +70,35 @@ function Checker(host, indices, out_id) {
 
       forall(index_phases, function(phase) {
         var data = data_for_phase(phase, index);
-        if (data) {
-          var checks = Checks.checks_for_phase(phase);
-          forall(checks, function(check) {
-            var color = 'green';
-            var msg = check.check(data, name);
-            if (msg) {
-              color = check.color;
-              index_color = worse_color(index_color, check.color)
-            }
-            log.result(color, check.name, msg)
-          });
-        }
+        index_color = Checks.worse_color(index_color, run_checks(phase, data))
       });
 
       log.set_section_color(index_color);
       log.end_section();
+      global_color = Checks.worse_color(global_color, index_color);
     });
+    return global_color;
+  }
+
+  function run_checks(phase, data) {
+    if (!data) {
+      return;
+    }
+
+    var section_color = 'green';
+    var checker = checker_for_phase(phase);
+    var checks = Checks.checks_for_phase(phase);
+
+    forall(checks, function(check) {
+      var color = 'green';
+      var msg = checker(check, data);
+      if (msg) {
+        color = check.color;
+        section_color = Checks.worse_color(section_color, check.color);
+      }
+      log.result(color, check.name, msg);
+    });
+    return section_color;
   }
 
   function data_for_phase(phase, name) {
@@ -92,6 +108,7 @@ function Checker(host, indices, out_id) {
 
     case "index.segments":
       return {
+        health : Checks.get_key(es_data, "index.health." + name),
         segments : Checks.get_key(es_data, "index.segments." + name),
         settings : Checks.get_key(es_data, "index.settings." + name
           + ".settings")
@@ -114,6 +131,54 @@ function Checker(host, indices, out_id) {
     }
   }
 
+  function checker_for_phase(phase) {
+
+    function check_types(check, mappings) {
+      var errors = [];
+      forall(mappings, function(mapping, type) {
+        if (check.check(mapping)) {
+          errors.push("`" + type + "`");
+        }
+      });
+      if (errors.length) {
+        return check.msg + ", in type" + (errors.length > 1 ? 's: ' : ': ')
+          + errors.join(", ") + '.';
+      }
+    }
+
+    function check_fields(check, mappings) {
+      var errors = [];
+      forall(mappings, function(mapping, type) {
+        if (mapping.properties) {
+          forall(mapping.properties, function(field_mapping, field) {
+            if (check.check(field_mapping)) {
+              errors.push("`" + type + ':' + field + "`");
+            }
+          })
+        }
+      });
+      if (errors.length) {
+        return check.msg + ", in field" + (errors.length > 1 ? 's: ' : ': ')
+          + errors.join(", ") + '.';
+      }
+    }
+
+    switch (phase) {
+
+    case "index.mappings":
+      return check_types;
+
+    case "index.mappings.fields":
+      return check_fields;
+
+    default:
+      return function(check, data) {
+        return check.check(data);
+      };
+    }
+
+  }
+
   function build_url(action) {
     if (!indices || indices === '*' || indices === '_all') {
       return '/' + action;
@@ -121,6 +186,16 @@ function Checker(host, indices, out_id) {
       return '/' + indices + '/' + action + '?expand_wildcards=open,closed'
     }
   }
+
+  function cluster_health_url() {
+    if (!indices || indices === '*' || indices === '_all') {
+      return '/_cluster/health?level=indices';
+    } else {
+      return '/_cluster/health/' + indices
+        + '?level=indices&expand_wildcards=open,closed'
+    }
+  }
+
   function load_es_data(version) {
     indices = indices || '*';
     return Promise.all([ //
@@ -128,6 +203,7 @@ function Checker(host, indices, out_id) {
     get_url(build_url('_settings')), //
     get_url(build_url('_mapping')), //
     get_url(build_url('_aliases')), //
+    get_url(cluster_health_url()), //
     get_url('/_cluster/settings') //
     ]).//
     then(function(data) {
@@ -137,10 +213,11 @@ function Checker(host, indices, out_id) {
           settings : version.lt('1.*') ? unflatten_settings(data[1]) : data[1],
           mappings : data[2],
           flat_mappings : flatten_mappings(data[2]),
-          aliases : data[3]
+          aliases : data[3],
+          health : data[4].indices
         },
         cluster : {
-          settings : data[4]
+          settings : data[5]
         }
       };
     });
@@ -218,17 +295,18 @@ function Checker(host, indices, out_id) {
   }
 
   function check_version() {
-    return get_version()
-      .then(
-        function(version) {
-          if (version.gt('1.*') || version.lt('0.90.*')) {
-            throw ('This plugin only works on Elasticsearch versions 0.90.x - 1.x. '
-              + 'This node is version ' + version)
-          } else {
-            log.result('green', 'Elasticsearch version: ' + version);
-            return version;
-          }
-        });
+    function is_version_ok(version) {
+      if (version.gt('1.*') || version.lt('0.90.*')) {
+        throw ('This plugin only works on Elasticsearch versions 0.90.x - 1.x. '
+          + 'This node is version ' + version)
+      } else {
+        log.result('green', 'Elasticsearch version: ' + version);
+        return version;
+      }
+    }
+    ;
+
+    return get_version().then(is_version_ok);
   }
 
   function get_version() {
@@ -238,27 +316,6 @@ function Checker(host, indices, out_id) {
           || Checks.get_key(r, "version.snapshot_build");
         return new ES_Version(r.version.number, snapshot);
       });
-  }
-
-  function then_in_turn(list, func) {
-    return (function next() {
-      if (list.length) {
-        return Promise.attempt(func, [ list.shift() ]).then(next);
-      }
-    }());
-  }
-
-  function worse_color(current_color, new_color) {
-    if (current_color === 'red' || new_color === 'red') {
-      return 'red'
-    }
-    if (current_color === 'yellow' || new_color === 'yellow') {
-      return 'yellow'
-    }
-    if (current_color === 'blue' || new_color === 'blue') {
-      return 'blue'
-    }
-    return 'green';
   }
 
   function get_url(path, params) {

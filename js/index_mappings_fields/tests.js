@@ -49,10 +49,7 @@ Checks.register("tests", [
     index : "good"
   }, {
     index : "bad",
-    msg : /Field test:foo uses deprecated parameter path/
-  }, {
-    index : "bad",
-    msg : /Field test:foo.bar uses deprecated parameter index_name/
+    msg : /The path and index_name parameters are deprecated, in fields: test:foo, test:foo.bar/
   } ]
 },
 
@@ -90,7 +87,7 @@ Checks.register("tests", [
     index : "good"
   }, {
     index : "bad",
-    msg : /Boolean field test:foo will return 1\/0/
+    msg : /Boolean fields will return 1\/0 instead of T\/F in scripts, aggregations, or sort values, in field: test:foo/
   } ]
 },
 

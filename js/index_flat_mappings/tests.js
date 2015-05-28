@@ -141,15 +141,15 @@ Checks
         },
         {
           "index" : "bad",
-          "msg" : /Mapping "for" field one:aaa "conflicts" with: two:aaa. "Check" parameter: type/
+          "msg" : /Mapping for field one:aaa conflicts with: two:aaa. Check parameter: type/
         },
         {
           "index" : "bad",
-          "msg" : /Mapping "for" field one:bbb.ccc "conflicts" with: two:bbb.ccc. "Check" parameter: type/
+          "msg" : /Mapping for field one:bbb.ccc conflicts with: two:bbb.ccc. Check parameter: type/
         },
         {
           "index" : "bad",
-          "msg" : /Mapping "for" field one:ddd "conflicts" with: two:ddd. "Check" parameter: fielddata.format/
+          "msg" : /Mapping for field one:ddd conflicts with: two:ddd. Check parameter: fielddata.format/
         }, {
           "index" : "safe"
         } ]

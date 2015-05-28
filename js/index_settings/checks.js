@@ -32,10 +32,10 @@ Checks
         color : "red",
         check : function(settings) {
           if (Checks.get_key(settings, "index.codec")) {
-            return "Custom codecs can no longer be configured. Reindex without the `index.codec` setting.";
+            return "Custom codecs can no longer be configured. Reindex "
+              + "without the `index.codec` setting.";
           }
         }
       },
-
 
     ]);

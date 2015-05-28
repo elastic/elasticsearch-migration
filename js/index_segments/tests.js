@@ -7,6 +7,9 @@ Checks.register("tests",
   setup : [],
 
   checks : [ {
+    index : "segments-red_index",
+    msg : /This index is missing 1 primary shard/
+  }, {
     index : "segments-closed_index",
     msg : /This index is closed/
   }, {

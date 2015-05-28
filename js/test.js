@@ -27,7 +27,8 @@ function Test_Checker(host, checks_out_id, test_out_id, no_delete) {
         return "Couldn't find error msg";
       }
       if (!el.text().match(check.msg)) {
-        return "Error msg doesn't match " + check.msg;
+        return "Error msg doesn't match `" + check.msg + "`. Got: `"
+          + el.text() + '`';
       }
       return;
     }
@@ -57,6 +58,7 @@ function Test_Checker(host, checks_out_id, test_out_id, no_delete) {
       });
       checker.log.clear();
       log.set_section_color(test_color);
+      return test_color;
     });
   }
 
@@ -66,7 +68,7 @@ function Test_Checker(host, checks_out_id, test_out_id, no_delete) {
     function next_step() {
       var step = setup.shift();
       if (step === undefined) {
-        return send_request('GET', '/_cluster/health?wait_for_status=yellow');
+        return send_request('GET', '/_cluster/health?wait_for_status=yellow&timeout=3s');
       }
       return send_request(step[0], step[1], step[2])//
       .then(next_step);
@@ -101,13 +103,14 @@ function Test_Checker(host, checks_out_id, test_out_id, no_delete) {
   function run() {
     var tests;
     var version;
+    var tests_color = 'green';
 
     function next_test() {
       var test = tests.shift();
       if (test === undefined) {
-        return;
+        return tests_color;
       }
-      log.start_section('test', test.name);
+      log.start_section('test', 'Test: `' + test.name + '`');
 
       if (should_skip(test, version)) {
         log.result('gray', 'Skipped - unsupported version');
@@ -135,18 +138,22 @@ function Test_Checker(host, checks_out_id, test_out_id, no_delete) {
           throw ("Error running checker: " + e)
         }).then(function() {
           return run_checks(test);
-        })
+        }).then(Promise.attempt(function(color) {
+          tests_color = Checks.worse_color(tests_color, color);
+        }));
       }).caught(function(e) {
         log.result('blue', e);
-      }).then(function() {
+        tests_color = Checks.worse_color(tests_color, 'blue');
+      }).then(function(color) {
         log.end_section();
+        tests_color = Checks.worse_color(tests_color, color);
         return next_test()
       });
     }
 
     tests = Checks.checks_for_phase('tests').slice();
     log = new Logger(test_out_id);
-    log.log('Testing cluster at: ' + host);
+    log.header('Testing cluster at: ' + host);
 
     return checker.version() //
     .then(function(v) {
@@ -158,8 +165,12 @@ function Test_Checker(host, checks_out_id, test_out_id, no_delete) {
     .caught(log.error);
   }
 
-  function finish() {
-    log.log('<span class="done"><i class="fa fa-check-circle"></i>All checks done</span>');
+  function finish(color) {
+    if (color == 'green') {
+      log.header('Test suite completed successfully', color);
+    } else {
+      log.header('Test suite failed', color);
+    }
   }
 
   function send_request(method, path, body) {

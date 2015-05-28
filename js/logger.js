@@ -2,15 +2,14 @@
 
 function Logger(out_id) {
   var out;
+  var header_el;
   var sections;
 
   function start_section(class_name, msg) {
     msg = msg.replace(/`([^`]+)`/g, "<code>$1</code>");
-    out.append('<li class="section"><span class="section ' +
-               class_name +
-               '"><i class="dot"></i>' +
-               '<strong>' + msg + '</strong>' +
-               '</span><ul></ul></li>');
+    out.append('<li class="section"><span class="section ' + class_name
+      + '"><i class="dot"></i>' + '<strong>' + msg + '</strong>'
+      + '</span><ul></ul></li>');
     sections.push(out);
     out = out.find(':last');
   }
@@ -27,10 +26,12 @@ function Logger(out_id) {
     out.append('<li>' + msg + '</li>');
   }
 
+  function header(msg, color) {
+    color = color || '';
+    header_el.html('<span class="' + color + '"><i class="fa"></i>' + msg + '</span>');
+  }
+
   function error(e) {
-    while (sections.length) {
-      end_section()
-    }
     var msg;
     if (typeof e === "string") {
       console.log(e);
@@ -39,13 +40,14 @@ function Logger(out_id) {
       console.log(e.message, e.stack);
       msg = e.message;
     }
-    out.append('<p class="error"><i class="fa fa-exclamation-circle"></i>ERROR: ' + msg + '</p>');
+    header(msg, 'error');
     throw (e);
   }
 
   function clear() {
-    jQuery(out_id).html('<ul></ul>');
+    jQuery(out_id).html('<ul><li class="header"></li></ul>');
     out = jQuery(out_id).find('ul');
+    header_el = out.find('.header');
     sections = [];
   }
 
@@ -55,14 +57,14 @@ function Logger(out_id) {
       start_section('check', check);
       msg = msg.replace(/`([^`]+)`/g, "<code>$1</code>");
       forall(msg.split(/\n/), function(line) {
-        out.append('<li class="status ' + color + '"><i class="dot"></i><span class="msg">' + line
-          + '</span></li>');
+        out.append('<li class="status ' + color
+          + '"><i class="dot"></i><span class="msg">' + line + '</span></li>');
       });
       set_section_color(color);
       end_section();
     } else {
-      out.append('<li class="status ' + color + '"><i class="dot"></i><span class="check">' + check
-        + '</span></li>');
+      out.append('<li class="status ' + color
+        + '"><i class="dot"></i><span class="check">' + check + '</span></li>');
     }
   }
 
@@ -72,6 +74,7 @@ function Logger(out_id) {
     clear : clear,
     log : log,
     error : error,
+    header : header,
     result : result,
     start_section : start_section,
     end_section : end_section,

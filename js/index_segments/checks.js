@@ -27,6 +27,14 @@ Checks
           return forall(group, check_shard)
         }
 
+        if (Checks.get_key(index.health, "status") === 'red') {
+          var missing = index.health.number_of_shards
+            - index.health.active_primary_shards;
+          return "This index is missing " + missing
+            + (missing === 1 ? ' primary shard' : ' primary shards')
+            + " which cannot be checked for ancient segments."
+        }
+
         if (Object.keys(index.segments).length == 0) {
           return "This index is closed and cannot be checked for ancient segments."
         }

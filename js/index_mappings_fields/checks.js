@@ -1,58 +1,33 @@
 "use strict";
 
-Checks
-  .register(
-    "index.mappings.fields",
-    [
+Checks.register("index.mappings.fields", [
 
-      {
-        name : "Use of `index_name` or `path`",
-        color : "blue",
-        check : function(mappings) {
-          return Checks.check_fields(mappings, function(field) {
-            if (field.path) {
-              return "Field `" + field._name
-                + "` uses deprecated parameter `path`.";
-            } else if (field.index_name) {
-              return "Field `" + field._name
-                + "` uses deprecated parameter `index_name`";
-            }
-          });
-        }
-      },
+  {
+    name : "Use of `index_name` or `path`",
+    color : "blue",
+    msg : "The `path` and `index_name` parameters are deprecated",
+    check : function(field) {
+      return field.path || field.index_name;
+    }
+  },
 
-      {
-        name : "Boolean fields",
-        color : "blue",
-        check : function(mappings) {
-          return Checks
-            .check_fields(
-              mappings,
-              function(field) {
-                if (field.type && field.type === "boolean") {
-                  return "Boolean field `"
-                    + field._name
-                    + "` will return `1/0` instead of `T/F` in scripts, aggregations, or sort values."
-                }
-              });
-        }
-      },
+  {
+    name : "Boolean fields",
+    color : "blue",
+    msg : "Boolean fields will return `1/0` instead of `T/F` in scripts, "
+      + "aggregations, or sort values",
+    check : function(field) {
+      return field.type && field.type === "boolean";
+    }
+  },
 
-      {
-        name : "Per-field postings format",
-        color : "red",
-        check : function(mappings) {
-          return Checks
-            .check_fields(
-              mappings,
-              function(field) {
-                if (field.postings_format) {
-                  return "Field `"
-                    + field._name
-                    + "` contains a `postings_format` which is no longer supported."
-                }
-              });
-        }
-      },
+  {
+    name : "Per-field postings format",
+    color : "red",
+    msg : "The `postings_format` parameter is no longer supported",
+    check : function(field) {
+      return field.postings_format;
+    }
+  },
 
-    ]);
+]);
