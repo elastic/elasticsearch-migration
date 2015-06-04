@@ -8,18 +8,9 @@ html, body, div, h1, ul, li, a {
 
 body {
   color: #878787;
-  background: white;
+  background: white url('images/body_bg.png') repeat-x 0 20px;
   margin: 0;
   padding: 0;
-}
-
-h1 {
-  color: #222;
-  font-size: 48px;
-  text-align: left;
-  background: url('images/elastic.png') 10px 0px no-repeat;
-  padding: 0 0 0 90px;
-  line-height: 52px;
 }
 
 a, a:hover,a:visited {
@@ -51,25 +42,36 @@ i.fa {
 
 div#body {
   max-width: 900px;
-  margin: 20px auto;
+  margin: 10px auto;
+  padding-top: 90px;
+  background: transparent url('images/elastic.jpeg') 0px 0px no-repeat;
 }
 
-#intro .note {
+h1 {
+  color: white;
+  font-size: 32px;
+  text-align: left;
+  font-family: Gibson-Regular, Arial, Helvetica, sans-serif;
+  height: 32px;
+  margin-bottom: 60px;
+}
+
+#intro {
+    line-height: 1.4em;
+}
+
+.note {
   padding: 1em;
-  border-radius: 0.5em;
-  background: #fafafa;
+  background: #f5f5f5;
+  border: 1px solid #e2e2e2;
 }
 
-#intro .note strong {
-  color: #2b4590;
+.note strong {
+  color: #ea468c;
 }
 
-#intro .link {
-  font-size: 1.2em;
-  color: #2b4590;
-  background: #31beb1;
-  padding: 0.5em 1em;
-  border-radius: 0.5em;
+#intro .breaking {
+  color: black;
   text-align: center;
 }
 
@@ -124,7 +126,6 @@ div#log_container {
   background: #fafafa;
   padding: 10px;
   margin: 10px 0;
-  border-radius: 0.5em;
   position: relative;
 }
 
@@ -183,7 +184,6 @@ li {
   background: #666;
   font-size: 1.2em;
   color: white;
-  border-radius: 0.5em;
   padding: 0.5em 0 0.5em 0.5em;
   margin: 0.5em 0 0.5em 0.5em;
   width: 97%;
@@ -197,22 +197,22 @@ li {
 
 #log .header > span.green i:before {
   content: "\f00c";
-  color: #1cd804;;
+  color: #95c73d;
 }
 
 #log .header > span.red i:before {
   content: "\f00d";
-  color: #fc2e40;
+  color: #fe2a39
 }
 
 #log .header > span.yellow i:before {
   content: "\f00d";
-  color: #ffd218;
+  color: #f3bb19;
 }
 
 #log .header > span.blue i:before {
   content: "\f00d";
-  color: #2a8fff;;
+  color: #748cd2;
 }
 
 #log .header > span.error {
@@ -225,22 +225,22 @@ li {
 
 li.green > i.dot,
 li.green > span > i.dot {
-  background: #1cd804;
+  background: #95c73d;
 }
 
 li.red > i.dot,
 li.red > span > i.dot {
-  background: #fc2e40;
+  background: #c33;
 }
 
 li.yellow > i.dot,
 li.yellow > span > i.dot {
-  background: #ffd218;
+  background: #f3bb19;
 }
 
 li.blue > i.dot,
 li.blue > span > i.dot {
-  background: #2a8fff;
+  background: #748cd2;
 }
 
 span.msg {
@@ -249,7 +249,6 @@ span.msg {
 
 #log > ul > li.section > span.section {
   background: #ddd;
-  border-radius: 0.5em;
   padding: 0.35em 0.5em 0.25em 0.5em;
   margin-left: 0.5em;
   width: 97%;
@@ -266,19 +265,19 @@ span.msg {
 }
 
 #log > ul > li.section.green > span.section {
-  background: #1cd804;
+  background: #95c73d;
 }
 
 #log > ul > li.section.red > span.section {
-  background: #fc2e40;
+  background: #c33;
 }
 
 #log > ul > li.section.yellow > span.section {
-  background: #ffd218;
+  background: #f3bb19;
 }
 
 #log > ul > li.section.blue > span.section {
-  background: #2a8fff;
+  background: #748cd2;
 }
 
 li.section strong {
