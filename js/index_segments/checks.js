@@ -51,7 +51,7 @@ Checks
           return;
         }
         if (Checks.get_key(index.settings, "index.version.minimum_compatible")
-          .match(/^2/)) {
+          .match(/^[45]/)) {
           return;
         }
 

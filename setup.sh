@@ -44,7 +44,7 @@ echo "Create index: segments-upgraded_index"
 curl -XPUT "http://localhost:9200/segments-upgraded_index" -d'
 {
   "settings": {
-    "index.version.minimum_compatible": "2000099"
+    "index.version.minimum_compatible": "4.0.0"
   }
 }'
 
@@ -356,6 +356,7 @@ sleep 1;
 echo ""
 echo "Shutting down Elasticsearch 0.90.0"
 kill `cat pid`
+sleep 2
 
 tar -czf test_data.tar.gz data
 
