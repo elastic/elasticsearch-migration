@@ -30,6 +30,7 @@ function Checker(host, indices, out_id) {
 
     return check_version() //
     .then(load_es_data) //
+    .then(check_cluster)//
     .then(check_indices)//
     .then(finish) //
     .caught(log.error);
@@ -45,6 +46,17 @@ function Checker(host, indices, out_id) {
     } else {
       log.header('Some checks failed. Upgrade with caution.', color);
     }
+  }
+
+  function check_cluster() {
+
+    log.start_section('cluster', 'Cluster settings');
+    var data = Checks.get_key(es_data, "cluster.settings");
+    var color = run_checks('cluster.settings', data);
+
+    log.set_section_color(color);
+    log.end_section();
+    return color;
   }
 
   function check_indices() {

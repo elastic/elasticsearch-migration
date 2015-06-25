@@ -34,7 +34,10 @@ Then open the following URL in your browser: http://localhost:9200/_plugin/migra
 
 === Checks performed
 
-This plugin will check each index for the following:
+This plugin will check cluster settings and each index for the following:
+
+* *Cluster settings*:
+** Use of byte or time settings without units.
 
 * *Index segments*:
 ** Segments created by Lucene 3, which cannot be read by Elasticsearch 2.x.
@@ -46,6 +49,7 @@ This plugin will check each index for the following:
 ** The `index.mapping.allow_type_wrapper` setting.
 ** Custom codecs
 ** Use of "default_index_analyzer"
+** Use of byte or time settings without units.
 
 * *Type mapping*:
 ** Custom configured `_id` field.

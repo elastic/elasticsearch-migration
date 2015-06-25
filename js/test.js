@@ -12,6 +12,11 @@ function Test_Checker(host, checks_out_id, test_out_id, no_delete) {
       if (el.length === 0) {
         return "Couldn't find index `" + check.index + "`";
       }
+    } else if (check.cluster) {
+      el = el.find("span.cluster:contains('" + check.cluster + "')").parent();
+      if (el.length === 0) {
+        return "Couldn't find cluster `" + check.cluster + "`";
+      }
     }
     el = el.find("span.check:contains('" + name + "')").parent();
     if (el.length === 0) {
@@ -68,7 +73,9 @@ function Test_Checker(host, checks_out_id, test_out_id, no_delete) {
     function next_step() {
       var step = setup.shift();
       if (step === undefined) {
-        return send_request('GET', '/_cluster/health?wait_for_status=yellow&timeout=3s');
+        return send_request(
+          'GET',
+          '/_cluster/health?wait_for_status=yellow&timeout=3s');
       }
       return send_request(step[0], step[1], step[2])//
       .then(next_step);

@@ -136,7 +136,32 @@ Checks
         } ]
       },
 
+      /* Units for time and byte settings */
+      {
+        name : "Units for time and byte settings",
+        setup : [ [ "PUT", "/good", {
+          "settings" : {
+            "index" : {
+              "refresh_interval" : "1s"
+            }
+          }
+        } ], [ "PUT", "/bad", {
+          "settings" : {
+            "index" : {
+              "refresh_interval" : "1000"
+            }
+          }
+        } ]
 
-}
+        ],
+
+        checks : [ {
+          index : "good"
+        }, {
+          index : "bad",
+          msg : /Units are required.*index.refresh_interval/
+        } ]
+      },
+
 
 ]);

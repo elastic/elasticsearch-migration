@@ -293,6 +293,7 @@ li code {
   font-family: Consolas, Menlo, 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', monospace;
 }
 
+li.section .cluster strong,
 li.section .test strong,
 li.section .index strong {
   color: #333;
