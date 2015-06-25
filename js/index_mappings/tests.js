@@ -416,7 +416,7 @@ Checks
           },
           {
             index : "bad",
-            msg : /field names are reserved.*in types: field_names, index, size, source, type, uid/
+            msg : /field names are reserved.*in types: field_names, index, (parent, )?size, source, type, uid/
           } ]
       }
 

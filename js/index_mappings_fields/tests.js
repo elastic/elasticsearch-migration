@@ -186,6 +186,9 @@ Checks
 
       {
         name : "Fielddata formats",
+        skip : {
+          lt : "1.0.*"
+        },
         setup : [
 
         [ "PUT", "/good", {

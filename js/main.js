@@ -211,28 +211,37 @@ function Checker(host, indices, out_id) {
   function load_es_data(version) {
     indices = indices || '*';
     return Promise.all([ //
-    get_url(build_url('_segments')), //
-    get_url(build_url('_settings')), //
+    get_url(build_url('_segments')).caught(function(e) {
+      return {}
+    }), //
+    get_url(build_url('_settings')).caught(function(e) {
+      return {
+        persistent : {}
+      }
+    }), //
     get_url(build_url('_mapping')), //
     get_url(build_url('_aliases')), //
     get_url(cluster_health_url()), //
     get_url('/_cluster/settings') //
     ]).//
-    then(function(data) {
-      es_data = {
-        index : {
-          segments : data[0].indices,
-          settings : version.lt('1.*') ? unflatten_settings(data[1]) : data[1],
-          mappings : data[2],
-          flat_mappings : flatten_mappings(data[2]),
-          aliases : data[3],
-          health : data[4].indices
-        },
-        cluster : {
-          settings : data[5]
-        }
-      };
-    });
+    then(
+      function(data) {
+        es_data = {
+          index : {
+            segments : data[0].indices,
+            settings : version.lt('1.*') ? unflatten_index_settings(data[1])
+              : data[1],
+            mappings : data[2],
+            flat_mappings : flatten_mappings(data[2]),
+            aliases : data[3],
+            health : data[4].indices
+          },
+          cluster : {
+            settings : version.lt('1.*') ? unflatten_cluster_settings(data[5])
+              : data[5]
+          }
+        };
+      });
   }
 
   function flatten_mappings(mappings) {
@@ -280,17 +289,17 @@ function Checker(host, indices, out_id) {
     return flat;
   }
 
-  function unflatten_settings(settings) {
-
-    function unflatten(current, parts, val) {
-      var next_part = parts.shift();
-      if (!parts.length) {
-        current[next_part] = val;
-      } else {
-        current[next_part] = current[next_part] || {};
-        unflatten(current[next_part], parts, val)
-      }
+  function unflatten(current, parts, val) {
+    var next_part = parts.shift();
+    if (!parts.length) {
+      current[next_part] = val;
+    } else {
+      current[next_part] = current[next_part] || {};
+      unflatten(current[next_part], parts, val)
     }
+  }
+
+  function unflatten_index_settings(settings) {
 
     var new_settings = {};
     forall(settings, function(index, name) {
@@ -304,6 +313,17 @@ function Checker(host, indices, out_id) {
       }
     });
     return new_settings;
+  }
+
+  function unflatten_cluster_settings(settings) {
+
+    var new_settings = {};
+    forall(settings.persistent, function(val, setting) {
+      unflatten(new_settings, setting.split(/\./), val);
+    });
+    return {
+      persistent : new_settings
+    };
   }
 
   function check_version() {
