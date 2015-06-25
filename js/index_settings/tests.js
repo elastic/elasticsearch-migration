@@ -163,5 +163,33 @@ Checks
         } ]
       },
 
+      /* Merge policy settings */
+      {
+        name : "Merge policy settings",
+        setup : [ [ "PUT", "/good", {
+          "settings" : {
+            "index" : {
+              "refresh_interval" : "1s"
+            }
+          }
+        } ], [ "PUT", "/bad", {
+          "settings" : {
+            "index" : {
+              "merge.policy.max_merge_docs" : "10000"
+            }
+          }
+        } ]
 
-]);
+        ],
+
+        checks : [
+          {
+            index : "good"
+          },
+          {
+            index : "bad",
+            msg : /Merge policy settings will be ignored: index.merge.policy.max_merge_docs/
+          } ]
+      }
+
+    ]);

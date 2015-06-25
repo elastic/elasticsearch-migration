@@ -50,6 +50,7 @@ This plugin will check cluster settings and each index for the following:
 ** Custom codecs
 ** Use of "default_index_analyzer"
 ** Use of byte or time settings without units.
+** Use of deprecated merge policy settings.
 
 * *Type mapping*:
 ** Custom configured `_id` field.

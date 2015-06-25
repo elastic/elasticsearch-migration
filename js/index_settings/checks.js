@@ -94,4 +94,31 @@ Checks
           }
         }
       },
+
+      {
+        name : "Merge policy settings",
+        color : "blue",
+        check : function(settings) {
+
+          var list = [ "index.merge.policy.type",
+            "index.merge.policy.min_merge_size",
+            "index.merge.policy.max_merge_size",
+            "index.merge.policy.merge_factor",
+            "index.merge.policy.max_merge_docs",
+            "index.merge.policy.calibrate_size_by_deletes",
+            "index.merge.policy.min_merge_docs",
+            "index.merge.policy.max_merge_docs", ];
+          var errors = [];
+          forall(list, function(setting) {
+            if (Checks.get_key(settings, setting)) {
+              errors.push(setting)
+            }
+          });
+          if (errors.length) {
+            return "Merge policy settings will be ignored: "
+              + errors.sort().join(", ");
+          }
+        }
+      },
+
     ]);
