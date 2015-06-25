@@ -1,89 +1,105 @@
 "use strict";
 
-Checks.register("tests",
+Checks
+  .register(
+    "tests",
 
-/* In-memory indices */
+    /* In-memory indices */
 
-[ {
-  name : "In-memory indices",
-  setup : [
+    [
+      {
+        name : "In-memory indices",
+        setup : [
 
-  [ "PUT", "/ram", {
-    settings : {
-      "index.store.type" : "ram"
-    }
-  } ],
+        [ "PUT", "/ram", {
+          settings : {
+            "index.store.type" : "ram"
+          }
+        } ],
 
-  [ "PUT", "/memory", {
-    settings : {
-      "index.store.type" : "memory"
-    }
-  } ],
+        [ "PUT", "/memory", {
+          settings : {
+            "index.store.type" : "memory"
+          }
+        } ],
 
-  [ "PUT", "/good", {} ]
+        [ "PUT", "/good", {} ]
 
-  ],
+        ],
 
-  checks : [ {
-    index : "ram",
-    msg : /index.store.type.*no longer supported/
-  }, {
-    index : "memory",
-    msg : /index.store.type.*no longer supported/
-  }, {
-    index : "good"
-  } ]
-},
+        checks : [ {
+          index : "ram",
+          msg : /index.store.type.*no longer supported/
+        }, {
+          index : "memory",
+          msg : /index.store.type.*no longer supported/
+        }, {
+          index : "good"
+        } ]
+      },
 
-/* Type wrapper setting */
+      /* Type wrapper setting */
 
-{
-  name : "Type wrapper setting",
-  setup : [
+      {
+        name : "Type wrapper setting",
+        setup : [
 
-  [ "PUT", "/good", {
-    settings : {
-      "index.mapping.allow_type_wrapper" : false
-    }
-  } ],
+        [ "PUT", "/good", {
+          settings : {
+            "index.mapping.allow_type_wrapper" : false
+          }
+        } ],
 
-  [ "PUT", "/bad", {
-    settings : {
-      "index.mapping.allow_type_wrapper" : true
-    }
-  } ],
+        [ "PUT", "/bad", {
+          settings : {
+            "index.mapping.allow_type_wrapper" : true
+          }
+        } ],
 
-  [ "PUT", "/not_set" ]
+        [ "PUT", "/not_set" ]
 
-  ],
+        ],
 
-  checks : [ {
-    index : "good"
-  }, {
-    index : "not_set"
-  }, {
-    index : "bad",
-    msg : /index.mapping.allow_type_wrapper/
-  } ]
+        checks : [ {
+          index : "good"
+        }, {
+          index : "not_set"
+        }, {
+          index : "bad",
+          msg : /index.mapping.allow_type_wrapper/
+        } ]
 
-},
+      },
 
-/* Codec setting */
+      /* Codec setting */
 
-{
-  name : "Codec setting",
-  skip : {
-    gte : "1.4.*"
-  },
-  setup : [
+      {
+        name : "Codec setting",
+        skip : {
+          gte : "1.4.*"
+        },
+        setup : [
 
-  [ "PUT", "/good" ], [ "PUT", "/bad", {
-    settings : {
-      "codec.postings_format" : {
-        my_format : {
-          type : "pulsing",
-          freq_cut_off : 5
-        }
+        [ "PUT", "/good" ], [ "PUT", "/bad", {
+          settings : {
+            "codec.postings_format" : {
+              my_format : {
+                type : "pulsing",
+                freq_cut_off : 5
+              }
+            }
+          }
+        } ]
+
+        ],
+        checks : [ {
+          index : "good"
+        }, {
+          index : "bad",
+          msg : /Custom codecs can no longer be configured/
+        } ]
+
+      },
 
       /* Default index analyzer */
       {
@@ -119,17 +135,7 @@ Checks.register("tests",
           msg : /default_index_analyzer/
         } ]
       },
-      }
-    }
-  } ]
 
-  ],
-  checks : [ {
-    index : "good"
-  }, {
-    index : "bad",
-    msg : /Custom codecs can no longer be configured/
-  } ]
 
 }
 
