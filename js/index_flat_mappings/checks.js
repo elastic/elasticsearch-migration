@@ -14,7 +14,6 @@ Checks.register("index.flat_mappings", [
       "copy_to" : true,
       "dynamic" : true,
       "enabled" : true,
-      "format" : true,
       "ignore_above" : true,
       "include_in_all" : true,
       "null_value" : true

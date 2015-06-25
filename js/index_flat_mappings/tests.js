@@ -70,12 +70,12 @@ Checks
           "two" : {
             "properties" : {
               "aaa" : {
-                "type" : "date"
+                "type" : "integer"
               },
               "bbb" : {
                 "properties" : {
                   "ccc" : {
-                    "type" : "date"
+                    "type" : "integer"
                   }
 
                 }
@@ -122,7 +122,6 @@ Checks
                   "ccc" : {
                     "type" : "date",
                     "copy_to" : [ "bar" ],
-                    "format" : "YYYY/mm/dd",
                     "include_in_all" : true
                   }
 
