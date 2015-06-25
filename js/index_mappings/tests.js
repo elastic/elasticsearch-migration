@@ -68,7 +68,6 @@ Checks
         } ]
       },
 
-
       /* _analyzer field */
 
       {
@@ -336,6 +335,88 @@ Checks
           {
             index : "bad",
             msg : /analyzer.*have been removed.*in types: analyzer, index_analyzer, search_analyzer/
+          } ]
+      },
+
+      /* Reserved field names */
+
+      {
+        name : "Reserved field names",
+        setup : [
+
+        [ "PUT", "/good", {
+          "mappings" : {
+            "good" : {
+              "properties" : {
+                "foo" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        } ], [ "PUT", "/bad", {
+          "mappings" : {
+            "uid" : {
+              "properties" : {
+                "_uid" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "type" : {
+              "properties" : {
+                "_type" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "source" : {
+              "properties" : {
+                "_source" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "parent" : {
+              "properties" : {
+                "_parent" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "field_names" : {
+              "properties" : {
+                "_field_names" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "index" : {
+              "properties" : {
+                "_index" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "size" : {
+              "properties" : {
+                "_size" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        }
+
+        ] ],
+
+        checks : [
+          {
+            index : "good"
+          },
+          {
+            index : "bad",
+            msg : /field names are reserved.*in types: field_names, index, size, source, type, uid/
           } ]
       }
 

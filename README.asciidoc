@@ -56,6 +56,7 @@ This plugin will check each index for the following:
 ** Custom configured `_size` field.
 ** Custom configured `_timestamp` field.
 ** Use of type-level default analyzer settings.
+** Use of reserved field names.
 
 * *Field mapping*:
 ** Fields with the same name in different types with conflicting mappings.

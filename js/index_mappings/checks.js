@@ -120,6 +120,26 @@ Checks
           return mapping.analyzer || mapping.search_analyzer
             || mapping.index_analyzer;
         }
+      },
+
+      {
+        name : "Reserved field names",
+        color : "blue",
+        msg : "The `_uid`, `_id`, `_type`, `_source`, `_all`, `_parent`, `_field_names`, "
+          + "`_routing`, `_index`, `_size`, `_timestamp`, and `_ttl` "
+          + "field names are reserved and can no longer be used in the document `_source`.",
+        check : function(mapping) {
+          var found;
+          var fields = mapping.properties || {};
+          forall(fields, function(v, k) {
+            if (k === '_uid' || k === '_type' || k === '_source'
+              || k === '_parent' || k === '_field_names' || k === '_index'
+              || k === '_size') {
+              found = true;
+            }
+          });
+          return found;
+        }
       }
 
     ]);
