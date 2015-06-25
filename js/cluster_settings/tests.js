@@ -7,7 +7,7 @@ Checks.register("tests", [
   setup : [ [ "PUT", "/_cluster/settings", {
     "persistent" : {
       "discovery.zen.publish_timeout" : "30s",
-      "cluster.info.update.timeout" : 15000
+      "indices.ttl.interval" : 15000
     }
   } ]
 
@@ -15,7 +15,7 @@ Checks.register("tests", [
 
   checks : [ {
     cluster : "Cluster settings",
-    msg : /Units are required.*: cluster.info.update.timeout$/
+    msg : /Units are required.*: indices.ttl.interval$/
   } ]
 }
 
