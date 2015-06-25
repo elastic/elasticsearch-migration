@@ -84,6 +84,41 @@ Checks.register("tests",
           type : "pulsing",
           freq_cut_off : 5
         }
+
+      /* Default index analyzer */
+      {
+        name : "Default index analyzer",
+        setup : [ [ "PUT", "/good", {
+          "settings" : {
+            "analysis" : {
+              "analyzer" : {
+                "default" : {
+                  "type" : "standard"
+                }
+              }
+            }
+          }
+        } ], [ "PUT", "/bad", {
+          "settings" : {
+            "analysis" : {
+              "analyzer" : {
+                "default_index_analyzer" : {
+                  "type" : "standard"
+                }
+              }
+            }
+          }
+        } ]
+
+        ],
+
+        checks : [ {
+          index : "good"
+        }, {
+          index : "bad",
+          msg : /default_index_analyzer/
+        } ]
+      },
       }
     }
   } ]
