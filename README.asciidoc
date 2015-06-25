@@ -63,6 +63,8 @@ This plugin will check each index for the following:
 ** Use of the `index_name` or `path` settings.
 ** Boolean fields, whose field value has changed from `T`/`F` to `1`/`0`.
 ** Custom postings formats.
+** Compressed binary fields.
+** Fielddata formats.
 
 === Test suite
 
