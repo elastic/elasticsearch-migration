@@ -54,6 +54,7 @@ This plugin will check each index for the following:
 ** Custom configured `_routing` field.
 ** Custom configured `_index` field.
 ** Custom configured `_size` field.
+** Custom configured `_timestamp` field.
 ** Use of type-level default analyzer settings.
 
 * *Field mapping*:

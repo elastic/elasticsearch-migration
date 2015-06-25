@@ -92,6 +92,25 @@ Checks
       },
 
       {
+        name : "Field: `_timestamp`",
+        color : "blue",
+        msg : "The `_timestamp` field will only accept the `enabled`, "
+          + "`format`, and `default` parameters in future indices. "
+          + "Importantly, it will not be possible to extract the `_timestamp` value "
+          + "from a `path`.",
+        check : function(mapping) {
+          var conf = Checks.get_key(mapping, '_timestamp');
+          if (conf) {
+            conf = JSON.parse(JSON.stringify(conf));
+            delete conf.enabled;
+            delete conf.format;
+            delete conf["default"];
+            return Object.keys(conf).length;
+          }
+        }
+      },
+
+      {
         name : "Type-level analyzer settings",
         phase : "index.mappings",
         color : "red",

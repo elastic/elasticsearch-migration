@@ -256,6 +256,48 @@ Checks
         } ]
       },
 
+      /* _timestamp field */
+      {
+        name : "Field: _timestamp",
+        setup : [
+
+        [ "PUT", "/good", {
+          "mappings" : {
+            "good" : {
+              "_timestamp" : {
+                "enabled" : true,
+                "format" : "dateOptionalTime",
+                "default" : "2015-01-01"
+              }
+            }
+          }
+        } ],
+
+        [ "PUT", "/bad", {
+          "mappings" : {
+            "bad" : {
+              "_timestamp" : {
+                "enabled" : true,
+                "format" : "dateOptionalTime",
+                "path" : "date",
+                "store" : true,
+                "default" : "2015-01-01",
+                "index" : "no"
+              }
+            }
+          }
+        } ]
+
+        ],
+
+        checks : [ {
+          index : "good"
+        }, {
+          index : "bad",
+          msg : /The _timestamp field will only accept the enabled/
+        } ]
+      },
+
       /* Type level analyzer settings */
 
       {
