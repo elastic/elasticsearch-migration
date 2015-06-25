@@ -277,6 +277,14 @@ curl -XPUT "http://localhost:9200/mappings-metafields" -d'
       "_size": {
         "store": true
       },
+      "_timestamp": {
+        "enabled": true,
+        "format": "dateOptionalTime",
+        "path": "date",
+        "store": true,
+        "default": "2015-01-01",
+        "index": "no"
+      },
       "analyzer": "whitespace",
       "index_analyzer": "whitespace",
       "search_analyzer": "whitespace"
@@ -290,7 +298,16 @@ curl -XPUT "http://localhost:9200/index_settings" -d'
 {
   "settings": {
     "index.store.type": "ram",
-    "index.mapping.allow_type_wrapper": true
+    "index.mapping.allow_type_wrapper": true,
+    "index.refresh_interval": 1000,
+    "index.merge.policy.max_merge_docs": 10000,
+    "analysis": {
+      "analyzer": {
+        "default_index_analyzer": {
+          "type": "standard"
+        }
+      }
+    }
   }
 }'
 
@@ -326,6 +343,23 @@ curl -XPUT "http://localhost:9200/field_mappings" -d'
         },
         "boolean_field": {
           "type": "boolean"
+        },
+        "uid" : {
+          "properties" : {
+            "_uid" : {
+              "type" : "string"
+            }
+          }
+        },
+        "binary_field": {
+          "type": "binary",
+          "compressed": true
+        },
+        "fielddata_field": {
+          "type": "string",
+          "fielddata": {
+            "format": "fst"
+          }
         }
       }
     }
@@ -350,7 +384,16 @@ curl -XPUT "http://localhost:9200/field_mappings-postings_format" -d'
 }'
 
 echo ""
+echo "Cluster settings"
+curl -XPUT "http://localhost:9200/_cluster/settings" -d'
+{
+  "persistent": {
+    "indices.ttl.interval": 30000
+  }
+}'
 
+
+echo ""
 sleep 1;
 
 echo ""
