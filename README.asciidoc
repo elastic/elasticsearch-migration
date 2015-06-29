@@ -1,4 +1,4 @@
-== Elasticsearch Migration Plugin
+== Elasticsearch Migration Plugin v0.04
 
 This plugin will help you to check whether you can upgrade directly to
 Elasticsearch version 2.x, or whether you need to make changes to your data
