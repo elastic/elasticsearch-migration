@@ -71,6 +71,7 @@ This plugin will check cluster settings and each index for the following:
 ** Custom postings formats.
 ** Compressed binary fields.
 ** Fielddata formats.
+** Field names with embedded periods.
 
 === Test suite
 

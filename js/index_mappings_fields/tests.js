@@ -248,4 +248,46 @@ Checks
           } ]
       },
 
+      /* Fields with dots */
+
+      {
+        name : "Fields with dots",
+        setup : [
+
+        [ "PUT", "/good", {
+          "mappings" : {
+            "good" : {
+              "properties" : {
+                "foo" : {
+                  "properties" : {
+                    "bar" : {
+                      "type" : "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        } ], [ "PUT", "/bad", {
+          "mappings" : {
+            "bad" : {
+              "properties" : {
+                "foo.bar" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        } ]
+
+        ],
+
+        checks : [ {
+          index : "good"
+        }, {
+          index : "bad",
+          msg : /Dots in field names.* in field: bad:foo\\.bar/
+        } ]
+      },
+
     ]);

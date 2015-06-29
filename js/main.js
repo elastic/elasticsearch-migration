@@ -163,7 +163,7 @@ function Checker(host, indices, out_id) {
       forall(mappings, function(mapping, type) {
         if (mapping.properties) {
           forall(mapping.properties, function(field_mapping, field) {
-            if (check.check(field_mapping)) {
+            if (check.check(field_mapping,field)) {
               errors.push("`" + type + ':' + field + "`");
             }
           })
@@ -253,7 +253,7 @@ function Checker(host, indices, out_id) {
       function flatten_fields(prefix, d) {
         for ( var field_name in d) {
           var field = d[field_name];
-          var path = prefix + field_name;
+          var path = prefix + field_name.replace(/\./g,'\\.');
 
           if (field.properties) {
             flatten_fields(path + ".", field.properties);

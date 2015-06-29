@@ -50,6 +50,16 @@ Checks
           var format = Checks.get_key(field, 'fielddata.format');
           return format === 'fst' || format === 'compressed';
         }
+      },
+
+      {
+        name : "Fields with dots",
+        color : "yellow",
+        msg : "Dots in field names lead to ambiguous field resolution",
+        check : function(field, name) {
+          return name.match(/\\\./)
+
+        }
       }
 
     ]);

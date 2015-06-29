@@ -288,6 +288,9 @@ curl -XPUT "http://localhost:9200/mappings-metafields" -d'
       "analyzer": "whitespace",
       "index_analyzer": "whitespace",
       "search_analyzer": "whitespace"
+    },
+    "foo.bar": {
+        "type": "string"
     }
   }
 }'
