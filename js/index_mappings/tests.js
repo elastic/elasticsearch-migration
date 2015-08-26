@@ -3,10 +3,47 @@
 Checks
   .register(
     "tests",
-
-    /* _id field */
-
     [
+
+      /* Long type names */
+      {
+        name : "Type name: length",
+        setup : [
+          [ "PUT", "/good", {
+            "mappings" : {
+              "short_type" : {
+                "properties" : {
+                  "field" : {
+                    "type" : "string"
+                  }
+                }
+              }
+            }
+          } ],
+          [
+            "PUT",
+            "/bad",
+            {
+              "mappings" : {
+                "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890" : {
+                  "properties" : {
+                    "field" : {
+                      "type" : "string"
+                    }
+                  }
+                }
+              }
+            } ] ],
+        checks : [ {
+          index : "good"
+        }, {
+          index : "bad",
+          msg : /longer than 255/
+        } ]
+      },
+
+      /* _id field */
+
       {
         name : "Field: _id",
         setup : [

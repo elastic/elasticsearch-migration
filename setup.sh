@@ -250,10 +250,11 @@ curl -XPUT "http://localhost:9200/conflicting_fields-good" -d'
 }'
 
 echo ""
-echo "Create index: mappings-metafields"
-curl -XPUT "http://localhost:9200/mappings-metafields" -d'
+echo "Create index: mappings"
+curl -XPUT "http://localhost:9200/mappings" -d'
 {
   "mappings": {
+    "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890": {},
     "test": {
       "_id": {
         "store": true

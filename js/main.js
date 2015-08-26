@@ -148,7 +148,7 @@ function Checker(host, indices, out_id) {
     function check_types(check, mappings) {
       var errors = [];
       forall(mappings, function(mapping, type) {
-        if (check.check(mapping)) {
+        if (check.check(mapping,type)) {
           errors.push("`" + type + "`");
         }
       });

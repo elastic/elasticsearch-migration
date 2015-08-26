@@ -53,6 +53,7 @@ This plugin will check cluster settings and each index for the following:
 ** Use of deprecated merge policy settings.
 
 * *Type mapping*:
+** Type mapping name length < 256
 ** Custom configured `_id` field.
 ** Custom configured `_type` field.
 ** Use of an `_analyer` field.
