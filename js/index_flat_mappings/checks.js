@@ -11,12 +11,13 @@ Checks.register("index.flat_mappings", [
     var conflicts = [];
     var safe = {
       _name : true, // Contains the original name of the field, with type prefix
+      "coerce" : true,
       "copy_to" : true,
       "dynamic" : true,
       "enabled" : true,
       "ignore_above" : true,
-      "include_in_all" : true,
-      "null_value" : true
+      "ignore_malformed": true,
+      "include_in_all" : true
     };
 
     function flatten_fields(d) {

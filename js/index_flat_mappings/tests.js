@@ -113,8 +113,7 @@ Checks
             "properties" : {
               "aaa" : {
                 "type" : "string",
-                "ignore_above" : 10,
-                "null_value" : "NULL"
+                "ignore_above" : 10
               },
               "bbb" : {
                 "dynamic" : true,
