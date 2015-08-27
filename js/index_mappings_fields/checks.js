@@ -54,7 +54,7 @@ Checks
 
       {
         name : "Fields with dots",
-        color : "yellow",
+        color : "red",
         msg : "Dots in field names lead to ambiguous field resolution",
         check : function(field, name) {
           return name.match(/\\\./)
