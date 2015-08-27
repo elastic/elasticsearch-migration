@@ -99,15 +99,9 @@ Checks
       {
         name : "Field: `_size`",
         color : "blue",
-        msg : "The `_size` field will only accept the `enabled` parameter in "
-          + "future indices",
+        msg : "The `_size` field has been moved to the <a href=\"https://www.elastic.co/guide/en/elasticsearch/plugins/2.0/mapper-size.html\">mapper-size</a> plugin.",
         check : function(mapping) {
-          var conf = Checks.get_key(mapping, '_size');
-          if (conf) {
-            conf = JSON.parse(JSON.stringify(conf));
-            delete conf.enabled;
-            return Object.keys(conf).length;
-          }
+          return Checks.get_key(mapping, '_size');
         }
       },
 
@@ -137,8 +131,10 @@ Checks
         msg : "`analyzer`, `search_analyzer` and `index_analyzer` settings have been "
           + "removed and will use the index defaults instead",
         check : function(mapping) {
-          return mapping.analyzer || mapping.search_analyzer && mapping.search_analyzer !== 'default_search'
-            || mapping.index_analyzer && mapping.index_analyzer !== 'default_index';
+          return mapping.analyzer || mapping.search_analyzer
+            && mapping.search_analyzer !== 'default_search'
+            || mapping.index_analyzer
+            && mapping.index_analyzer !== 'default_index';
         }
       },
 

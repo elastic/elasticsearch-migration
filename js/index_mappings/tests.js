@@ -296,11 +296,7 @@ Checks
 
         [ "PUT", "/good", {
           mappings : {
-            test : {
-              _size : {
-                enabled : true
-              }
-            }
+            test : {}
           }
         } ],
 
@@ -308,7 +304,7 @@ Checks
           mappings : {
             test : {
               _size : {
-                store : true
+                enabled : true
               }
             }
           }
@@ -320,7 +316,7 @@ Checks
           index : "good"
         }, {
           index : "bad",
-          msg : /The _size field will only accept the enabled parameter/
+          msg : /The _size field has been moved/
         } ]
       },
 

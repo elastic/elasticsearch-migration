@@ -61,7 +61,7 @@ This plugin will check cluster settings and each index for the following:
 ** Use of the `_boost` field.
 ** Custom configured `_routing` field.
 ** Custom configured `_index` field.
-** Custom configured `_size` field.
+** Use of `_size` field.
 ** Custom configured `_timestamp` field.
 ** Use of type-level default analyzer settings.
 ** Use of reserved field names.
