@@ -54,6 +54,7 @@ This plugin will check cluster settings and each index for the following:
 
 * *Type mapping*:
 ** Type mapping name length < 256
+** Type names with initial dot
 ** Custom configured `_id` field.
 ** Custom configured `_type` field.
 ** Use of an `_analyer` field.

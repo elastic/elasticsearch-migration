@@ -5,27 +5,37 @@ Checks
     "index.mappings",
     [
 
-     {
-       name : "Type name: length",
-       color : "yellow",
-       msg : "Mapping type names longer than 255 characters may no longer be added.",
+      {
+        name : "Type name: length",
+        color : "yellow",
+        msg : "Mapping type names longer than 255 characters may no longer be added.",
 
-       check : function(mapping,name) {
-         return name.length > 255
-       }
-     },
+        check : function(mapping, name) {
+          return name.length > 255
+        }
+      },
 
-     {
-       name : "Field: `_id`",
-       color : "blue",
-       msg : "The `_id` field can no longer be configured in new indices. "
-         + "Importantly, it will not be possible to extract the `_id` value "
-         + "from a `path`",
+      {
+        name : "Type name: initial dot",
+        color : "yellow",
+        msg : "Mapping type names may not begin with a dot in new indices.",
 
-       check : function(mapping) {
-         return mapping._id && Object.keys(mapping._id).length;
-       }
-     },
+        check : function(mapping, name) {
+          return name.substr(0, 1) === '.' && name !== '.percolator';
+        }
+      },
+
+      {
+        name : "Field: `_id`",
+        color : "blue",
+        msg : "The `_id` field can no longer be configured in new indices. "
+          + "Importantly, it will not be possible to extract the `_id` value "
+          + "from a `path`",
+
+        check : function(mapping) {
+          return mapping._id && Object.keys(mapping._id).length;
+        }
+      },
 
       {
         name : "Field: `_type`",

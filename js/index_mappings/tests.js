@@ -42,6 +42,38 @@ Checks
         } ]
       },
 
+      /* Type names with initial dot */
+      {
+        name : "Type name: initial dot",
+        setup : [ [ "PUT", "/good", {
+          "mappings" : {
+            "no_dot" : {
+              "properties" : {
+                "field" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        } ], [ "PUT", "/bad", {
+          "mappings" : {
+            ".dot" : {
+              "properties" : {
+                "field" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        } ] ],
+        checks : [ {
+          index : "good"
+        }, {
+          index : "bad",
+          msg : /begin with a dot/
+        } ]
+      },
+
       /* _id field */
 
       {
