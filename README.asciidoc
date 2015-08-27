@@ -75,6 +75,7 @@ This plugin will check cluster settings and each index for the following:
 ** Fielddata formats.
 ** Field names with embedded periods.
 ** Use of `position_offset_gap`.
+** Use of murmur3 fields.
 
 === Test suite
 

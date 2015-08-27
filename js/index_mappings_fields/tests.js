@@ -328,4 +328,41 @@ Checks
           msg : /The position_offset_gap parameter has been renamed/
         } ]
       },
-    ]);
+
+      /* Murmur3 */
+
+      {
+        name : "Murmur3",
+        setup : [
+
+        [ "PUT", "/good", {
+          mappings : {
+            test : {
+              properties : {
+                foo : {
+                  type : "string"
+                }
+              }
+            }
+          }
+        } ], [ "PUT", "/bad", {
+          mappings : {
+            test : {
+              properties : {
+                foo : {
+                  type : "murmur3"
+                }
+              }
+            }
+          }
+        } ]
+
+        ],
+
+        checks : [ {
+          index : "good"
+        }, {
+          index : "bad",
+          msg : /The murmur3 field datatype has been moved/
+        } ]
+      }, ]);

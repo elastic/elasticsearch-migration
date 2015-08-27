@@ -65,10 +65,19 @@ Checks
       {
         name : "Position offset gap",
         color : "yellow",
-        msg : "The `position_offset_gap` parameter has been renamed to `position_increment_gap",
+        msg : "The `position_offset_gap` parameter has been renamed to `position_increment_gap`",
         check : function(field) {
           return field.hasOwnProperty('position_offset_gap')
         }
-      }
+      },
+
+      {
+        name : "Murmur3",
+        color : "red",
+        msg : "The `murmur3` field datatype has been moved to the <a href=\"https://www.elastic.co/guide/en/elasticsearch/plugins/2.0/mapper-murmur3.html\">mapper-murmur3</a> plugin.",
+        check : function(field) {
+          return field.type && field.type === "murmur3"
+        }
+      },
 
     ]);

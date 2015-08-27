@@ -368,6 +368,9 @@ curl -XPUT "http://localhost:9200/field_mappings" -d'
         "position_gap": {
           "type": "string",
           "position_offset_gap": 10
+        },
+        "murmur3": {
+            "type": "murmur3"
         }
       }
     }
