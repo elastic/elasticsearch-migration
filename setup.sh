@@ -365,6 +365,10 @@ curl -XPUT "http://localhost:9200/field_mappings" -d'
           "fielddata": {
             "format": "fst"
           }
+        },
+        "position_gap": {
+          "type": "string",
+          "position_offset_gap": 10
         }
       }
     }

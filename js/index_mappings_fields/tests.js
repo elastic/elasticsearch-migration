@@ -290,4 +290,42 @@ Checks
         } ]
       },
 
+      /* Position offset gap */
+
+      {
+        name : "Position offset gap",
+        setup : [
+
+        [ "PUT", "/good", {
+          mappings : {
+            test : {
+              properties : {
+                foo : {
+                  type : "string"
+                }
+              }
+            }
+          }
+        } ], [ "PUT", "/bad", {
+          mappings : {
+            test : {
+              properties : {
+                foo : {
+                  type : "string",
+                  position_offset_gap : 10
+                }
+              }
+            }
+          }
+        } ]
+
+        ],
+
+        checks : [ {
+          index : "good"
+        }, {
+          index : "bad",
+          msg : /The position_offset_gap parameter has been renamed/
+        } ]
+      },
     ]);

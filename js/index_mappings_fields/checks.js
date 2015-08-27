@@ -60,6 +60,15 @@ Checks
           return name.match(/\\\./)
 
         }
+      },
+
+      {
+        name : "Position offset gap",
+        color : "yellow",
+        msg : "The `position_offset_gap` parameter has been renamed to `position_increment_gap",
+        check : function(field) {
+          return field.hasOwnProperty('position_offset_gap')
+        }
       }
 
     ]);
