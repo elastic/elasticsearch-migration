@@ -373,8 +373,26 @@ Checks
         setup : [
 
         [ "PUT", "/good", {
+          settings : {
+            index : {
+              analysis : {
+                analyzer : {
+                  default_index : {
+                    type : "standard"
+                  },
+                  default_search : {
+                    type : "standard"
+                  }
+                }
+              }
+            }
+          },
           mappings : {
-            test : {}
+            test : {
+              index_analyzer : "default_index",
+              search_analyzer : "default_search",
+              properties : {}
+            }
           }
         } ],
 

@@ -137,8 +137,8 @@ Checks
         msg : "`analyzer`, `search_analyzer` and `index_analyzer` settings have been "
           + "removed and will use the index defaults instead",
         check : function(mapping) {
-          return mapping.analyzer || mapping.search_analyzer
-            || mapping.index_analyzer;
+          return mapping.analyzer || mapping.search_analyzer && mapping.search_analyzer !== 'default_search'
+            || mapping.index_analyzer && mapping.index_analyzer !== 'default_index';
         }
       },
 
