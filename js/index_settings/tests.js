@@ -118,7 +118,7 @@ Checks
           "settings" : {
             "analysis" : {
               "analyzer" : {
-                "default_index_analyzer" : {
+                "default_index" : {
                   "type" : "standard"
                 }
               }
@@ -132,7 +132,7 @@ Checks
           index : "good"
         }, {
           index : "bad",
-          msg : /default_index_analyzer/
+          msg : /default_index analyzer/
         } ]
       },
 

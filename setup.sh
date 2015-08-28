@@ -307,7 +307,7 @@ curl -XPUT "http://localhost:9200/index_settings" -d'
     "index.merge.policy.max_merge_docs": 10000,
     "analysis": {
       "analyzer": {
-        "default_index_analyzer": {
+        "default_index": {
           "type": "standard"
         }
       }

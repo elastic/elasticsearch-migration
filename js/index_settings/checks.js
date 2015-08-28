@@ -42,10 +42,8 @@ Checks
         name : "Default index analyzer",
         color : "yellow",
         check : function(settings) {
-          if (Checks.get_key(
-            settings,
-            "index.analysis.analyzer.default_index_analyzer")) {
-            return "`default_index_analyzer` has been replaced by the name `default`."
+          if (Checks.get_key(settings, "index.analysis.analyzer.default_index")) {
+            return "`default_index` analyzer has been replaced by the name `default`."
           }
         }
       },
