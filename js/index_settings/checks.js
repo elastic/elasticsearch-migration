@@ -105,7 +105,10 @@ Checks
             "index.merge.policy.max_merge_docs",
             "index.merge.policy.calibrate_size_by_deletes",
             "index.merge.policy.min_merge_docs",
-            "index.merge.policy.max_merge_docs", ];
+            "index.merge.policy.max_merge_docs", 'indices.store.throttle.type',
+            'indices.store.throttle.max_bytes_per_sec',
+            'index.store.throttle.type',
+            'index.store.throttle.max_bytes_per_sec' ];
           var errors = [];
           forall(list, function(setting) {
             if (Checks.get_key(settings, setting)) {
