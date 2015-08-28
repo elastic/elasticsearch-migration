@@ -6,6 +6,7 @@ Checks
     [
       {
         name : "In-memory indices",
+        docs : "https://www.elastic.co/guide/en/elasticsearch/reference/master/_setting_changes.html#_in_memory_indices",
         color : "red",
         check : function(settings) {
           if (Checks.get_key(settings, "index.store.type").match(/ram|memory/)) {
@@ -17,6 +18,7 @@ Checks
 
       {
         name : "Type wrapper setting",
+        docs : "https://www.elastic.co/guide/en/elasticsearch/reference/master/_crud_and_routing_changes.html#_documents_must_be_specified_without_a_type_wrapper",
         color : "red",
         check : function(settings) {
           if (Checks.get_key(settings, "index.mapping.allow_type_wrapper") === 'true') {
@@ -29,6 +31,7 @@ Checks
 
       {
         name : "Codec setting",
+        docs : "https://www.elastic.co/guide/en/elasticsearch/reference/master/_mapping_changes.html#_posting_and_doc_values_codecs",
         color : "red",
         check : function(settings) {
           if (Checks.get_key(settings, "index.codec")) {
@@ -50,6 +53,7 @@ Checks
 
       {
         name : "Units for time and byte settings",
+        docs : "https://www.elastic.co/guide/en/elasticsearch/reference/master/_setting_changes.html#_units_required_for_time_and_byte_sized_settings",
         color : "blue",
         check : function(settings) {
 
@@ -95,6 +99,7 @@ Checks
 
       {
         name : "Merge policy settings",
+        docs : "https://www.elastic.co/guide/en/elasticsearch/reference/master/_setting_changes.html#_merge_and_merge_throttling_settings",
         color : "blue",
         check : function(settings) {
 

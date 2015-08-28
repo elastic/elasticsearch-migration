@@ -247,6 +247,15 @@ span.msg {
   border: none;
 }
 
+a.info:before {
+  content: "\f05a";
+  margin-left: 0.5em;
+}
+
+a.info:hover {
+  text-decoration: none;
+}
+
 #log > ul > li.section > span.section {
   background: #ddd;
   padding: 0.35em 0.5em 0.25em 0.5em;

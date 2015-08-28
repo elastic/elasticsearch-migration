@@ -28,7 +28,8 @@ function Logger(out_id) {
 
   function header(msg, color) {
     color = color || '';
-    header_el.html('<span class="' + color + '"><i class="fa"></i>' + msg + '</span>');
+    header_el.html('<span class="' + color + '"><i class="fa"></i>' + msg
+      + '</span>');
   }
 
   function error(e) {
@@ -51,7 +52,7 @@ function Logger(out_id) {
     sections = [];
   }
 
-  function result(color, check, msg) {
+  function result(color, check, msg, docs) {
     check = check.replace(/`([^`]+)`/g, "<code>$1</code>");
     if (msg) {
       start_section('check', check);
@@ -63,8 +64,14 @@ function Logger(out_id) {
       set_section_color(color);
       end_section();
     } else {
+      if (docs) {
+        docs = '<a class="info fa" title="Read more" href="' + docs + '"></a>';
+      } else {
+        docs = '';
+      }
       out.append('<li class="status ' + color
-        + '"><i class="dot"></i><span class="check">' + check + '</span></li>');
+        + '"><i class="dot"></i><span class="check">' + check + docs
+        + '</span></li>');
     }
   }
 
