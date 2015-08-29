@@ -54,8 +54,13 @@ function Logger(out_id) {
 
   function result(color, check, msg, docs) {
     check = check.replace(/`([^`]+)`/g, "<code>$1</code>");
+    if (docs) {
+      docs = '<a class="info fa" title="Read more" href="' + docs + '"></a>';
+    } else {
+      docs = '';
+    }
     if (msg) {
-      start_section('check', check);
+      start_section('check', check + docs);
       msg = msg.replace(/`([^`]+)`/g, "<code>$1</code>");
       forall(msg.split(/\n/), function(line) {
         out.append('<li class="status ' + color
@@ -64,11 +69,6 @@ function Logger(out_id) {
       set_section_color(color);
       end_section();
     } else {
-      if (docs) {
-        docs = '<a class="info fa" title="Read more" href="' + docs + '"></a>';
-      } else {
-        docs = '';
-      }
       out.append('<li class="status ' + color
         + '"><i class="dot"></i><span class="check">' + check + docs
         + '</span></li>');
