@@ -55,7 +55,7 @@ function Logger(out_id) {
   function result(color, check, msg, docs) {
     check = check.replace(/`([^`]+)`/g, "<code>$1</code>");
     if (docs) {
-      docs = '<a class="info fa" title="Read more" href="' + docs + '"></a>';
+      docs = '<a class="info fa" title="Read more" href="' + docs + '" rel="external"></a>';
     } else {
       docs = '';
     }
