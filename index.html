@@ -30,6 +30,11 @@
             jQuery('#show_green').click(function(e) {
                 jQuery('#log').toggleClass('no_green');
             });
+            // Links with rel="external" open a new window
+            jQuery('body').on('click', 'a[href][rel~="external"]', function(e) {
+              window.open(this.href, '', '');
+              e.preventDefault();
+            });
         });
         var run = function () {
           var host = jQuery('#es_host').val();
