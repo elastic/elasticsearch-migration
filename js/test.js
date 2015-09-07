@@ -2,7 +2,7 @@
 
 function Test_Checker(host, checks_out_id, test_out_id, no_delete) {
   var log;
-  var checker = new Checker(host, '', checks_out_id);
+  var checker = new Checker(host, '', false, checks_out_id);
 
   function run_check(name, check) {
     var el = jQuery(checks_out_id);

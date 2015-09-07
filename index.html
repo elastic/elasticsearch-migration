@@ -40,7 +40,8 @@
           var host = jQuery('#es_host').val();
           var indices = jQuery('#indices').val();
           jQuery('#log_container').attr('style','');
-          var checker = new Checker(host,indices,'#log');
+          var ignore_closed = jQuery('#ignore_closed').is(':checked');
+          var checker = new Checker(host,indices,ignore_closed,'#log');
           checker.run();
         };
 
