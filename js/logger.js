@@ -7,11 +7,12 @@ function Logger(out_id) {
 
   function start_section(class_name, msg) {
     msg = msg.replace(/`([^`]+)`/g, "<code>$1</code>");
-    out.append('<li class="section"><span class="section ' + class_name
-      + '"><i class="dot"></i>' + '<strong>' + msg + '</strong>'
+    var new_out = jQuery('<li class="section"><span class="section '
+      + class_name + '"><i class="dot"></i>' + '<strong>' + msg + '</strong>'
       + '</span><ul></ul></li>');
+    out.append(new_out);
     sections.push(out);
-    out = out.find(':last');
+    out = new_out;
   }
 
   function set_section_color(color) {
@@ -55,7 +56,8 @@ function Logger(out_id) {
   function result(color, check, msg, docs) {
     check = check.replace(/`([^`]+)`/g, "<code>$1</code>");
     if (docs) {
-      docs = '<a class="info fa" title="Read more" href="' + docs + '" rel="external"></a>';
+      docs = '<a class="info fa" title="Read more" href="' + docs
+        + '" rel="external"></a>';
     } else {
       docs = '';
     }
