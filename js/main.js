@@ -120,10 +120,11 @@ function Checker(host, indices, out_id) {
 
     case "index.segments":
       return {
-        health : Checks.get_key(es_data, "index.health." + name),
-        segments : Checks.get_key(es_data, "index.segments." + name),
+        health : Checks.get_key(es_data, "index.health." + name) || {},
+        segments : Checks.get_key(es_data, "index.segments." + name) || {},
         settings : Checks.get_key(es_data, "index.settings." + name
           + ".settings")
+          || {}
       };
 
     case "index.settings":
