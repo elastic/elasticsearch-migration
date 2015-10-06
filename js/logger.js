@@ -12,7 +12,7 @@ function Logger(out_id) {
       + '</span><ul></ul></li>');
     out.append(new_out);
     sections.push(out);
-    out = new_out;
+    out = new_out.find('ul');
   }
 
   function set_section_color(color) {
