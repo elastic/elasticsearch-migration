@@ -19,7 +19,7 @@ function forall(obj, f) {
   }
 }
 
-function Checker(host, indices, ignore_closed, out_id) {
+function Checker(host, indices, ignore_closed, out_id, enable_creds) {
 
   var es_data;
   var log;
@@ -362,23 +362,53 @@ function Checker(host, indices, ignore_closed, out_id) {
   }
 
   function get_url(path, params) {
-    return new Promise(function(resolve, reject) {
-      jQuery.getJSON(host + path, params).done(resolve).fail(function(e) {
-        var msg = "Failed to fetch [" + host + path;
-        if (params) {
-          msg += '?' + jQuery.param(params);
-        }
-        msg += '].  REASON: ';
-        if (e.responseJSON && e.responseJSON.error) {
-          msg += e.responseJSON.error;
-        } else if (e.responseText) {
-          msg += e.responseText;
-        } else {
-          msg += e.statusText;
-        }
-        reject(msg);
+    var req = {
+      dataType : "json",
+      url : host + path,
+      data : params
+    };
+    if (enable_creds) {
+      req['xhrFields'] = {
+        withCredentials : true
+      };
+      req['crossDomain'] = true;
+    }
+    return new Promise(
+      function(resolve, reject) {
+        jQuery
+          .ajax(req)
+          .done(resolve)
+          .fail(
+            function(e) {
+              var msg = "Failed to fetch [" + host + path;
+              if (params) {
+                msg += '?' + jQuery.param(params);
+              }
+              msg += ']. ';
+              var reason;
+              if (e.responseJSON && e.responseJSON.error) {
+                reason = e.responseJSON.error;
+              } else if (e.responseText) {
+                reason = e.responseText;
+              } else {
+                reason = e.statusText;
+              }
+
+              if (reason.match(/^\s*</)) {
+                reason = 'Is the URL correct?';
+              } else if (reason === 'error') {
+                reason = 'Is the URL correct?';
+                var origin = window.location.protocol + "//"
+                  + window.location.hostname
+                  + (window.location.port ? ':' + window.location.port : '');
+                if (path.indexOf(origin) !== 0) {
+                  reason += ' Does Elasticsearch have <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-http.html">CORS enabled</a> and properly configured?'
+                }
+              }
+              msg += " " + reason;
+              reject(msg);
+            });
       });
-    });
   }
 
   return {

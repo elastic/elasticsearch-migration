@@ -32,6 +32,26 @@ To install, run the following command in your Elasticsearch home directory:
 
 Then open the following URL in your browser: http://localhost:9200/_plugin/migration
 
+=== Checking a remote cluster
+
+The migration tool can run checks against a remote Elasticsearch cluster, as long
+as the cluster has https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-http.html[CORS enabled and properly configured].
+
+As a minimum, you will need to set the following in `elasticsearch.yml`:
+
+[source,yaml]
+-----
+http.cors.enabled:      true
+http.cors.allow-origin: # the hostname or a regex which matches the hostname
+-----
+
+If you use basic AUTH, you will also need to tick the `Enable basic AUTH support` checkbox and add this setting to `elasticsearch.yml`:
+
+[source,yaml]
+-----
+http.cors.allow-credentials: true
+-----
+
 === Checks performed
 
 This plugin will check cluster settings and each index for the following:

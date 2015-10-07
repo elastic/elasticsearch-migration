@@ -41,7 +41,8 @@
           var indices = jQuery('#indices').val();
           jQuery('#log_container').attr('style','');
           var ignore_closed = jQuery('#ignore_closed').is(':checked');
-          var checker = new Checker(host,indices,ignore_closed,'#log');
+          var enable_creds = jQuery('#enable_creds').is(':checked');
+          var checker = new Checker(host,indices,ignore_closed,'#log',enable_creds);
           checker.run();
         };
 
@@ -92,6 +93,10 @@
                 Ignore closed indices
             </label>
             <input type="checkbox" name="ignore_closed" id="ignore_closed" />
+            <label for="enable_creds">
+                Enable basic AUTH support
+            </label>
+            <input type="checkbox" name="enable_creds" id="enable_creds" />
         </div>
     </form>
     <div id="log_container" style="display:none">

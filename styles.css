@@ -90,6 +90,10 @@ h1 {
   border-top: 1px solid #ccc;
 }
 
+#main_form input[type=checkbox] {
+  margin-right: 1em;
+}
+
 #main_form input[type=text],
 #main_form button[type=submit] {
   font-size: 100%;
