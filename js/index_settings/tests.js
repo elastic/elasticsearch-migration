@@ -190,6 +190,27 @@ Checks
             index : "bad",
             msg : /Merge policy settings will be ignored: index.merge.policy.max_merge_docs/
           } ]
-      }
+      },
+
+      /* Index buffer size */
+      {
+        name : "Index buffer size setting",
+        setup : [ [ "PUT", "/good", {} ], [ "PUT", "/bad", {
+          "settings" : {
+            "index" : {
+              "buffer_size" : "2mb"
+            }
+          }
+        } ]
+
+        ],
+
+        checks : [ {
+          index : "good"
+        }, {
+          index : "bad",
+          msg : /index.buffer_size setting/
+        } ]
+      },
 
     ]);

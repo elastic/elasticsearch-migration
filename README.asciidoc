@@ -71,6 +71,7 @@ This plugin will check cluster settings and each index for the following:
 ** Use of "default_index" analyzer
 ** Use of byte or time settings without units.
 ** Use of deprecated merge policy settings.
+** Use of the `index.buffer_size` setting.
 
 * *Type mapping*:
 ** Type mapping name length < 256

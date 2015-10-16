@@ -57,7 +57,7 @@ Checks
         color : "blue",
         check : function(settings) {
 
-          var list = [ "index.buffer_size", "index.merge.policy.floor_segment",
+          var list = [ "index.merge.policy.floor_segment",
             "index.merge.policy.max_merged_segment",
             "index.merge.policy.max_merge_size",
             "index.merge.policy.min_merge_size",
@@ -123,6 +123,16 @@ Checks
           if (errors.length) {
             return "Merge policy settings will be ignored: "
               + errors.sort().join(", ");
+          }
+        }
+      },
+
+      {
+        name : "Index buffer size setting",
+        color : "blue",
+        check : function(settings) {
+          if (Checks.get_key(settings, "index.buffer_size")) {
+            return "The `index.buffer_size` setting has been removed and will be ignored."
           }
         }
       },
