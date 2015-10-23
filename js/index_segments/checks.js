@@ -7,7 +7,7 @@ Checks
 
     {
       name : "Ancient index segments",
-      docs : "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-2.0.html#_indices_created_before_0_90",
+      docs : "https://www.elastic.co/guide/en/elasticsearch/reference/2.0/breaking-changes-2.0.html#_indices_created_before_0_90",
       color : "red",
       check : function(index) {
 
