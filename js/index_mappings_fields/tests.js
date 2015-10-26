@@ -290,6 +290,51 @@ Checks
         } ]
       },
 
+      /* search_analyzer without analyzer */
+
+      {
+        name : "Search analyzer without index analyzer",
+        setup : [
+
+          [ "PUT", "/good", {
+            "mappings" : {
+              "good" : {
+                "properties" : {
+                  "foo" : {
+                    "properties" : {
+                      "bar" : {
+                        "type" : "string",
+                        "search_analyzer": "simple",
+                        "analyzer": "keyword"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          } ], [ "PUT", "/bad", {
+            "mappings" : {
+              "bad" : {
+                "properties" : {
+                  "foo.bar" : {
+                    "type" : "string",
+                    "search_analyzer": "simple"
+                  }
+                }
+              }
+            }
+          } ]
+
+        ],
+
+        checks : [ {
+          index : "good"
+        }, {
+          index : "bad",
+          msg : /Analyzer must be set when search_analyzer is set, in field: bad:foo..bar./
+        } ]
+      },
+
       /* Position offset gap */
 
       {

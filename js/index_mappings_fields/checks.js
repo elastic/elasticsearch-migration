@@ -69,6 +69,16 @@ Checks
       },
 
       {
+        name : "Search analyzer without index analyzer",
+        docs : "https://www.elastic.co/guide/en/elasticsearch/reference/2.0/_mapping_changes.html#_analyzer_mappings",
+        color : "red",
+        msg : "Analyzer must be set when search_analyzer is set",
+        check : function(field) {
+          return field.search_analyzer && ! (field.index_analyzer || field.analyzer);
+        }
+      },
+
+      {
         name : "Position offset gap",
         docs : "https://www.elastic.co/guide/en/elasticsearch/reference/2.0/_mapping_changes.html#_position_offset_gap",
         color : "yellow",
