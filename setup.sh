@@ -289,9 +289,6 @@ curl -XPUT "http://localhost:9200/mappings" -d'
       "analyzer": "whitespace",
       "index_analyzer": "whitespace",
       "search_analyzer": "whitespace"
-    },
-    "foo.bar": {
-        "type": "string"
     }
   }
 }'
@@ -369,8 +366,22 @@ curl -XPUT "http://localhost:9200/field_mappings" -d'
           "type": "string",
           "position_offset_gap": 10
         },
+        "index_analyzer": {
+          "type": "string",
+          "search_analyzer": "whitespace"
+        }
+      }
+    }
+  }
+}'
+
+curl -XPUT "http://localhost:9200/murmur" -d'
+{
+  "mappings": {
+    "test": {
+      "properties": {
         "murmur3": {
-            "type": "murmur3"
+          "type": "murmur3"
         }
       }
     }

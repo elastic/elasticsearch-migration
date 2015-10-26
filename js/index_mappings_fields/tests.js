@@ -290,6 +290,72 @@ Checks
         } ]
       },
 
+      /* search_analyzer without analyzer */
+
+      {
+        name : "Search analyzer without index analyzer",
+        setup : [
+
+        [ "PUT", "/analyzer", {
+          "mappings" : {
+            "good" : {
+              "properties" : {
+                "foo" : {
+                  "properties" : {
+                    "bar" : {
+                      "type" : "string",
+                      "search_analyzer" : "simple",
+                      "analyzer" : "keyword"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        } ], [ "PUT", "/index_analyzer", {
+          "mappings" : {
+            "good" : {
+              "properties" : {
+                "foo" : {
+                  "properties" : {
+                    "bar" : {
+                      "type" : "string",
+                      "search_analyzer" : "simple",
+                      "index_analyzer" : "keyword"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        } ], [ "PUT", "/bad", {
+          "mappings" : {
+            "bad" : {
+              "properties" : {
+                "foo.bar" : {
+                  "type" : "string",
+                  "search_analyzer" : "simple"
+                }
+              }
+            }
+          }
+        } ]
+
+        ],
+
+        checks : [
+          {
+            index : "analyzer"
+          },
+          {
+            index : "index_analyzer"
+          },
+          {
+            index : "bad",
+            msg : /Analyzer must be set when search_analyzer is set, in field: bad:foo..bar./
+          } ]
+      },
+
       /* Position offset gap */
 
       {
