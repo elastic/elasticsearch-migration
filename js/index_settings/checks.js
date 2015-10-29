@@ -86,7 +86,8 @@ Checks
             "index.translog.sync_interval" ];
           var errors = [];
           forall(list, function(setting) {
-            if (Checks.get_key(settings, setting).match(/\d$/)) {
+            var val = Checks.get_key(settings, setting);
+            if (val.match(/\d$/) && val !== "0" && val !== "-1") {
               errors.push(setting)
             }
           });

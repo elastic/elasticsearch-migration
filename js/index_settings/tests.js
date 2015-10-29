@@ -139,10 +139,16 @@ Checks
       /* Units for time and byte settings */
       {
         name : "Units for time and byte settings",
-        setup : [ [ "PUT", "/good", {
+        setup : [ [ "PUT", "/units", {
           "settings" : {
             "index" : {
               "refresh_interval" : "1s"
+            }
+          }
+        } ], [ "PUT", "/exempt", {
+          "settings" : {
+            "index" : {
+              "refresh_interval" : "-1"
             }
           }
         } ], [ "PUT", "/bad", {
@@ -156,7 +162,9 @@ Checks
         ],
 
         checks : [ {
-          index : "good"
+          index : "units"
+        }, {
+          index : "exempt"
         }, {
           index : "bad",
           msg : /Units are required.*index.refresh_interval/
