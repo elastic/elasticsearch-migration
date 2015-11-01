@@ -238,7 +238,6 @@ curl -XPUT "http://localhost:9200/conflicting_fields-good" -d'
               "copy_to": [
                 "bar"
               ],
-              "format": "YYYY/mm/dd",
               "include_in_all": true
             }
           }
