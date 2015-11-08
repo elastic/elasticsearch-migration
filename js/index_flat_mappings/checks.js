@@ -7,7 +7,7 @@ Checks
 
     {
       name : "Conflicting field mappings",
-      docs : "https://www.elastic.co/guide/en/elasticsearch/reference/2.0/_mapping_changes.html#_conflicting_field_mappings",
+      docs : "https://www.elastic.co/guide/en/elasticsearch/reference/2.0/breaking_20_mapping_changes.html#_conflicting_field_mappings",
       color : "red",
       check : function(mappings) {
         var errors = [];

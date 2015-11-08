@@ -35,7 +35,7 @@ Then open the following URL in your browser: http://localhost:9200/_plugin/migra
 === Checking a remote cluster
 
 The migration tool can run checks against a remote Elasticsearch cluster, as long
-as the cluster has https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-http.html[CORS enabled and properly configured].
+as the cluster has https://www.elastic.co/guide/en/elasticsearch/reference/1.7/modules-http.html[CORS enabled and properly configured].
 
 As a minimum, you will need to set the following in `elasticsearch.yml`:
 

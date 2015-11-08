@@ -7,7 +7,7 @@ Checks
 
       {
         name : "Units for time and byte cluster settings",
-        docs : "https://www.elastic.co/guide/en/elasticsearch/reference/2.0/_setting_changes.html#_units_required_for_time_and_byte_sized_settings",
+        docs : "https://www.elastic.co/guide/en/elasticsearch/reference/2.0/breaking_20_setting_changes.html#_units_required_for_time_and_byte_sized_settings",
         color : "blue",
         check : function(settings) {
 

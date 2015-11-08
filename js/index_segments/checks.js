@@ -11,7 +11,7 @@ Checks
       color : "red",
       check : function(index) {
 
-        var install_1_6 = 'Install Elasticsearch 1.6.x and upgrade this '
+        var install_1_7 = 'Install Elasticsearch 1.7.x and upgrade this '
           + 'index with the <a href="http://www.elastic.co/guide/en/elasticsearch/reference/current/indices-upgrade.html">`upgrade` API</a>.';
 
         function check_segment(segment) {
@@ -42,7 +42,7 @@ Checks
 
         if (forall(index.segments.shards, check_shard_group)) {
           return "This index contains segments created before Lucene 4. "
-            + install_1_6;
+            + install_1_7;
         }
 
         var created_v = Checks.get_key(index.settings, "index.version.created")
@@ -59,7 +59,7 @@ Checks
         return "This index was created by an old version of Elasticsearch based on "
           + "Lucene 3."
           + " It no longer contains segments from Lucene 3, but it needs to be "
-          + "marked as upgraded. " + install_1_6;
+          + "marked as upgraded. " + install_1_7;
       }
     }
 
