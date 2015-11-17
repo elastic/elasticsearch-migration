@@ -24,7 +24,7 @@ var Checks = (function() {
 
   function get_key(o, path) {
     while (path.length) {
-      if (!o instanceof Object) {
+      if (!(o instanceof Object)) {
         return "";
       }
       var matches = path.match(/^((?:\\.|[^.])+)\.?/);
