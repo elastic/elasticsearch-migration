@@ -208,6 +208,8 @@ function Checker(host, indices, ignore_closed, out_id, enable_creds) {
   function build_url(action) {
     if (!indices || indices === '*' || indices === '_all') {
       return '/' + action;
+    } else if (action === '_segments' || ignore_closed) {
+      return '/' + indices + '/' + action + '?expand_wildcards=open'
     } else {
       return '/' + indices + '/' + action + '?expand_wildcards=open,closed'
     }
