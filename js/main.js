@@ -96,6 +96,9 @@ function Checker(host, indices, ignore_closed, out_id, enable_creds) {
         });
 
         log.set_section_color(index_color);
+      if (ignore_closed
+        && !Checks.get_key(es_data, "index.segments").hasOwnProperty(index)) {
+        log.log("Skipping checks on closed index.");
         log.end_section();
         global_color = Checks.worse_color(global_color, index_color);
       });
