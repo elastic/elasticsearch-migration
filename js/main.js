@@ -68,40 +68,34 @@ function Checker(host, indices, ignore_closed, out_id, enable_creds) {
       return global_color;
     }
 
-    forall(
-      indices,
-      function(index) {
-        var index_color = 'green';
-        var index_phases = [ //
-        'index.segments', //
-        'index.settings', //
-        'index.mappings', //
-        'index.flat_mappings', //
-        'index.mappings.fields' //
-        ];
+    forall(indices, function(index) {
+      var index_color = 'green';
+      var index_phases = [ //
+      'index.segments', //
+      'index.settings', //
+      'index.mappings', //
+      'index.flat_mappings', //
+      'index.mappings.fields' //
+      ];
 
-        log.start_section('index', 'Index: `' + index + "`");
+      log.start_section('index', 'Index: `' + index + "`");
 
-        if (ignore_closed
-          && !Checks.get_key(es_data, "index.segments." + index)) {
-          log.log("Skipping checks on closed index.");
-          log.end_section();
-          return;
-        }
-
-        forall(index_phases, function(phase) {
-          var data = data_for_phase(phase, index);
-          index_color = Checks
-            .worse_color(index_color, run_checks(phase, data))
-        });
-
-        log.set_section_color(index_color);
       if (ignore_closed
         && !Checks.get_key(es_data, "index.segments").hasOwnProperty(index)) {
         log.log("Skipping checks on closed index.");
         log.end_section();
-        global_color = Checks.worse_color(global_color, index_color);
+        return;
+      }
+
+      forall(index_phases, function(phase) {
+        var data = data_for_phase(phase, index);
+        index_color = Checks.worse_color(index_color, run_checks(phase, data))
       });
+
+      log.set_section_color(index_color);
+      log.end_section();
+      global_color = Checks.worse_color(global_color, index_color);
+    });
     return global_color;
   }
 
