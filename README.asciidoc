@@ -23,14 +23,22 @@ Changes] documentation online.
 
 === Installation
 
-To install, run the following command in your Elasticsearch home directory:
+To install, run the following command in your Elasticsearch home directory on a *nix system:
 
 [source,sh]
 ---------------
 ./bin/plugin -i elastic/elasticsearch-migration
 ---------------
 
-Then open the following URL in your browser: http://localhost:9200/_plugin/migration
+Or the equivalent on a Windows machine:
+[source,sh]
+---------------
+.\bin\plugin -i elastic/elasticsearch-migration
+---------------
+
+=== Checking a local server
+
+Simply open the following URL in your browser: http://localhost:9200/_plugin/migration
 
 === Checking a remote cluster
 
