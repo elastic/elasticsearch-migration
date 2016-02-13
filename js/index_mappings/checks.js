@@ -151,7 +151,7 @@ Checks
       {
         name : "Reserved field names",
         docs : "https://www.elastic.co/guide/en/elasticsearch/reference/2.0/breaking_20_mapping_changes.html#migration-meta-fields",
-        color : "blue",
+        color : "red",
         msg : "The `_uid`, `_id`, `_type`, `_source`, `_all`, `_parent`, `_field_names`, "
           + "`_routing`, `_index`, `_size`, `_timestamp`, and `_ttl` "
           + "field names are reserved and can no longer be used in the document `_source`.",
