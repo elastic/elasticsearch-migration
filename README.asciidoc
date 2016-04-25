@@ -1,25 +1,32 @@
-== Elasticsearch Migration Plugin v0.17
+== Elasticsearch Migration Helper  v2.0-alpha1
 
-This plugin will help you to check whether you can upgrade directly to
-Elasticsearch version 2.x, or whether you need to make changes to your data
-before doing so. It will run on Elasticsearch versions 0.90.x to 1.x.
+This Elasticsearch Migration Helper plugin helps you to prepare for your
+migration from Elasticsearch 2.3.x to Elasticsearch 5.x. Before starting your
+migration and before using this plugin, you should backup your data with
+https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-snapshots.html[snapshot/restore].
 
-NOTE: Checks are limited only to data that is stored in the cluster, such as
-cluster and index settings, mappings, and segments. It does not take settings
-files or your use of the API into account. *You should still test your
-application thoroughly and backup your data before upgrading.*
+Read more about important changes in the https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-5.0.html[Breaking Changes] documentation online.
 
-Each check is given a color, whose meaning is as follows:
+This plugin has three tools:
 
-Green::  All OK.
-Blue::   An advisory note that something has changed. No action needed.
-Yellow:: You can upgrade directly, but you are using deprecated functionality which will not be
-         available in version 2.x.
-Red::    You cannot upgrade without fixing this problem.
+Cluster Checkup::
 
-Read more about important changes in the
-http://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes.html[Breaking
-Changes] documentation online.
+  Runs a series of checks on your cluster, nodes, and indices and alerts you
+  to any known problems that need to be rectified before upgrading.
+
+Reindex Helper::
+
+  Indices created before v2.0.0 need to be reindexed before they can be used
+  in Elasticsearch 5.x. The reindex helper upgrades old indices at the click
+  of a button.
+
+Deprecation Logging::
+
+  Elasticsearch comes with a deprecation logger which will log a message
+  whenever deprecated functionality is used. This tool enables or disables
+  deprecation logging on your cluster.
+
+IMPORTANT: It will run on Elasticsearch version 2.3.x only.
 
 === Installation
 
@@ -27,19 +34,19 @@ To install, run the following command in your Elasticsearch home directory on a 
 
 [source,sh]
 ---------------
-./bin/plugin -i elastic/elasticsearch-migration
+./bin/plugin install https://github.com/elastic/elasticsearch-migration/releases/download/v2.0-alpha1/elasticsearch-migration-2.0-alpha1.zip
 ---------------
 
 Or the equivalent on a Windows machine:
 
 [source,sh]
 ---------------
-.\bin\plugin -i elastic/elasticsearch-migration
+.\bin\plugin install https://github.com/elastic/elasticsearch-migration/releases/download/v2.0-alpha1/elasticsearch-migration-2.0-alpha1.zip
 ---------------
 
 === Checking a local server
 
-Open the following URL in your browser: http://localhost:9200/_plugin/migration
+Open the following URL in your browser: http://localhost:9200/_plugin/elasticsearch-migration
 
 === Checking a remote cluster
 
@@ -60,64 +67,4 @@ If you use basic AUTH, you will also need to tick the `Enable basic AUTH support
 -----
 http.cors.allow-credentials: true
 -----
-
-=== Checks performed
-
-This plugin will check cluster settings and each index for the following:
-
-* *Cluster settings*:
-** Use of byte or time settings without units.
-
-* *Index segments*:
-** Segments created by Lucene 3, which cannot be read by Elasticsearch 2.x.
-** Indices created before 0.90 which no longer have Lucene 3 segments, but
-   which require a setting to mark them as 2.x compatible.
-
-* *Index settings*:
-** In memory indices, which are no longer supported.
-** The `index.mapping.allow_type_wrapper` setting.
-** Custom codecs
-** Use of "default_index" analyzer
-** Use of byte or time settings without units.
-** Use of deprecated merge policy settings.
-** Use of the `index.buffer_size` setting.
-
-* *Type mapping*:
-** Type mapping name length < 256
-** Type names with initial dot
-** Custom configured `_id` field.
-** Custom configured `_type` field.
-** Use of an `_analyer` field.
-** Use of the `_boost` field.
-** Custom configured `_routing` field.
-** Custom configured `_index` field.
-** Use of `_size` field.
-** Custom configured `_timestamp` field.
-** Use of type-level default analyzer settings.
-** Use of reserved field names.
-
-* *Field mapping*:
-** Fields with the same name in different types with conflicting mappings.
-** Use of the `index_name` or `path` settings.
-** Boolean fields, whose field value has changed from `T`/`F` to `1`/`0`.
-** Custom postings formats.
-** Compressed binary fields.
-** Fielddata formats.
-** Field names with embedded periods.
-** Fields with a `search_analyzer` but no `analyzer` or `index_analyzer`
-** Use of `position_offset_gap`.
-** Use of murmur3 fields.
-
-=== Test suite
-
-Two test suites are available:
-
-http://localhost:9200/_plugin/migration/test.html::
-
-Tests all checks except the index segments checks. No setup required.
-
-http://localhost:9200/_plugin/migration/test_index_segments.html::
-
-Tests the index segments checks.  Requires a pre-existing `data/` directory which is packaged
-with this plugin.  Follow the instructions on the test suite page.
 

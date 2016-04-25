@@ -1,0 +1,2754 @@
+jQuery(function() {
+
+function Client(host, enable_creds) {
+
+  var version;
+
+  function get_version() {
+    if (version) {
+      return Promise.resolve(version);
+    }
+    return this.get('/').then(function(r) {
+      version = new ES_Version(r.version.number, r.version.build_snapshot);
+      return version;
+    });
+  }
+
+  function handle_error(e, method, url) {
+    var msg = "Failed to " + method + " " + url;
+
+    if (e.responseJSON) {
+      if (e.status === 404 && e.responseJSON.found === false) {
+        e.responseJSON.type = 'not_found';
+        e.responseJSON.reason = 'resource not found';
+        throw new ES_Error(method + ' ' + url, {
+          status : 404,
+          error : {
+            root_cause : [
+              e.responseJSON
+            ]
+          }
+        })
+      }
+      if (e.responseJSON.error) {
+        throw new ES_Error(method + ' ' + url, e.responseJSON);
+      }
+    }
+
+    var reason = e.responseText || e.statusText;
+
+    if (reason.match(/^\s*</)) {
+      reason = 'Is the URL correct?';
+    } else if (reason === 'error') {
+      reason = 'Is the URL correct?';
+      var origin = window.location.protocol
+        + "//"
+        + window.location.hostname
+        + (window.location.port ? ':' + window.location.port : '');
+      if (url.indexOf(origin) !== 0) {
+        reason += ' Does Elasticsearch have <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-http.html">CORS enabled</a> and properly configured?'
+      }
+    }
+    msg += " " + reason;
+    throw (msg);
+  }
+
+  function _request(method, path, qs, body) {
+    var url = host + path;
+    if (qs) {
+      url += '?' + jQuery.param(qs);
+    }
+
+    var req = {
+      dataType : "json",
+      method : method,
+      url : url
+    };
+    if (body) {
+      req.data = JSON.stringify(body)
+    }
+    if (enable_creds) {
+      req['xhrFields'] = {
+        withCredentials : true
+      };
+      req['crossDomain'] = true;
+    }
+
+    return new Promise(function(resolve, reject) {
+      jQuery.ajax(req) //
+      .done(resolve) //
+      .fail(function(e) {
+        try {
+          handle_error(e, method, url)
+        } catch (e) {
+          reject(e);
+        }
+      })
+    });
+
+  }
+
+  return {
+    get : function(path, qs) {
+      return _request('GET', path, qs)
+    },
+    del : function(path, qs) {
+      return _request('DELETE', path, qs)
+    },
+    post : function(path, qs, body) {
+      return _request('POST', path, qs, body)
+    },
+    put : function(path, qs, body) {
+      return _request('PUT', path, qs, body)
+    },
+    get_version : get_version,
+    host : host
+  }
+}
+
+function ES_Version(v_string, snapshot) {
+  var parts = v_string.split('.');
+  this.major = parts[0];
+  this.minor = parts[1] || 0;
+  this.patch = parts[2] || 0;
+  this.snapshot = snapshot ? 1 : 0;
+
+  this.cmp = function(other) {
+    if (typeof other === "string") {
+      other = new ES_Version(other);
+    }
+    var keys = [
+      'major', 'minor', 'patch', 'snapshot'
+    ];
+    for (var i = 0; i < 4; i++) {
+      var key = keys[i];
+      if (this[key] === "*" || other[key] === "*") {
+        return 0;
+      }
+      if (this[key] === other[key]) {
+        continue;
+      }
+      return this[key] > other[key] ? 1 : -1
+    }
+    return 0;
+  }
+
+  this.lt = function(v) {
+    return this.cmp(v) === -1
+  }
+  this.lte = function(v) {
+    return this.cmp(v) !== 1
+  }
+
+  this.gt = function(v) {
+    return this.cmp(v) === 1
+  }
+  this.gte = function(v) {
+    return this.cmp(v) !== -1
+  }
+
+  this.matches = function(v) {
+    return this.cmp(v) === 0;
+  }
+  this.toString = function() {
+    return this.major
+      + "."
+      + this.minor
+      + "."
+      + this.patch
+      + (this.snapshot ? '-SNAPSHOT' : '')
+  }
+
+  return this;
+}
+
+function ES_Error(request, e) {
+  this.request = request;
+  this.params = e.error.root_cause[0];
+  this.status = e.status;
+  this.type = this.params.type;
+  this.reason = this.params.reason;
+
+  delete this.params.type;
+  delete this.params.reason;
+
+  this.toString = function() {
+    return this.request
+      + " failed with ["
+      + this.status
+      + "] "
+      + this.reason
+      + ": "
+      + JSON.stringify(this.params)
+  }
+}
+
+ES_Error.prototype = Object.create(Error.prototype);
+ES_Error.prototype.constructor = ES_Error;
+"use strict";
+
+function MigrationController(es,log,error) {
+
+"use strict";
+
+function Logger(log_el,error_el) {
+  var out;
+  var header_el;
+  var sections;
+
+  function start_section(class_name, msg) {
+    msg = msg.replace(/`([^`]+)`/g, "<code>$1</code>");
+    var new_out = jQuery('<li class="section '
+      + class_name
+      + '"><span>'
+      + msg
+      + '</span><ul></ul></li>');
+    out.append(new_out);
+    sections.push(out);
+    out = new_out.find('ul');
+  }
+
+  function set_section_color(color) {
+    out.parent().addClass(color)
+  }
+
+  function end_section() {
+    out = sections.pop();
+  }
+
+  function log(msg) {
+    out.append('<li>' + msg + '</li>');
+  }
+
+  function header(msg, color) {
+    color = color || '';
+    header_el.text(msg);
+    header_el.attr('class','header '+color);
+  }
+
+  function error(e) {
+    var msg;
+    if (typeof e === "string") {
+      console.log(e);
+      msg = e;
+    } else {
+      console.log(e.message, e.stack);
+      msg = e.message;
+    }
+    error_el.empty().html(msg);
+    header("An error occurred", 'error');
+    throw (e);
+  }
+
+  function clear() {
+    error_el.empty();
+    log_el.html('<ul><li class="header"></li></ul>');
+    out = log_el.find('ul');
+    header_el = out.find('.header');
+    sections = [];
+  }
+
+  function result(color, check, fail, docs) {
+    check = check.replace(/`([^`]+)`/g, "<code>$1</code>");
+    if (fail.length === 0) {
+      color = 'green';
+    }
+    if (docs) {
+      docs = '<a class="info" title="Read more" href="'
+        + docs
+        + '" target="_blank">&#x2139;</a>';
+    } else {
+      docs = '';
+    }
+    if (fail.length > 0) {
+      start_section('check', check + docs);
+      _.forEach(fail, function(msg) {
+        msg = msg.replace(/`([^`]+)`/g, "<code>$1</code>");
+        out.append('<li>' + msg + '</li>');
+      });
+      set_section_color(color);
+      end_section();
+    } else {
+      out.append('<li class="status '
+        + color
+        + '">'
+        + check
+        + docs
+        + '</li>');
+    }
+    return color;
+  }
+
+  clear();
+
+  return {
+    clear : clear,
+    log : log,
+    error : error,
+    header : header,
+    result : result,
+    start_section : start_section,
+    end_section : end_section,
+    set_section_color : set_section_color
+  };
+
+}
+"use strict";
+
+function ClusterSettings() {
+
+  var cluster_color = 'green';
+
+  return es.get('/_cluster/settings', {
+    flat_settings : true
+  })
+
+  .then(
+    function(r) {
+
+      var settings = r.persistent;
+      cluster_color = worse(cluster_color, ClusterSettings
+        .removed_settings(settings));
+      cluster_color = worse(cluster_color, ClusterSettings
+        .renamed_settings(settings));
+      cluster_color = worse(cluster_color, ClusterSettings
+        .unknown_settings(settings));
+
+      return cluster_color;
+    });
+
+};
+
+ClusterSettings.unknown_settings = function(settings) {
+
+  var group_settings = [
+    /^cluster\.routing\.allocation\.(?:require|include|exclude|awareness\.force)\./,
+    /^request\.headers\./,
+    /^indices\.analysis\.hunspell\.dictionary\./,
+    /^logger\./,
+    /^monitor\.jvm\.gc\.collector\./,
+    /^threadpool\./,
+    /^transport\.profiles\./
+  ];
+  return check_hash(
+    'blue',
+    'Unknown settings',
+    settings,
+    function(v, s) {
+      if (_.has(ClusterSettings.known_settings, s)) {
+        return;
+      }
+      var found = false;
+      _.forEach(group_settings, function(regex) {
+        if (s.match(regex)) {
+          found = true;
+        }
+      })
+      if (found) {
+        return;
+      }
+      return "`" + s + "` will be moved to the `archived` namespace on upgrade"
+    },
+    'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html');
+};
+
+ClusterSettings.renamed_settings = function(settings) {
+  var renamed = {
+    "http.netty.http.blocking_server" : "http.tcp.blocking_server",
+    "http.netty.tcp_no_delay" : "http.tcp.no_delay",
+    "http.netty.tcp_keep_alive" : "http.tcp.keep_alive",
+    "http.netty.reuse_address" : "http.txp.reuse_address",
+    "http.netty.tcp_send_buffer_size" : "http.tcp.send_buffer_size",
+    "http.netty.tcp_receive_buffer_size" : "http.tcp.receive_buffer_size",
+    "discovery.zen.initial_ping_timeout" : "discovery.zen.ping_timeout",
+    "discovery.zen.ping.timeout" : "discovery.zen.ping_timeout",
+    "discovery.zen.master_election.filter_client" : "discovery.zen.master_election.ignore_non_master_pings",
+    "discovery.zen.master_election.filter_data" : "discovery.zen.master_election.ignore_non_master_pings",
+    "indices.recovery.max_size_per_sec" : "indices.recovery.max_bytes_per_sec",
+    "indices.cache.query.size" : "indices.requests.cache.size",
+    "indices.requests.cache.clean_interval" : "indices.cache.clean_interval",
+    "indices.fielddata.cache.clean_interval" : "indices.cache.clean_interval",
+    "cluster.routing.allocation.concurrent_recoveries" : "cluster.routing.allocation.node_concurrent_recoveries",
+    "cloud.aws.proxy_host" : "cloud.aws.proxy.host",
+    "cloud.aws.ec2.proxy_host" : "cloud.aws.ec2.proxy.host",
+    "cloud.aws.s3.proxy_host" : "cloud.aws.s3.proxy.host",
+    "cloud.aws.proxy_port" : "cloud.aws.proxy.port",
+    "cloud.aws.ec2.proxy_port" : "cloud.aws.ec2.proxy.port",
+    "cloud.aws.s3.proxy_port" : "cloud.aws.s3.proxy.port",
+    "cloud.azure.storage.account" : "cloud.azure.storage.{my_account_name}.account",
+    "cloud.azure.storage.key" : "cloud.azure.storage.{my_account_name}.key",
+  };
+
+  return check_hash(
+    'blue',
+    'Renamed settings',
+    settings,
+    function(v, k) {
+      if (_.has(renamed, k)) {
+        delete settings[k];
+        return "`" + k + "` has been renamed to `" + renamed[k] + "`"
+      }
+    },
+    "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html");
+};
+
+ClusterSettings.removed_settings = function(settings) {
+  var removed = {
+    "action.get.realtime" : true,
+    "gateway.format" : true,
+    "http.netty.host" : true,
+    "http.netty.bind_host" : true,
+    "http.netty.publish_host" : true,
+    "security.manager.enabled" : true,
+    "indices.recovery.concurrent_small_file_streams" : true,
+    "indices.recovery.concurrent_file_streams" : true,
+    "indices.requests.cache.concurrency_level" : true,
+    "indices.fielddata.cache.concurrency_level" : true,
+    "indices.memory.min_shard_index_buffer_size" : true,
+    "indices.memory.max_shard_index_buffer_size" : true,
+    "max-open-files" : true,
+    "netty.gathering" : true,
+    "useLinkedTransferQueue" : true,
+  };
+
+  return check_hash(
+    'blue',
+    'Removed settings',
+    settings,
+    function(v, k) {
+      if (_.has(removed, k)) {
+        delete settings[k];
+        return "`" + k + "`"
+      }
+    },
+    "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html");
+};
+
+ClusterSettings.known_settings = {
+  "action.auto_create_index" : true,
+  "action.destructive_requires_name" : true,
+  "action.master.force_local" : true,
+  "action.search.shard_count.limit" : true,
+  "bootstrap.ctrlhandler" : true,
+  "bootstrap.mlockall" : true,
+  "bootstrap.seccomp" : true,
+  "cache.recycler.page.limit.heap" : true,
+  "cache.recycler.page.type" : true,
+  "cache.recycler.page.weight.bytes" : true,
+  "cache.recycler.page.weight.ints" : true,
+  "cache.recycler.page.weight.longs" : true,
+  "cache.recycler.page.weight.objects" : true,
+  "client.transport.ignore_cluster_name" : true,
+  "client.transport.nodes_sampler_interval" : true,
+  "client.transport.ping_timeout" : true,
+  "client.transport.sniff" : true,
+  "client.type" : true,
+  "cluster.blocks.read_only" : true,
+  "cluster.indices.close.enable" : true,
+  "cluster.info.update.interval" : true,
+  "cluster.info.update.timeout" : true,
+  "cluster.name" : true,
+  "cluster.nodes.reconnect_interval" : true,
+  "cluster.routing.allocation.allow_rebalance" : true,
+  "cluster.routing.allocation.awareness.attributes" : true,
+  "cluster.routing.allocation.balance.index" : true,
+  "cluster.routing.allocation.balance.shard" : true,
+  "cluster.routing.allocation.balance.threshold" : true,
+  "cluster.routing.allocation.cluster_concurrent_rebalance" : true,
+  "cluster.routing.allocation.disk.include_relocations" : true,
+  "cluster.routing.allocation.disk.reroute_interval" : true,
+  "cluster.routing.allocation.disk.threshold_enabled" : true,
+  "cluster.routing.allocation.disk.watermark.high" : true,
+  "cluster.routing.allocation.disk.watermark.low" : true,
+  "cluster.routing.allocation.enable" : true,
+  "cluster.routing.allocation.node_concurrent_incoming_recoveries" : true,
+  "cluster.routing.allocation.node_concurrent_outgoing_recoveries" : true,
+  "cluster.routing.allocation.node_concurrent_recoveries" : true,
+  "cluster.routing.allocation.node_initial_primaries_recoveries" : true,
+  "cluster.routing.allocation.snapshot.relocation_enabled" : true,
+  "cluster.routing.allocation.total_shards_per_node" : true,
+  "cluster.routing.allocation.type" : true,
+  "cluster.routing.rebalance.enable" : true,
+  "cluster.service.slow_task_logging_threshold" : true,
+  "config.ignore_system_properties" : true,
+  "discovery.initial_state_timeout" : true,
+  "discovery.type" : true,
+  "discovery.zen.commit_timeout" : true,
+  "discovery.zen.fd.connect_on_network_disconnect" : true,
+  "discovery.zen.fd.ping_interval" : true,
+  "discovery.zen.fd.ping_retries" : true,
+  "discovery.zen.fd.ping_timeout" : true,
+  "discovery.zen.fd.register_connection_listener" : true,
+  "discovery.zen.join_retry_attempts" : true,
+  "discovery.zen.join_retry_delay" : true,
+  "discovery.zen.join_timeout" : true,
+  "discovery.zen.master_election.ignore_non_master_pings" : true,
+  "discovery.zen.master_election.wait_for_joins_timeout" : true,
+  "discovery.zen.masterservice.type" : true,
+  "discovery.zen.max_pings_from_another_master" : true,
+  "discovery.zen.minimum_master_nodes" : true,
+  "discovery.zen.no_master_block" : true,
+  "discovery.zen.ping.unicast.concurrent_connects" : true,
+  "discovery.zen.ping_timeout" : true,
+  "discovery.zen.publish_diff.enable" : true,
+  "discovery.zen.publish_timeout" : true,
+  "discovery.zen.send_leave_request" : true,
+  "gateway.expected_data_nodes" : true,
+  "gateway.expected_master_nodes" : true,
+  "gateway.expected_nodes" : true,
+  "gateway.initial_shards" : true,
+  "gateway.recover_after_data_nodes" : true,
+  "gateway.recover_after_master_nodes" : true,
+  "gateway.recover_after_nodes" : true,
+  "gateway.recover_after_time" : true,
+  "http.compression" : true,
+  "http.compression_level" : true,
+  "http.cors.allow-credentials" : true,
+  "http.cors.allow-headers" : true,
+  "http.cors.allow-methods" : true,
+  "http.cors.allow-origin" : true,
+  "http.cors.enabled" : true,
+  "http.cors.max-age" : true,
+  "http.detailed_errors.enabled" : true,
+  "http.enabled" : true,
+  "http.max_chunk_size" : true,
+  "http.max_content_length" : true,
+  "http.max_header_size" : true,
+  "http.max_initial_line_length" : true,
+  "http.netty.max_composite_buffer_components" : true,
+  "http.netty.max_cumulation_buffer_capacity" : true,
+  "http.netty.receive_predictor_max" : true,
+  "http.netty.receive_predictor_min" : true,
+  "http.netty.worker_count" : true,
+  "http.pipelining" : true,
+  "http.pipelining.max_events" : true,
+  "http.port" : true,
+  "http.publish_port" : true,
+  "http.reset_cookies" : true,
+  "http.tcp.blocking_server" : true,
+  "http.tcp.keep_alive" : true,
+  "http.tcp.receive_buffer_size" : true,
+  "http.tcp.reuse_address" : true,
+  "http.tcp.send_buffer_size" : true,
+  "http.tcp_no_delay" : true,
+  "http.type" : true,
+  "index.codec" : true,
+  "index.store.fs.fs_lock" : true,
+  "index.store.type" : true,
+  "indices.analysis.hunspell.dictionary.ignore_case" : true,
+  "indices.analysis.hunspell.dictionary.lazy" : true,
+  "indices.breaker.fielddata.limit" : true,
+  "indices.breaker.fielddata.overhead" : true,
+  "indices.breaker.fielddata.type" : true,
+  "indices.breaker.request.limit" : true,
+  "indices.breaker.request.overhead" : true,
+  "indices.breaker.request.type" : true,
+  "indices.breaker.total.limit" : true,
+  "indices.cache.cleanup_interval" : true,
+  "indices.fielddata.cache.size" : true,
+  "indices.mapping.dynamic_timeout" : true,
+  "indices.queries.cache.count" : true,
+  "indices.queries.cache.size" : true,
+  "indices.query.query_string.allowLeadingWildcard" : true,
+  "indices.query.query_string.analyze_wildcard" : true,
+  "indices.recovery.internal_action_long_timeout" : true,
+  "indices.recovery.internal_action_timeout" : true,
+  "indices.recovery.max_bytes_per_sec" : true,
+  "indices.recovery.recovery_activity_timeout" : true,
+  "indices.recovery.retry_delay_network" : true,
+  "indices.recovery.retry_delay_state_sync" : true,
+  "indices.requests.cache.expire" : true,
+  "indices.requests.cache.size" : true,
+  "indices.store.delete.shard.timeout" : true,
+  "indices.store.throttle.max_bytes_per_sec" : true,
+  "indices.store.throttle.type" : true,
+  "indices.ttl.interval" : true,
+  "logger.level" : true,
+  "monitor.fs.refresh_interval" : true,
+  "monitor.jvm.gc.enabled" : true,
+  "monitor.jvm.gc.refresh_interval" : true,
+  "monitor.jvm.refresh_interval" : true,
+  "monitor.os.refresh_interval" : true,
+  "monitor.process.refresh_interval" : true,
+  "network.server" : true,
+  "network.tcp.blocking" : true,
+  "network.tcp.blocking_client" : true,
+  "network.tcp.blocking_server" : true,
+  "network.tcp.connect_timeout" : true,
+  "network.tcp.keep_alive" : true,
+  "network.tcp.no_delay" : true,
+  "network.tcp.receive_buffer_size" : true,
+  "network.tcp.reuse_address" : true,
+  "network.tcp.send_buffer_size" : true,
+  "node.add_id_to_custom_path" : true,
+  "node.data" : true,
+  "node.enable_lucene_segment_infos_trace" : true,
+  "node.ingest" : true,
+  "node.local" : true,
+  "node.master" : true,
+  "node.max_local_storage_nodes" : true,
+  "node.mode" : true,
+  "node.name" : true,
+  "node.portsfile" : true,
+  "node_id.seed" : true,
+  "path.conf" : true,
+  "path.home" : true,
+  "path.logs" : true,
+  "path.plugins" : true,
+  "path.scripts" : true,
+  "path.shared_data" : true,
+  "pidfile" : true,
+  "processors" : true,
+  "repositories.fs.chunk_size" : true,
+  "repositories.fs.compress" : true,
+  "repositories.fs.location" : true,
+  "repositories.uri.list_directories" : true,
+  "repositories.url.url" : true,
+  "rest.action.multi.allow_explicit_index" : true,
+  "script.aggs" : true,
+  "script.auto_reload_enabled" : true,
+  "script.cache.expire" : true,
+  "script.cache.max_size" : true,
+  "script.default_lang" : true,
+  "script.engine.expression.file.aggs" : true,
+  "script.engine.expression.file.ingest" : true,
+  "script.engine.expression.file.search" : true,
+  "script.engine.expression.file.update" : true,
+  "script.engine.expression.stored.aggs" : true,
+  "script.engine.expression.stored.ingest" : true,
+  "script.engine.expression.stored.search" : true,
+  "script.engine.expression.stored.update" : true,
+  "script.engine.expression.inline.aggs" : true,
+  "script.engine.expression.inline.ingest" : true,
+  "script.engine.expression.inline.search" : true,
+  "script.engine.expression.inline.update" : true,
+  "script.engine.groovy.file.aggs" : true,
+  "script.engine.groovy.file.ingest" : true,
+  "script.engine.groovy.file.search" : true,
+  "script.engine.groovy.file.update" : true,
+  "script.engine.groovy.stored.aggs" : true,
+  "script.engine.groovy.stored.ingest" : true,
+  "script.engine.groovy.stored.search" : true,
+  "script.engine.groovy.stored.update" : true,
+  "script.engine.groovy.inline.aggs" : true,
+  "script.engine.groovy.inline.ingest" : true,
+  "script.engine.groovy.inline.search" : true,
+  "script.engine.groovy.inline.update" : true,
+  "script.engine.mustache.file.aggs" : true,
+  "script.engine.mustache.file.ingest" : true,
+  "script.engine.mustache.file.search" : true,
+  "script.engine.mustache.file.update" : true,
+  "script.engine.mustache.stored.aggs" : true,
+  "script.engine.mustache.stored.ingest" : true,
+  "script.engine.mustache.stored.search" : true,
+  "script.engine.mustache.stored.update" : true,
+  "script.engine.mustache.inline.aggs" : true,
+  "script.engine.mustache.inline.ingest" : true,
+  "script.engine.mustache.inline.search" : true,
+  "script.engine.mustache.inline.update" : true,
+  "script.engine.painless.file.aggs" : true,
+  "script.engine.painless.file.ingest" : true,
+  "script.engine.painless.file.search" : true,
+  "script.engine.painless.file.update" : true,
+  "script.engine.painless.stored.aggs" : true,
+  "script.engine.painless.stored.ingest" : true,
+  "script.engine.painless.stored.search" : true,
+  "script.engine.painless.stored.update" : true,
+  "script.engine.painless.inline.aggs" : true,
+  "script.engine.painless.inline.ingest" : true,
+  "script.engine.painless.inline.search" : true,
+  "script.engine.painless.inline.update" : true,
+  "script.file" : true,
+  "script.indexed" : true,
+  "script.ingest" : true,
+  "script.inline" : true,
+  "script.search" : true,
+  "script.update" : true,
+  "search.default_keep_alive" : true,
+  "search.default_search_timeout" : true,
+  "search.keep_alive_interval" : true,
+  "security.manager.filter_bad_defaults" : true,
+  "transport.connections_per_node.bulk" : true,
+  "transport.connections_per_node.ping" : true,
+  "transport.connections_per_node.recovery" : true,
+  "transport.connections_per_node.reg" : true,
+  "transport.connections_per_node.state" : true,
+  "transport.netty.boss_count" : true,
+  "transport.netty.max_composite_buffer_components" : true,
+  "transport.netty.max_cumulation_buffer_capacity" : true,
+  "transport.netty.receive_predictor_max" : true,
+  "transport.netty.receive_predictor_min" : true,
+  "transport.netty.receive_predictor_size" : true,
+  "transport.netty.worker_count" : true,
+  "transport.ping_schedule" : true,
+  "transport.publish_port" : true,
+  "transport.service.type" : true,
+  "transport.tcp.blocking_client" : true,
+  "transport.tcp.blocking_server" : true,
+  "transport.tcp.compress" : true,
+  "transport.tcp.connect_timeout" : true,
+  "transport.tcp.keep_alive" : true,
+  "transport.tcp.port" : true,
+  "transport.tcp.receive_buffer_size" : true,
+  "transport.tcp.reuse_address" : true,
+  "transport.tcp.send_buffer_size" : true,
+  "transport.tcp_no_delay" : true,
+  "transport.type" : true,
+  "tribe.blocks.metadata" : true,
+  "tribe.blocks.write" : true,
+  "tribe.name" : true,
+  "tribe.on_conflict" : true
+};
+"use strict";
+
+function Plugins() {
+
+  function site_plugins(plugins) {
+    return check_array(
+      'yellow',
+      'Site plugins are no longer supported',
+      plugins,
+      function(p) {
+        if (p.site && p.name !== 'elasticsearch-migration') {
+          return p.name
+        }
+      },
+      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_plugins.html#_site_plugins_removed');
+  }
+
+  function removed_plugins(plugins) {
+    return check_array(
+      'yellow',
+      'Removed plugins',
+      plugins,
+      function(p) {
+        if (p.name === 'discovery-multicast') {
+          return p.name
+        }
+      },
+      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_plugins.html#_multicast_plugin_removed');
+  }
+
+  function renamed_plugins(plugins) {
+    var names = {
+      "cloud-aws" : "The `cloud-aws` plugin has been split into the `discovery-ec2` and `repository-s3` plugins",
+      "cloud-azure" : "The `cloud-azure` plugin has been split into the `discovery-azure` and `repository-azure` plugins",
+      "cloud-gce" : "The `cloud-gce` plugin has been renamed to `discovery-gce`",
+    };
+
+    return check_array(
+      'blue',
+      'Renamed plugins',
+      plugins,
+      function(p) {
+        if (names[p.name]) {
+          return names[p.name]
+        }
+      },
+      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_plugins.html#_cloud_aws_plugin_changes');
+  }
+
+  function x_plugins(plugins) {
+    var names = {
+      "license" : "The `license` plugin is now part of the `x-pack`",
+      "graph" : "The `graph` plugin is now part of the `x-pack`",
+      "marvel-agent" : "The `marvel-agent` plugin is now part of the `x-pack`",
+      "shield" : "The `shield` plugin is now part of the `x-pack`",
+      "watcher" : "The `watcher` plugin is now part of the `x-pack`",
+    };
+
+    return check_array('blue', 'X-pack plugins', plugins, function(p) {
+      if (names[p.name]) {
+        return names[p.name]
+      }
+    }, 'https://www.elastic.co/guide/en/x-pack/current/index.html');
+  }
+
+  function deprecated_plugins(plugins) {
+    var names = {
+      "mapper-attachments" : "The `mapper-attachments` plugin has been deprecated in favour of the `ingest-attachment` plugin",
+    };
+
+    return check_array(
+      'blue',
+      'Deprecated plugins',
+      plugins,
+      function(p) {
+        if (names[p.name]) {
+          return names[p.name]
+        }
+      },
+      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_plugins.html#_mapper_attachments_plugin_deprecated');
+  }
+
+  return es.get('/_cluster/stats', {
+    filter_path : 'nodes.plugins'
+  })
+
+  .then(function(r) {
+    var color = 'green';
+    var plugins = r.nodes.plugins || [];
+    delete plugins['elasticsearch-migration'];
+
+    color = worse(color, site_plugins(plugins));
+    color = worse(color, removed_plugins(plugins));
+    color = worse(color, renamed_plugins(plugins));
+    color = worse(color, x_plugins(plugins));
+    color = worse(color, deprecated_plugins(plugins));
+
+    return color;
+  })
+
+};
+"use strict";
+
+function Indices() {
+
+"use strict";
+
+function Mapping(index) {
+
+  function fielddata_regex(fields) {
+    return check_hash(
+      'yellow',
+      'Fielddata regex filters',
+      fields,
+      function(mapping, name) {
+        if (_.has(mapping, [
+          'fielddata', 'filter.regex'
+        ])) {
+          return name
+        }
+      },
+      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_mapping_changes.html#_literal_fielddata_filter_regex_literal');
+  }
+
+  function field_names_disabled(fields) {
+    return check_hash(
+      'blue',
+      'Disabled `_field_names` prevents `exists` query',
+      fields,
+      function(mapping, name) {
+        if (name.match(':_field_names') && _.has(mapping, 'enabled')) {
+          return name
+        }
+      },
+      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_search_changes.html#_changes_to_queries');
+  }
+
+  function source_transform(fields) {
+    return check_hash(
+      'yellow',
+      'Source transform has been removed',
+      fields,
+      function(mapping, name) {
+        if (name.match(':transform')) {
+          return name
+        }
+      },
+      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_mapping_changes.html#_source_transform_removed');
+  }
+
+  function classic_similarity(fields) {
+    return check_hash(
+      'blue',
+      "`default` similarity renamed to `classic`",
+      fields,
+      function(mapping, name) {
+        if (mapping.similarity === 'default') {
+          return name
+        }
+      },
+      "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html#_similarity_settings");
+  }
+
+  function percolator(fields) {
+    return check_hash(
+      'blue',
+      'Percolator type replaced by percolator field',
+      fields,
+      function(mapping, name) {
+        if (name === '.percolator:query') {
+          return '.percolator'
+        }
+      },
+      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_percolator.html');
+  }
+
+  function flatten_mappings(mappings) {
+    var flat = {};
+
+    function flatten_fields(mappings, prefix) {
+      _.forEach(mappings, function(mapping, name) {
+        if (_.isObject(mapping)) {
+          var props = mapping.properties;
+          delete mapping.properties;
+          mapping._name = name;
+          flat[prefix + name] = mapping;
+          if (props) {
+            flatten_fields(props, prefix + name + '.')
+          }
+        }
+      })
+    }
+
+    _.forEach(mappings, function(mapping, type_name) {
+      flatten_fields(mapping.properties, type_name + ':');
+      delete mapping.properties;
+      flatten_fields(mapping, type_name + ':')
+    });
+
+    return flat;
+  }
+
+  var color = 'green';
+
+  return es.get('/' + index + '/_mapping')
+
+  .then(function(r) {
+    var fields = flatten_mappings(r[index].mappings);
+    color = worse(color, fielddata_regex(fields));
+    color = worse(color, field_names_disabled(fields));
+    color = worse(color, source_transform(fields));
+    color = worse(color, classic_similarity(fields));
+    color = worse(color, percolator(fields));
+
+    return color;
+  })
+
+};
+"use strict";
+
+function Warmers(index) {
+
+  return es
+    .get('/' + index + '/_warmers')
+
+    .then(
+      function(r) {
+        var warmers = _.keys(r[index].warmers);
+        return log
+          .result(
+            'blue',
+            'Warmers removed',
+            warmers,
+            'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_index_apis.html#_warmers')
+      });
+
+};
+function IndexSettings(index) {
+
+  var color = 'green';
+  var settings;
+
+  function removed_settings() {
+    var removed = {
+      "index.translog.fs.type" : true
+    };
+
+    return check_hash(
+      'blue',
+      'Removed settings',
+      settings,
+      function(v, s) {
+        if (removed[s]) {
+          delete settings[s];
+          return "`" + s + "` is no longer supported"
+        }
+      },
+      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html#_translog_settings');
+  }
+
+  function translog_sync() {
+    var fail = [];
+    if (_.has(settings, [
+      'index.translog.sync_interval'
+    ]) && settings['index.translog.sync_interval'] === "0") {
+      fail = [
+        "`index.translog.sync_interval` may no longer be set to `0`"
+      ];
+    }
+    return log
+      .result(
+        'blue',
+        "Translog sync",
+        fail,
+        "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html#_translog_settings")
+
+  }
+
+  function replaced_settings() {
+    var replaced = {
+      "index.shard.recovery.translog_size" : "indices.recovery.translog_size",
+      "index.shard.recovery.translog_ops" : "indices.recovery.translog_ops",
+      "index.shard.recovery.file_chunk_size" : "indices.recovery.file_chunk_size",
+      "index.shard.recovery.concurrent_streams" : "indices.recovery.concurrent_streams",
+      "index.shard.recovery.concurrent_small_file_streams" : "indices.recovery.concurrent_small_file_streams",
+      "index.cache.query.enable" : "index.requests.cache.enable",
+      "indices.cache.query.size" : "indices.requests.cache.size",
+      "index.translog.flush_threshold_ops" : "index.translog.flush_threshold_size",
+      "index.cache.query.enable" : "index.requests.cache.enable"
+    };
+
+    return check_hash(
+      'blue',
+      'Replaced settings',
+      settings,
+      function(v, s) {
+        if (replaced[s]) {
+          delete settings[s];
+          return "`" + s + "` has been superseded by `" + replaced[s] + "`"
+        }
+      },
+      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html');
+  }
+
+  function similarity_settings() {
+    var forbidden = /^index\.similarity\.(?:classic|BM25|default|DFR|IB|LMDirichlet|LMJelinekMercer|DFI)/;
+
+    return check_hash(
+      'blue',
+      'Built-in similarities cannot be overridden',
+      settings,
+      function(v, s) {
+        if (s.match(forbidden)) {
+          return "`" + s + "`"
+        }
+      },
+      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html#_similarity_settings');
+  }
+
+  function unknown_settings() {
+    var group_settings = /^index\.(?:analysis|similarity|routing\.allocation\.(?:require|include|exclude))\./;
+
+    return check_hash(
+      'blue',
+      'Unknown index settings',
+      settings,
+      function(v, s) {
+        if (!_.has(IndexSettings.known_settings, s) && !s.match(group_settings)) {
+          return "`"
+            + s
+            + "` will be moved to the `archived` namespace on upgrade"
+        }
+      },
+      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html');
+  }
+
+  return es.get('/' + index + '/_settings', {
+    flat_settings : true
+  })
+
+  .then(function(r) {
+    settings = r[index].settings;
+
+    color = worse(color, translog_sync());
+    color = worse(color, removed_settings());
+    color = worse(color, replaced_settings());
+    color = worse(color, similarity_settings());
+    color = worse(color, unknown_settings());
+
+    return color;
+  });
+
+}
+
+IndexSettings.known_settings = {
+  "index.auto_expand_replicas" : true,
+  "index.blocks.metadata" : true,
+  "index.blocks.read" : true,
+  "index.blocks.read_only" : true,
+  "index.blocks.write" : true,
+  "index.codec" : true,
+  "index.compound_format" : true,
+  "index.creation_date" : true,
+  "index.data_path" : true,
+  "index.fielddata.cache" : true,
+  "index.gc_deletes" : true,
+  "index.indexing.slowlog.level" : true,
+  "index.indexing.slowlog.reformat" : true,
+  "index.indexing.slowlog.source" : true,
+  "index.indexing.slowlog.threshold.index.debug" : true,
+  "index.indexing.slowlog.threshold.index.info" : true,
+  "index.indexing.slowlog.threshold.index.trace" : true,
+  "index.indexing.slowlog.threshold.index.warn" : true,
+  "index.load_fixed_bitset_filters_eagerly" : true,
+  "index.mapper.dynamic" : true,
+  "index.mapping.attachment.detect_language" : true,
+  "index.mapping.attachment.ignore_errors" : true,
+  "index.mapping.attachment.indexed_chars" : true,
+  "index.mapping.coerce" : true,
+  "index.mapping.depth.limit" : true,
+  "index.mapping.ignore_malformed" : true,
+  "index.mapping.nested_fields.limit" : true,
+  "index.mapping.total_fields.limit" : true,
+  "index.max_result_window" : true,
+  "index.merge.policy.expunge_deletes_allowed" : true,
+  "index.merge.policy.floor_segment" : true,
+  "index.merge.policy.max_merge_at_once" : true,
+  "index.merge.policy.max_merge_at_once_explicit" : true,
+  "index.merge.policy.max_merged_segment" : true,
+  "index.merge.policy.reclaim_deletes_weight" : true,
+  "index.merge.policy.segments_per_tier" : true,
+  "index.merge.scheduler.auto_throttle" : true,
+  "index.merge.scheduler.max_merge_count" : true,
+  "index.merge.scheduler.max_thread_count" : true,
+  "index.number_of_replicas" : true,
+  "index.number_of_shards" : true,
+  "index.percolator.map_unmapped_fields_as_string" : true,
+  "index.priority" : true,
+  "index.queries.cache.everything" : true,
+  "index.queries.cache.type" : true,
+  "index.query.default_field" : true,
+  "index.query.parse.allow_unmapped_fields" : true,
+  "index.query_string.lenient" : true,
+  "index.recovery.initial_shards" : true,
+  "index.refresh_interval" : true,
+  "index.requests.cache.enable" : true,
+  "index.routing.allocation.enable" : true,
+  "index.routing.allocation.total_shards_per_node" : true,
+  "index.routing.rebalance.enable" : true,
+  "index.search.slowlog.level" : true,
+  "index.search.slowlog.reformat" : true,
+  "index.search.slowlog.threshold.fetch.debug" : true,
+  "index.search.slowlog.threshold.fetch.info" : true,
+  "index.search.slowlog.threshold.fetch.trace" : true,
+  "index.search.slowlog.threshold.fetch.warn" : true,
+  "index.search.slowlog.threshold.query.debug" : true,
+  "index.search.slowlog.threshold.query.info" : true,
+  "index.search.slowlog.threshold.query.trace" : true,
+  "index.search.slowlog.threshold.query.warn" : true,
+  "index.shadow_replicas" : true,
+  "index.shard.check_on_startup" : true,
+  "index.shared_filesystem" : true,
+  "index.shared_filesystem.recover_on_any_node" : true,
+  "index.store.fs.fs_lock" : true,
+  "index.store.stats_refresh_interval" : true,
+  "index.store.throttle.max_bytes_per_sec" : true,
+  "index.store.throttle.type" : true,
+  "index.store.type" : true,
+  "index.translog.durability" : true,
+  "index.translog.flush_threshold_size" : true,
+  "index.translog.sync_interval" : true,
+  "index.ttl.disable_purge" : true,
+  "index.unassigned.node_left.delayed_timeout" : true,
+  "index.uuid" : true,
+  "index.version.created" : true,
+  "index.warmer.enabled" : true,
+
+};
+
+  var indices_color = 'green';
+  var indices;
+
+  function remove_old_indices() {
+    return check_hash(
+      'red',
+      'Indices created before v2.0.0 must be reindexed with the Reindex Helper',
+      indices,
+      function(v, k) {
+        if (v.settings.index.version.created < '2000000') {
+          delete indices[k];
+          return '`' + k + '`';
+        }
+      },
+      "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-5.0.html#_indices_created_before_5_0");
+  }
+
+  function indexed_scripts() {
+    return check_hash(
+      'yellow',
+      'Indexed scripts/templates moved to cluster state',
+      indices,
+      function(v, k) {
+        if (k === '.scripts') {
+          delete indices[k];
+          return "Indexed scripts and templates in the `.scripts` index will need to be recreated as `stored` scripts/templates";
+        }
+      },
+      "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_scripting.html#_indexed_scripts_and_templates");
+  }
+
+  function per_index_checks(index_names) {
+
+    function _check() {
+      var index = index_names.shift();
+      if (!index) {
+        return;
+      }
+      var index_color = 'green';
+
+      log.start_section('index', '`' + index + '`');
+      log.start_section('mappings', 'Mappings');
+
+      return new Mapping(index)
+
+      .then(function(color) {
+        index_color = process_color(index_color, color);
+        log.start_section('warmers', 'Warmers');
+        return new Warmers(index)
+      })
+
+      .then(function(color) {
+        index_color = process_color(index_color, color);
+        log.start_section('settings', 'Index settings');
+        return new IndexSettings(index)
+      })
+
+      .then(function(color) {
+        index_color = process_color(index_color, color);
+        indices_color = process_color(indices_color, index_color);
+        return _check();
+      })
+
+    }
+    return _check();
+  }
+
+  return es.get(
+    '/_cluster/state/metadata',
+    {
+      filter_path : "metadata.indices.*.state,"
+        + "metadata.indices.*.settings.index.version.created"
+    })
+
+  .then(function(r) {
+    if (!r.metadata) {
+      log.log('No indices to check');
+      return;
+    }
+    indices = r.metadata.indices;
+    indices_color = worse(indices_color, remove_old_indices());
+    indices_color = worse(indices_color, indexed_scripts());
+    return per_index_checks(_.keys(indices).sort());
+  })
+
+  .then(function() {
+    return indices_color;
+  });
+
+};
+"use strict";
+
+function NodeSettings() {
+
+  var nodes_color = 'green';
+  var nodes;
+
+  function node_roles(node) {
+    var roles = {
+      "data" : null,
+      "master" : null,
+      "client" : "`node.client: true` should be replaced with `node.data: false` and `node.master: false`"
+    };
+    return check_hash(
+      'red',
+      'Node roles',
+      node.attributes,
+      function(v, k) {
+        if (_.has(roles, k)) {
+          delete node.attributes[k];
+          return roles[k]
+        }
+      },
+      "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html#_node_types_settings");
+  }
+
+  function node_attrs(node) {
+    return check_hash(
+      'red',
+      'Node attributes move to `attr` namespace',
+      node.attributes,
+      function(v, k) {
+        return "`node." + k + "` should be rewritten as `node.attr." + k + "`"
+      },
+      "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html#_node_attribute_settings");
+  }
+
+  function heap_size(node) {
+    var fail = [];
+    if (node.jvm.mem.heap_init_in_bytes > 1.1 * node.jvm.mem.heap_max_in_bytes) {
+      fail = [
+        'The min heap size (`-Xms`) and max heap size (`-Xmx`) must be set to the same value'
+      ];
+    }
+    return log
+      .result(
+        'red',
+        'Heap Size',
+        fail,
+        'https://www.elastic.co/guide/en/elasticsearch/reference/master/heap-size.html');
+  }
+
+  function file_descriptors(node) {
+    var min = node.os.name === 'Mac OS X' ? 10240 : 65536;
+    var fail = [];
+    if (node.process.max_file_descriptors < min) {
+      fail = [
+        'At least `'
+          + min
+          + '` file descriptors must be available to Elasticsearch'
+      ];
+    }
+    return log
+      .result(
+        'red',
+        'File Descriptors',
+        fail,
+        'https://www.elastic.co/guide/en/elasticsearch/reference/master/file-descriptors.html');
+  }
+
+  function mlockall(node) {
+    var fail = [];
+    if (node.settings['bootstrap.mlockall'] === 'true'
+      && !node.process.mlockall) {
+      fail = [
+        '`bootstrap.mlockall` is set to `true` but mlockall has failed'
+      ];
+    }
+    return log
+      .result(
+        'red',
+        'Mlockall',
+        fail,
+        'https://www.elastic.co/guide/en/elasticsearch/reference/master/setup-configuration-memory.html');
+  }
+
+  function min_master_nodes(node) {
+    var fail = [];
+    if (!_.has(node.settings, "discovery.zen.minimum_master_nodes")) {
+      fail = [
+        '`discovery.zen.minimum_master_nodes` must be set before going into production'
+      ];
+    }
+    return log
+      .result(
+        'red',
+        'Minimum Master Nodes',
+        fail,
+        'https://www.elastic.co/guide/en/elasticsearch/reference/master/important-settings.html#minimum_master_nodes');
+  }
+
+  function script_settings(node) {
+    return check_hash(
+      'red',
+      'Script Settings',
+      node.settings,
+      function(v, k) {
+        if (k.match(/^script\./)) {
+          var val = node.settings[k];
+          var msg = [];
+          if (k.match(/\.indexed/)) {
+            var new_k = k.replace(/\.indexed/, '.stored');
+            msg.push('`' + k + '` has been renamed to `' + new_k + '`');
+            k = new_k;
+          }
+          if (!val.match(/true|false|sandbox/)) {
+            msg.push("`" + k + "` only accepts `true` | `false` | `sandbox`");
+          }
+          return msg.join("\n");
+        }
+      },
+      "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html#_script_mode_settings");
+  }
+
+  function host_settings(node) {
+    return check_hash(
+      'red',
+      'Host Settings',
+      node.settings,
+      function(v, k) {
+        if (k.match(/\.host$/)) {
+          var val = node.settings[k];
+          if (val === '_non_loopback_') {
+            return "`" + k + "` no longer accepts `_non_loopback_`"
+          }
+        }
+      },
+      "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html#_network_settings");
+  }
+
+  function index_settings(node) {
+    return check_hash(
+      'red',
+      'Index settings',
+      node.settings,
+      function(v, k) {
+        if (k.match(/^index\./)
+          && k !== 'index.codec'
+          && k !== 'index.store.fs.fs_lock'
+          && k !== 'index.store.type') {
+          return "`" + k + "` can no longer be set in the config file"
+        }
+      },
+      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html#_index_level_settings');
+  }
+
+  function per_node_checks(node_name) {
+
+    var node_color = 'green';
+    log.start_section('node', '`' + node_name + '`');
+    var node = nodes[node_name];
+
+    node_color = worse(node_color, node_roles(node));
+    node_color = worse(node_color, node_attrs(node));
+    node_color = worse(node_color, heap_size(node));
+    node_color = worse(node_color, file_descriptors(node));
+    node_color = worse(node_color, mlockall(node));
+    node_color = worse(node_color, min_master_nodes(node));
+    node_color = worse(node_color, script_settings(node));
+    node_color = worse(node_color, host_settings(node));
+    node_color = worse(node_color, index_settings(node));
+    node_color = worse(node_color, ClusterSettings
+      .removed_settings(node.settings));
+    node_color = worse(node_color, ClusterSettings
+      .renamed_settings(node.settings));
+    node_color = worse(node_color, ClusterSettings
+      .unknown_settings(node.settings));
+
+    return node_color;
+  }
+
+  return Promise
+    .all([
+      es.get('/_nodes/settings,os,process,jvm', {
+        flat_settings : true
+      }), es.get('/_nodes/stats/process')
+    ])
+
+    .then(
+      function(r) {
+        nodes = {};
+        _
+          .forEach(
+            r[0].nodes,
+            function(v, k) {
+              delete v.settings.name;
+              v.process.max_file_descriptors = r[1].nodes[k].process.max_file_descriptors;
+              nodes[v.name + '/' + v.host + ' [' + k + ']'] = v;
+            });
+
+        _.forEach(_.keys(nodes).sort(), function(node) {
+          nodes_color = process_color(nodes_color, per_node_checks(node));
+        });
+
+        return nodes_color;
+      })
+
+};
+
+  var log = new Logger(log,error);
+  var version;
+  var global_color = 'green';
+
+  function worse(old_color, new_color) {
+    if (new_color === 'red' || old_color === 'red') {
+      return 'red'
+    }
+    if (new_color === 'yellow' || old_color === 'yellow') {
+      return 'yellow'
+    }
+    if (new_color === 'blue' || old_color === 'blue') {
+      return 'blue'
+    }
+    return 'green'
+  }
+
+  function process_color(old_color, new_color) {
+    log.set_section_color(new_color);
+    log.end_section();
+    return worse(old_color, new_color);
+  }
+
+  function check_array(color, name, items, check, doc) {
+    var fail = [];
+    _.forEach(items, function(v) {
+      var ret_val = check(v);
+      if (ret_val) {
+        fail.push(ret_val)
+      }
+    });
+    return log.result(color, name, fail, doc);
+  }
+
+  function check_hash(color, name, items, check, doc) {
+    var fail = [];
+    _.forEach(items, function(v, k) {
+      var ret_val = check(v, k);
+      if (ret_val) {
+        fail.push(ret_val)
+      }
+    });
+    return log.result(color, name, fail, doc);
+  }
+
+  log.header('Checking host: ' + es.host);
+
+  es.get_version()
+
+  .then(function(v) {
+    version = v;
+    if (version.lt('2.3.*') || version.gt('2.*')) {
+      throw ('This plugin only works with Elasticsearch versions 2.3.0 - 2.x')
+    }
+  })
+
+  .then(function() {
+    log.start_section('top', 'Plugins');
+    return new Plugins();
+  })
+
+  .then(function(color) {
+    global_color = process_color(global_color, color);
+    log.start_section('top', 'Cluster Settings');
+    return new ClusterSettings();
+  })
+
+  .then(function(color) {
+    global_color = process_color(global_color, color);
+    log.start_section('top', 'Node Settings');
+    return new NodeSettings();
+  })
+
+  .then(function(color) {
+    global_color = process_color(global_color, color);
+    log.start_section('top', 'Indices');
+    return new Indices();
+  })
+
+  .then(function(color) {
+    global_color = process_color(global_color, color);
+    var msg;
+    switch (global_color) {
+    case "green":
+      msg = "All checks passed";
+      break;
+    case "red":
+      msg = "Checks completed. The cluster requires action before upgrading.";
+      break;
+    case "blue":
+      msg = "Some checks failed. Upgrade with caution";
+    }
+    log.header(msg, global_color);
+  })
+
+  .caught(log.error);
+}
+"use strict";
+
+var controller_init_time;
+
+function ReindexController(es, wrapper, error) {
+
+function Index(name, info, state, on_change) {
+
+  this.name = name;
+  this.info = info;
+  this.state = state || {
+    reindex_status : ''
+  };
+  this.extra = '';
+
+  this.sort_key = function() {
+    return [
+      this.info.state === 'close' ? '1' : '0',
+      _.padStart(1000000 - parseInt(this.info.priority || 0), 7, '0'),
+      (2000000000000 - this.info.created_timestamp),
+      this.name
+    ].join('~')
+  };
+
+  this.get_extra = function() {
+    return this.extra
+      || (this.info.state === 'close' && 'Index is closed')
+      || (this.info.health !== 'green' && 'Index is not green')
+      || (this.get_reindex_status() === 'error' && this.state.error)
+      || '';
+  };
+
+  this.set_extra = function(extra) {
+    this.extra = extra;
+    return on_change(this.name)
+  };
+
+  this.get_reindex_status = function() {
+    return this.state.reindex_status;
+  }
+
+  this.set_reindex_status = function(status) {
+    if (status && this.state.reindex_status === 'cancelled') {
+      return Promise.resolve();
+    }
+    if (status === this.state.reindex_status) {
+      return Promise.resolve();
+    }
+    console.log("Setting status `" + status + "`");
+    this.state.reindex_status = status;
+    return status === 'finished' ? this.del() : this.save();
+  }
+
+  this.save = function() {
+    var name = this.name;
+    return es.put('/' + Index.reindex_index + '/index/' + name, {
+      refresh : true
+    }, this.state)
+
+    .then(function() {
+      return on_change(name)
+    });
+  };
+
+  this.del = function() {
+    var name = this.name;
+    return es.del('/' + Index.reindex_index + '/index/' + name, {
+      refresh : true
+    })
+
+    .then(function() {
+      return on_change(name)
+    });
+  };
+
+  this.status = function() {
+
+    if (this.info.state === 'close') {
+      return 'Closed';
+    }
+
+    switch (this.info.health) {
+    case 'red':
+      return 'Red';
+    case 'yellow':
+      return 'Yellow';
+    }
+
+    switch (this.state.reindex_status) {
+    case 'queued':
+      return 'Queued';
+    case 'error':
+      return 'Error';
+    case '':
+      return 'Pending';
+    case 'cancelled':
+      return 'Cancelled';
+    default:
+      return 'Reindexing'
+    }
+  };
+
+  this.action = function() {
+
+    var self = this;
+
+    function cancel() {
+      return [
+        'Cancel',
+        function() {
+          var status = self.get_reindex_status();
+
+          console.log("Cancelling status `" + status + "`");
+
+          if (status === 'finished'
+            || status === 'src_deleted'
+            || status === 'green') {
+            console.log("Too late to cancel");
+            return;
+          }
+
+          if (dequeue(self)) {
+            console.log('Found job in queue')
+            return self.set_reindex_status('');
+          }
+
+          return self.set_reindex_status('cancelled');
+
+        }
+      ]
+    }
+
+    function reset() {
+      return [
+        'Reset', function() {
+          return new Reindexer(self).reset()
+        }
+      ]
+    }
+
+    function queue() {
+      return [
+        'Reindex', function() {
+          return self.set_reindex_status('queued') //
+          .then(function() {
+            enqueue(self);
+          });
+        }
+      ];
+    }
+
+    var status = this.status();
+    switch (status) {
+    case 'Closed':
+    case 'Red':
+    case 'Yellow':
+      return;
+    case 'Queued':
+      return cancel();
+    case 'Error':
+    case 'Cancelled':
+      return reset();
+    case 'Reindexing':
+      return cancel();
+    case 'Pending':
+      return queue();
+    default:
+      throw ("Unknown status: " + status);
+    }
+  }
+
+}
+
+Index.reindex_index = '.reindex-status';
+
+Index.init_all_indices = function(on_change) {
+  var indices = {};
+  return Index.init_index()
+
+  .then(function() {
+    console.log('Loading index data');
+    return es.post('/_refresh')
+  })
+
+  .then(
+    function() {
+      return Promise.all([
+        es.get('/_cluster/state/metadata', {
+          "filter_path" : "metadata.indices.*.state,"
+            + "metadata.indices.*.settings.index.version.created,"
+            + "metadata.indices.*.settings.index.creation_date,"
+            + "metadata.indices.*.settings.index.number*,"
+            + "metadata.indices.*.settings.index.priority"
+        }),
+        es.get('/_cluster/health', {
+          "level" : "indices",
+          "filter_path" : "indices.*.status"
+        }),
+        es.get('/_stats', {
+          "human" : true,
+          "filter_path" : "indices.*.primaries.docs.count,"
+            + "indices.*.primaries.store.size"
+        })
+
+      ])
+    })
+
+  .then(
+    function(d) {
+
+      function format_version(version) {
+        return version.substr(0, 1)
+          + '.'
+          + parseInt(version.substr(1, 2))
+          + '.'
+          + parseInt(version.substr(3, 2));
+      }
+
+      function format_date(timestamp) {
+        var date = new Date(parseInt(timestamp));
+        return date.getFullYear()
+          + '-'
+          + _.padStart(date.getMonth(), 2, '0')
+          + '-'
+          + _.padStart(date.getDay(), 2, '0');
+      }
+
+      var state = d[0].metadata.indices;
+      var health = d[1].indices;
+      var stats = d[2].indices || {};
+
+      _.forEach(state, function(v, k) {
+
+        var version = v.settings.index.version.created;
+        if (version >= 2000000) {
+          return;
+        }
+
+        indices[k] = {
+          version : format_version(version),
+          state : v.state,
+          shards : v.settings.index.number_of_shards,
+          replicas : v.settings.index.number_of_replicas,
+          created : format_date(v.settings.index.creation_date),
+          created_timestamp : v.settings.index.creation_date,
+          priority : v.settings.index.priority || '',
+          health : health[k] ? health[k].status : '',
+          docs : stats[k] ? stats[k].primaries.docs.count : '',
+          size : stats[k] ? stats[k].primaries.store.size : ''
+        };
+
+      });
+
+      if (_.keys(indices).length === 0) {
+        return Promise.resolve({
+          docs : []
+        });
+      }
+      return es.post('/' + Index.reindex_index + '/index/_mget', {
+        filter_path : "docs._id,docs._source"
+      }, {
+        ids : _.keys(indices)
+      });
+    })
+
+  .then(function(r) {
+    _.forEach(r.docs, function(v) {
+      indices[v._id] = new Index(v._id, indices[v._id], v._source, on_change)
+    });
+
+    if (_.keys(indices).length === 0) {
+      return Index.delete_index();
+    }
+  })
+
+  .then(function() {
+    return indices;
+  });
+}
+
+Index.init_index = function() {
+  var index_name = Index.reindex_index;
+
+  console.log('Creating index: `' + index_name + '`');
+  return es.put('/' + index_name, {}, {
+    "settings" : {
+      "number_of_shards" : 1
+    },
+    "mappings" : {
+      "index" : {
+        "properties" : {
+          "reindex_status" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "task_id" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "error" : {
+            "enabled" : false
+          },
+          "aliases" : {
+            "enabled" : false
+          },
+          "replicas" : {
+            "enabled" : false
+          },
+          "refresh" : {
+            "enabled" : false
+          }
+
+        }
+      }
+    }
+  }) //
+  .then(function() {
+    console.log('Index `' + index_name + '` created successfully')
+  }) //
+  .caught(ES_Error, function(e) {
+    if (e.type === 'index_already_exists_exception') {
+      console.log('Index `' + index_name + '` already exists - skipping')
+    } else {
+      throw (e)
+    }
+  });
+};
+
+Index.delete_index = function() {
+  var index_name = Index.reindex_index;
+  console.log('Deleting `' + index_name + '`');
+  return es.del('/' + index_name)
+
+  .then(function() {
+    console.log('Index `' + index_name + '` deleted successfully');
+  })
+
+  .caught(ES_Error, function(e) {
+    if (e.type === 'index_not_found_exception') {
+      console.log('Index `' + index_name + '` not found');
+    } else {
+      throw (e)
+    }
+  });
+}
+function Indices(wrapper) {
+
+  var indices;
+  var table;
+
+  function on_change(name) {
+    var index = indices[name];
+    var row = jQuery('#' + name_to_id(name));
+    if (index.get_reindex_status() === 'finished') {
+      delete indices[name];
+      row.remove();
+      if (_.keys(indices).length === 0) {
+        return init();
+      }
+    } else {
+      row.attr('class', index.status());
+      row.empty().append(render_row(index));
+    }
+    table.trigger('update');
+    add_td_hover(row);
+  }
+
+  function name_to_id(name) {
+    return 'index_' + name.replace(/[. ]/g, '_');
+  }
+
+  function init_queue() {
+    var queued = [];
+
+    _.forEach(sorted_indices(), function(name) {
+      var index = indices[name];
+      var status = index.status();
+      if (status === 'Reindexing') {
+        enqueue(index);
+      } else if (status === 'Queued') {
+        queued.push(index)
+      }
+    });
+
+    _.forEach(queued, function(index) {
+      enqueue(index)
+    });
+
+  }
+
+  function render_no_indices() {
+    wrapper.empty().append(
+      '<div id="no_indices">No indices exist which require reindexing.</div>');
+  }
+
+  function render_table() {
+    var headers = [
+      'Name',
+      'Version',
+      'Created',
+      'Docs',
+      'Size',
+      'Shards',
+      'Replicas',
+      'Status',
+      'Action',
+      'Info',
+    ];
+
+    table = jQuery(
+
+    '<table>'
+      + col(headers)
+      + '<thead>'
+      + '<tr>'
+      + th(headers)
+      + '</tr>'
+      + '</thead>'
+      + '<tbody></tbody>'
+      + '</table>');
+
+    var tbody = table.find('tbody');
+    _.forEach(sorted_indices(), function(name) {
+      var index = indices[name];
+      var row = jQuery(
+        '<tr id="'
+          + name_to_id(name)
+          + '" class="'
+          + index.status()
+          + '"></tr>)') //
+      .append(render_row(index));
+      tbody.append(row);
+    });
+
+    wrapper.empty().append('<div id="td_detail"></div>').append(table);
+
+    table.tablesorter({
+      cssAsc : 'asc',
+      cssDesc : 'desc'
+    });
+
+    add_td_hover(table);
+  }
+
+  function render_row(index) {
+
+    return jQuery(
+      td([
+        index.name,
+        index.info.version,
+        index.info.created,
+        index.info.docs,
+        index.info.size,
+        index.info.shards,
+        index.info.replicas,
+        index.status()
+      ])).add(build_action(index.action())).add(td([
+      index.get_extra()
+    ]));
+  }
+
+  function add_td_hover(el) {
+    var detail = jQuery('#td_detail');
+    detail.hide().mouseout(function() {
+      detail.hide();
+    });
+
+    el.find('td').mouseover(
+      function() {
+        var td = jQuery(this);
+        if (td.text() === '' || td.find('button').length > 0) {
+          return;
+        }
+        var pos = td.position();
+        detail.text(td.text()).css('top', pos.top - 0.5 * td.height()).css(
+          'left',
+          pos.left + 'px').css('min-width', td.width()).show();
+      });
+  }
+
+  function col(cols) {
+    var html = '';
+    _.forEach(cols, function(v) {
+      html += '<col class="' + v + '">'
+    });
+    return html;
+  }
+
+  function th(ths) {
+    var html = '';
+    _.forEach(ths, function(v) {
+      html += '<th>' + v + '</th>'
+    });
+    return html;
+  }
+
+  function td(tds) {
+    var html = '';
+    _.forEach(tds, function(v) {
+      html += '<td>' + v + '</td>'
+    });
+    return html;
+  }
+
+  function build_action(action) {
+    if (!action) {
+      return '<td></td>'
+    }
+    var button = jQuery('<button>' + action[0] + '</button>').click(action[1]);
+    return jQuery('<td>').append(button);
+  }
+
+  function sorted_indices() {
+    var sort_keys = {};
+    _.forEach(indices, function(v, k) {
+      sort_keys[k] = v.sort_key()
+    });
+
+    return _.keys(sort_keys).sort(function(a, b) {
+      if (sort_keys[a] < sort_keys[b]) {
+        return -1
+      }
+      if (sort_keys[b] < sort_keys[a]) {
+        return 1
+      }
+      return 0;
+    })
+  }
+
+  function init() {
+    return Index.init_all_indices(on_change)
+
+    .then(function(i) {
+      indices = i;
+      if (_.keys(indices).length === 0) {
+        render_no_indices();
+      } else {
+        render_table();
+        init_queue();
+      }
+    });
+  }
+
+  init();
+}
+function Reindexer(index) {
+  var src = index.name;
+  var dest = src + "-" + version;
+
+  function create_dest_index() {
+    if (index.get_reindex_status() !== 'starting') {
+      return Promise.resolve()
+    }
+    return es.get('/' + src) //
+    .then(function(d) {
+      d = d[src];
+
+      delete d.warmers;
+
+      index.state.aliases = d.aliases;
+      delete d.aliases;
+
+      index.state.refresh = d.settings.index.refresh_interval || '1s';
+      index.state.replicas = d.settings.index.number_of_replicas;
+
+      d.settings.index.refresh_interval = -1;
+      d.settings.index.number_of_replicas = 0;
+
+      delete d.settings.index.version;
+      delete d.settings.index.creation_date;
+      delete d.settings.index.blocks;
+      delete d.settings.index.legacy;
+
+      console.log('Creating index `' + dest + '`');
+      return es.put('/' + dest, {}, d)
+
+      .then(function() {
+        return index.set_reindex_status('index_created')
+      });
+    });
+  }
+
+  function set_src_read_only() {
+    if (index.get_reindex_status() !== 'index_created') {
+      return Promise.resolve()
+    }
+    console.log('Setting index `' + src + '` to read-only');
+    return es.put('/' + src + '/_settings', {}, {
+      "index.blocks.write" : true
+    });
+  }
+
+  function start_reindex() {
+    if (index.get_reindex_status() !== 'index_created') {
+      return Promise.resolve()
+    }
+    console.log('Starting reindex');
+    return es.post('/_reindex', {
+      wait_for_completion : false
+    }, {
+      source : {
+        index : src
+      },
+      dest : {
+        index : dest,
+        version_type : "external"
+      }
+    }) //
+    .then(function(r) {
+      index.state.task_id = r.task;
+      return index.set_reindex_status('reindexing');
+    });
+  }
+
+  function monitor_reindex() {
+    if (index.get_reindex_status() !== 'reindexing') {
+      return Promise.resolve();
+    }
+    if (!index.state.task_id) {
+      throw ("Index should be reindexing, but there is no task ID");
+    }
+
+    return new MonitorTask(index, index.state.task_id).then(function() {
+      index.set_reindex_status('reindexed');
+      return es.post('/' + dest + '/_refresh');
+    });
+  }
+
+  function check_success() {
+    if (index.get_reindex_status() !== 'reindexed') {
+      return Promise.resolve();
+    }
+    return Promise.all([
+      es.get('/' + src + '/_count'), es.get('/' + dest + '/_count')
+    ]) //
+    .then(
+      function(d) {
+        if (d[0].count !== d[1].count) {
+          throw ('Index `'
+            + src
+            + '` has `'
+            + d[0].count
+            + '` docs, but index `'
+            + dest
+            + '` has `'
+            + d[1].count + '` docs');
+        }
+        console.log('Indices `'
+          + src
+          + '` and `'
+          + dest
+          + '` have the same number of docs');
+      });
+  }
+
+  function finalise_dest() {
+    if (index.get_reindex_status() !== 'reindexed') {
+      return Promise.resolve();
+    }
+    var settings = {
+      "index.number_of_replicas" : index.state.replicas,
+      "index.refresh_interval" : index.state.refresh
+    };
+
+    console.log('Adding replicas to index `' + dest + '`');
+
+    return es.put('/' + dest + '/_settings', {}, settings) //
+    .then(function() {
+      console.log('Waiting for index `' + dest + '` to turn green');
+      index.set_extra('Waiting for index `' + dest + '` to turn `green`');
+      return new MonitorHealth(index, dest)
+    })
+
+  }
+
+  function delete_src() {
+    if (index.get_reindex_status() !== 'green') {
+      return Promise.resolve();
+    }
+    console.log('Deleting index `' + src + '`');
+    return es.del('/' + src) //
+    .then(function() {
+      return index.set_reindex_status('src_deleted');
+    });
+  }
+
+  function add_aliases_to_dest() {
+    if (index.get_reindex_status() !== 'src_deleted') {
+      return Promise.resolve();
+    }
+    console.log('Adding aliases to index `' + src + '`');
+    var actions = [
+      {
+        add : {
+          index : dest,
+          alias : src
+        }
+      }
+    ];
+
+    _.forEach(index.state.aliases, function(v, k) {
+      v.index = dest;
+      v.alias = k;
+      actions.push({
+        add : v
+      });
+    });
+
+    return es.post('/_aliases', {}, {
+      actions : actions
+    })
+
+    .then(function() {
+      return index.set_reindex_status('finished');
+    });
+  }
+
+  function reset() {
+    console.log('Resetting index `' + src + '` and index `' + dest + '`');
+    index.set_extra('');
+    return Promise
+      .all([ //
+        es.get('/' + src + '/_count'), //
+        es.get('/_cluster/health/' + src, {
+          level : "indices"
+        })
+      //
+      ])
+
+      .then(
+        function(r) {
+          if (r[0].count !== index.info.docs) {
+            throw ('Doc count in index `' + src + '` has changed. Not resetting.')
+          }
+
+          var health = _.get(r[1], 'indices.' + src + '.status') || 'missing';
+          if (health !== 'green') {
+            throw ('Health of index `'
+              + src
+              + '` is `'
+              + health
+              + '`, not `green`. ' + 'Not resetting.');
+          }
+
+          console.log('Setting index `' + src + '` to writable');
+        })
+
+      .then(function() {
+        return es.put('/' + src + '/_settings', {}, {
+          "index.blocks.write" : false
+        });
+      })
+
+      .then(function() {
+        console.log('Deleting index `' + dest + '`');
+        return es.del('/' + dest).caught(ES_Error, function(e) {
+          if (e.status !== 404) {
+            throw (e);
+          }
+        })
+      })
+
+      .lastly(function() {
+        index.set_extra('');
+        return index.set_reindex_status('');
+      })
+
+      .caught(handle_error);
+  }
+
+  function handle_error(e) {
+    index.state.error = e.toString();
+    return index.set_reindex_status('error') //
+    .then(function() {
+      throw (e)
+    });
+
+  }
+
+  function reindex() {
+
+    if (index.get_reindex_status() === 'error') {
+      return Promise.reject("Cannot reindex `"
+        + src
+        + "`. First resolve error: "
+        + state.error);
+    }
+
+    console.log('Reindexing `' + src + '` to `' + dest + '`');
+
+    return create_dest_index() //
+    .then(set_src_read_only) //
+    .then(start_reindex) //
+    .then(monitor_reindex) //
+    .then(check_success) //
+    .then(finalise_dest) //
+    .then(delete_src) //
+    .then(add_aliases_to_dest) //
+    .then(function() {
+      if (index.get_reindex_status() === 'cancelled') {
+        console.log('Reindexing cancelled');
+        return reset();
+      }
+      return console.log('Reindexing completed successfully');
+    }) //
+    .caught(handle_error);
+  }
+
+  return {
+    reindex : reindex,
+    reset : reset
+  }
+
+}
+function MonitorTask(index, task_id) {
+
+  var monitor_init_time = controller_init_time;
+  var node_id = task_id.split(':')[0];
+
+  function get_task(resolve, reject) {
+
+    function _get_task() {
+      if (index.get_reindex_status() === 'cancelled') {
+        console.log('Cancelling reindex task: ', task_id);
+        resolve();
+        return es.post('/_tasks/' + task_id + '/_cancel')
+      }
+
+      return es.get('/_tasks/' + task_id, {
+        detailed : true,
+        nodes : node_id
+      }) //
+      .then(
+        function(r) {
+          if (monitor_init_time === controller_init_time && r.nodes[node_id]) {
+            var status = r.nodes[node_id].tasks[task_id].status;
+            index.set_extra((status.created + status.updated)
+              + " / "
+              + status.total);
+            return Promise.delay(1000).then(_get_task);
+          }
+          index.set_extra('');
+          resolve();
+        }) //
+      .caught(reject);
+    }
+    _get_task();
+  }
+  return new Promise(get_task);
+};
+function MonitorHealth(index, dest) {
+
+  var monitor_init_time = controller_init_time;
+
+  function wait_for_green(resolve, reject) {
+
+    function _wait_for_green() {
+      es.get('/_cluster/health/' + dest, {
+        level : 'indices'
+      }) //
+      .then(
+        function(r) {
+          if (index.get_reindex_status() === 'cancelled'
+            || monitor_init_time !== controller_init_time) {
+            resolve();
+            return;
+          }
+          if (r.indices[dest].status === 'green') {
+            index.set_extra('');
+            index.set_reindex_status('green');
+            resolve();
+            return;
+          }
+          return Promise.delay(1000).then(_wait_for_green);
+        }) //
+      .caught(reject);
+    }
+    _wait_for_green();
+  }
+
+  return new Promise(wait_for_green);
+
+}
+
+  var version;
+  var current;
+  var queue = [];
+
+  function enqueue(index) {
+    queue.push(index);
+    reindex_next();
+  }
+
+  function dequeue(index) {
+    var found = _.remove(queue, function(el) {
+      return el.name === index.name
+    });
+    return found.length > 0;
+  }
+
+  function reindex_next() {
+    var reindex_init_time = controller_init_time;
+
+    if (current) {
+      return;
+    }
+
+    function _next() {
+      if (reindex_init_time !== controller_init_time) {
+        return;
+      }
+
+      current = queue.shift();
+      if (current) {
+        Promise.resolve().then(function() {
+          if (current.get_reindex_status() === 'queued') {
+            return current.set_reindex_status('starting')
+          }
+        })
+
+        .then(function() {
+          return new Reindexer(current).reindex()
+        })
+
+        .caught(show_error).lastly(function() {
+          current = undefined;
+        })
+
+        .delay(0).then(_next)
+      }
+    }
+
+    _next();
+  }
+
+  function show_error(e) {
+    error.empty().html(e);
+    throw (e);
+  }
+
+  controller_init_time = Date.now();
+
+  error.empty();
+  wrapper.empty();
+
+  console.log('Connecting to: ' + es.host);
+
+  es.get_version().then(function(v) {
+    version = v;
+    if (v.lt('2.3.*') || v.gt('2.*')) {
+      throw ('This plugin only works with Elasticsearch versions 2.3.0 - 2.x')
+    }
+    return new Indices(wrapper);
+  }).caught(show_error);
+}
+"use strict";
+
+var controller_init_time;
+
+function DeprecationController(es, wrapper, error) {
+
+  function render_status(status) {
+    var msg;
+    var buttons;
+    var color;
+
+    switch (status) {
+    case -1:
+      msg = "Enabled on all nodes";
+      color = 'green';
+      buttons = [
+        'disable'
+      ];
+      break;
+    case 0:
+      msg = "Disabled on all nodes";
+      color = 'red';
+      buttons = [
+        'enable'
+      ];
+      break;
+    default:
+      color = 'yellow';
+      msg = "Enabled on some nodes";
+      buttons = [
+        'enable', 'disable'
+      ];
+    }
+
+    wrapper.empty().html(
+      '<h2>Deprecation logging is currently: '
+        + '<span id="depr_status" class="'
+        + color
+        + '">'
+        + msg
+        + '</span></h2>');
+
+    _.forEach(buttons, function(v) {
+      var button;
+      switch (v) {
+      case 'enable':
+        button = jQuery(
+          '<a href="#" class="enable">'
+            + 'Enable deprecation logging on all nodes in the cluster'
+            + '</a>').click(function(e) {
+          e.preventDefault();
+          return set_status('enable');
+        }); break;
+      case 'disable':
+        button = jQuery(
+          '<a href="#" class="disable">'
+            + 'Disable deprecation logging on all nodes in the cluster'
+            + '</a>').click(function(e) {
+          e.preventDefault();
+          return set_status('disable');
+        });
+      }
+      wrapper.append(button);
+    });
+
+  }
+
+  function set_status(status) {
+    return es.put('/_cluster/settings', {}, {
+      "transient" : {
+        "logger.deprecation" : status === 'enable' ? 'DEBUG' : 'INFO'
+      }
+    })
+
+    .then(get_status)
+  }
+
+  function get_status() {
+    return Promise.all([
+      es.get('/_cluster/settings', {
+        flat_settings : true
+      }), es.get('/_nodes/settings', {
+        flat_settings : true
+      })
+    ])
+
+    .then(function(r) {
+      var status;
+      var setting = _.get(r[0], [
+        'transient', 'logger.deprecation'
+      ]) || _.get(r[0], [
+        'persistent', 'logger.deprecation'
+      ]);
+      if (setting) {
+        status = setting === 'DEBUG' ? -1 : 0;
+      } else {
+        var nodes = r[1].nodes;
+        var count = 0;
+        _.forEach(nodes, function(v) {
+          if (_.get(v, [
+            'settings', 'logger.deprecation'
+          ]) === 'DEBUG') {
+            count++;
+          }
+        });
+        if (count === _.keys(nodes).length) {
+          status = -1;
+        } else if (count === 0) {
+          status = 0;
+        } else {
+          status = count
+        }
+      }
+      render_status(status)
+    });
+  }
+
+  function show_error(e) {
+    error.empty().html(e);
+    throw (e);
+  }
+
+  error.empty();
+  wrapper.empty();
+
+  console.log('Connecting to: ' + es.host);
+
+  es.get_version().then(function(v) {
+    if (v.lt('2.3.*') || v.gt('2.*')) {
+      throw ('This plugin only works with Elasticsearch versions 2.3.0 - 2.x')
+    }
+    return get_status();
+  }).caught(show_error);
+}
+
+  var els = {
+    home : jQuery('#intro_switch'),
+    blurb : jQuery('#blurb p, #blurb ul'),
+    form : jQuery('#blurb form'),
+    es_host : jQuery('#es_host'),
+    creds : jQuery('#enable_creds'),
+    show_green : jQuery('#show_green'),
+    buttons : {
+      blurb : jQuery('#blurb_button'),
+      migration : jQuery('#blurb form button.migration'),
+      reindex : jQuery('#blurb form button.reindex'),
+      depr : jQuery('#blurb form button.depr'),
+    },
+    sections : {
+      intro : jQuery('.intro'),
+      migration : jQuery('.migration'),
+      reindex : jQuery('.reindex'),
+      depr : jQuery('.depr')
+    },
+    wrappers : {
+      migration : jQuery('#migration_wrapper'),
+      migration_log : jQuery('#migration_log'),
+      reindex : jQuery('#reindex_wrapper'),
+      depr : jQuery('#depr_wrapper'),
+      error : jQuery('#error_wrapper'),
+    }
+  };
+
+  function get_client() {
+    return new Client(els.es_host.val(), els.creds.is(':checked'));
+  }
+
+  function run_migration(e) {
+    e.preventDefault();
+    blurb('Hide');
+    els.wrappers.migration.show();
+    new MigrationController(
+      get_client(),
+      els.wrappers.migration_log,
+      els.wrappers.error);
+  }
+
+  function run_reindex(e) {
+    e.preventDefault();
+    blurb('Hide');
+    new ReindexController(
+      get_client(),
+      els.wrappers.reindex,
+      els.wrappers.error);
+  }
+
+  function run_depr(e) {
+    e.preventDefault();
+    blurb('Hide');
+    new DeprecationController(
+      get_client(),
+      els.wrappers.depr,
+      els.wrappers.error);
+  }
+
+  function blurb(state) {
+    if (state !== 'Show' && state !== 'Hide') {
+      state = els.buttons.blurb.text()
+    }
+
+    if (state === 'Show') {
+      els.blurb.show(200);
+      els.buttons.blurb.text('Hide');
+    } else {
+      els.blurb.hide(200);
+      els.buttons.blurb.text('Show');
+    }
+    els.buttons.blurb.blur();
+  }
+
+  function switch_view(page) {
+    _.forEach(els.sections, function(v, k) {
+      k === page ? v.show(200) : v.hide(200);
+    });
+
+    if (page === 'intro') {
+      els.home.hide(200);
+      els.buttons.blurb.hide(200);
+      els.form.hide(200);
+    } else {
+      els.home.show(200);
+      els.buttons.blurb.show(200);
+      els.form.show(200);
+    }
+
+    if (page === 'migration') {
+      els.wrappers.migration.hide(200);
+      els.wrappers.migration_log.empty();
+    }
+
+    blurb('Show');
+    els.wrappers.error.empty();
+  }
+
+  function show_green() {
+    if (els.show_green.is(':checked')) {
+      els.wrappers.migration_log.removeClass('no_green');
+    } else {
+      els.wrappers.migration_log.addClass('no_green');
+    }
+  }
+
+  function init() {
+    _.forEach(_.keys(els.sections), function(k) {
+      jQuery('#' + k + '_switch').click(function(e) {
+        e.preventDefault();
+        switch_view(k)
+      });
+    });
+
+    els.buttons.migration.click(run_migration);
+    els.buttons.reindex.click(run_reindex);
+    els.buttons.depr.click(run_depr);
+    els.buttons.blurb.click(blurb);
+
+    els.show_green.change(show_green);
+
+    switch_view('intro');
+
+    els.es_host.val(location.protocol + '//' + location.host);
+  }
+  init();
+});
