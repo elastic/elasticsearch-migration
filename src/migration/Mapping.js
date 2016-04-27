@@ -2,6 +2,21 @@
 
 function Mapping(index) {
 
+  function completion_fields(fields) {
+    return check_hash(
+      'yellow',
+      'Completion Suggester',
+      fields,
+      function(mapping, name) {
+        if (mapping.type === 'completion') {
+          return "Completion field `"
+            + name
+            + "` will not be compatible with new `completion` fields in 5.x"
+        }
+      },
+      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_suggester.html');
+  }
+
   function fielddata_regex(fields) {
     return check_hash(
       'yellow',
@@ -105,6 +120,7 @@ function Mapping(index) {
 
   .then(function(r) {
     var fields = flatten_mappings(r[index].mappings);
+    color = worse(color, completion_fields(fields));
     color = worse(color, fielddata_regex(fields));
     color = worse(color, field_names_disabled(fields));
     color = worse(color, source_transform(fields));
