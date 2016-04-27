@@ -81,7 +81,7 @@ function IndexSettings(index) {
   }
 
   function unknown_settings() {
-    var group_settings = /^index\.(?:analysis|similarity|routing\.allocation\.(?:require|include|exclude))\./;
+    var group_settings = /^index\.(?:marvel|analysis|similarity|routing\.allocation\.(?:require|include|exclude))\./;
 
     return check_hash(
       'blue',
