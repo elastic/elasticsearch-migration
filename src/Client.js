@@ -39,12 +39,16 @@ function Client(host, enable_creds) {
       reason = 'Is the URL correct?';
     } else if (reason === 'error') {
       reason = 'Is the URL correct?';
-      var origin = window.location.protocol
-        + "//"
-        + window.location.hostname
-        + (window.location.port ? ':' + window.location.port : '');
-      if (url.indexOf(origin) !== 0) {
-        reason += ' Does Elasticsearch have <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-http.html">CORS enabled</a> and properly configured?'
+      if (window.location.protocol === 'https:' && url.indexOf('https:') !== 0) {
+        reason += ' Cannot access a cluster via HTTP when this plugin is served via HTTPS.'
+      } else {
+        var origin = window.location.protocol
+          + "//"
+          + window.location.hostname
+          + (window.location.port ? ':' + window.location.port : '');
+        if (url.indexOf(origin) !== 0) {
+          reason += ' Does Elasticsearch have <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-http.html">CORS enabled</a> and properly configured?'
+        }
       }
     }
     msg += " " + reason;
