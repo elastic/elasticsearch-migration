@@ -174,16 +174,14 @@ dd {
   color: black;
 }
 
-#depr_wrapper a:before,
-#depr_status:before {
+#depr_wrapper a:before, #depr_status:before {
   content: "\2022";
   font-size: 3em;
   vertical-align: top;
   margin-right: 5px;
 }
 
-#depr_wrapper a.enable:before,
-#depr_status.green:before {
+#depr_wrapper a.enable:before, #depr_status.green:before {
   color: #95c73d;
 }
 
@@ -191,11 +189,9 @@ dd {
   color: #f3bb19;
 }
 
-#depr_wrapper a.disable:before,
-#depr_status.red:before {
+#depr_wrapper a.disable:before, #depr_status.red:before {
   color: #c33;
 }
-
 
 /* ----- Reindex table --------------------------------------------------------------- */
 #reindex_wrapper {
@@ -271,8 +267,7 @@ col.Action, col.Shards, col.Size, col.Version, col.Replicas {
   width: 7.75%;
 }
 
-col.Name,
-col.Info {
+col.Name, col.Info {
   width: 15.5%;
 }
 
@@ -338,15 +333,13 @@ div#show_hide_green {
   width: 97%;
 }
 
-#colors,
-#migration_log ul {
+#colors, #migration_log ul {
   padding: 0;
   margin: 0 0 5px 0;
   list-style-type: none;
 }
 
-#colors li:before,
-#migration_log li:before {
+#colors li:before, #migration_log li:before {
   content: "\2022";
   font-size: 3em;
   vertical-align: top;
@@ -403,20 +396,6 @@ li.red:before {
   background: #c33;
 }
 
-#migration_log li.check>ul>li:before {
-  content: ""
-}
-
-#migration_log li.check>ul {
-  list-style-type: disc;
-  list-style-position: inside;
-  margin: 5px 0;
-}
-
-#migration_log li.node, #migration_log li.index {
-  margin-top: 15px;
-}
-
 #migration_log li.node>span, #migration_log li.index>span {
   display: inline-block;
   border: 1px solid #ddd;
@@ -428,6 +407,22 @@ li.red:before {
 
 #migration_log li.node  ul, #migration_log li.index  ul {
   padding-left: 30px;
+}
+
+#migration_log li.check>ul>li:before {
+  content: "";
+  margin: 0;
+}
+
+#migration_log li.check>ul {
+  padding: 0; list-style-type : disc;
+  list-style-position: outside;
+  list-style-type: disc; list-style-position : outside;
+  margin: 5px 0 5px 40px;
+}
+
+#migration_log li.node, #migration_log li.index {
+  margin-top: 15px;
 }
 
 a.info {
