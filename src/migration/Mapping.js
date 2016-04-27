@@ -60,7 +60,7 @@ function Mapping(index) {
 
   function classic_similarity(fields) {
     return check_hash(
-      'blue',
+      'yellow',
       "`default` similarity renamed to `classic`",
       fields,
       function(mapping, name) {

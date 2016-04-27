@@ -10,7 +10,7 @@ function IndexSettings(index) {
     };
 
     return check_hash(
-      'blue',
+      'yellow',
       'Removed settings',
       settings,
       function(v, k) {
@@ -34,7 +34,7 @@ function IndexSettings(index) {
     }
     return log
       .result(
-        'blue',
+        'yellow',
         "Translog sync",
         fail,
         "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html#_translog_settings")
@@ -56,7 +56,7 @@ function IndexSettings(index) {
     };
 
     return check_hash(
-      'blue',
+      'red',
       'Replaced settings',
       settings,
       function(v, k) {
@@ -77,7 +77,7 @@ function IndexSettings(index) {
     var forbidden = /^index\.similarity\.(?:classic|BM25|default|DFR|IB|LMDirichlet|LMJelinekMercer|DFI)/;
 
     return check_hash(
-      'blue',
+      'red',
       'Built-in similarities cannot be overridden',
       settings,
       function(v, k) {

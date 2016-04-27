@@ -104,7 +104,7 @@ ClusterSettings.renamed_settings = function(settings) {
   }
 
   return check_hash(
-    'blue',
+    'red',
     'Renamed settings',
     settings,
     function(v, k) {

@@ -69,7 +69,7 @@ function Plugins() {
     };
 
     return check_array(
-      'blue',
+      'yellow',
       'Deprecated plugins',
       plugins,
       function(p) {
