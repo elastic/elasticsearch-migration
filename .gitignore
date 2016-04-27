@@ -1,6 +1,7 @@
 /.external*
 /.project
 /.settings/*
-
+/*.zip
+/*.zip.sha1
 test/
 tmp/
