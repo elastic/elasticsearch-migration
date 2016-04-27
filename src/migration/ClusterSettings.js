@@ -40,20 +40,23 @@ ClusterSettings.unknown_settings = function(settings) {
     'blue',
     'Unknown settings',
     settings,
-    function(v, s) {
-      if (_.has(ClusterSettings.known_settings, s)) {
+    function(v, k) {
+      var base_k = strip_dot_num(k);
+      if (_.has(ClusterSettings.known_settings, base_k)) {
         return;
       }
       var found = false;
       _.forEach(group_settings, function(regex) {
-        if (s.match(regex)) {
+        if (base_k.match(regex)) {
           found = true;
         }
       })
       if (found) {
         return;
       }
-      return "`" + s + "` will be moved to the `archived` namespace on upgrade"
+      return "`"
+        + base_k
+        + "` will be moved to the `archived` namespace on upgrade"
     },
     'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html');
 };
@@ -105,16 +108,17 @@ ClusterSettings.renamed_settings = function(settings) {
     'Renamed settings',
     settings,
     function(v, k) {
-      if (_.has(renamed, k)) {
+      var base_k = strip_dot_num(k);
+      if (_.has(renamed, base_k)) {
         delete settings[k];
-        return "`" + k + "` has been renamed to `" + renamed[k] + "`"
+        return "`" + base_k + "` has been renamed to `" + renamed[base_k] + "`"
       }
-      var new_k = re_replace(k, /^shield\./, 'xpack.security.')
-        || re_replace(k, /^marvel\./, 'xpack.monitoring.')
-        || re_replace(k, /^watcher\./, 'xpack.watcher.');
+      var new_k = re_replace(base_k, /^shield\./, 'xpack.security.')
+        || re_replace(base_k, /^marvel\./, 'xpack.monitoring.')
+        || re_replace(base_k, /^watcher\./, 'xpack.watcher.');
       if (new_k) {
-        delete settings[k];
-        return "`" + k + "` has been renamed to `" + new_k + "`";
+        delete settings[base_k];
+        return "`" + base_k + "` has been renamed to `" + new_k + "`";
       }
     },
     "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html");
@@ -144,9 +148,10 @@ ClusterSettings.removed_settings = function(settings) {
     'Removed settings',
     settings,
     function(v, k) {
-      if (_.has(removed, k)) {
+      var base_k = strip_dot_num(k);
+      if (_.has(removed, base_k)) {
         delete settings[k];
-        return "`" + k + "`"
+        return "`" + base_k + "`"
       }
     },
     "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html");

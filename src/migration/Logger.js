@@ -71,7 +71,7 @@ function Logger(log_el,error_el) {
     }
     if (fail.length > 0) {
       start_section('check', check + docs);
-      _.forEach(fail, function(msg) {
+      _.forEach(_.sortedUniq(fail), function(msg) {
         msg = msg.replace(/`([^`]+)`/g, "<code>$1</code>");
         out.append('<li>' + msg + '</li>');
       });

@@ -1,6 +1,6 @@
 "use strict";
 
-function MigrationController(es,log,error) {
+function MigrationController(es, log, error) {
 
   require('Logger.js');
   require('ClusterSettings.js');
@@ -8,7 +8,7 @@ function MigrationController(es,log,error) {
   require('Indices.js');
   require('NodeSettings.js');
 
-  var log = new Logger(log,error);
+  var log = new Logger(log, error);
   var version;
   var global_color = 'green';
 
@@ -51,6 +51,10 @@ function MigrationController(es,log,error) {
       }
     });
     return log.result(color, name, fail, doc);
+  }
+
+  function strip_dot_num(k) {
+    return k.replace(/\.\d+$/, '');
   }
 
   log.header('Checking host: ' + es.host);

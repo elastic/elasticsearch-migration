@@ -30,7 +30,13 @@ function NodeSettings() {
       'Node attributes move to `attr` namespace',
       node.attributes,
       function(v, k) {
-        return "`node." + k + "` should be rewritten as `node.attr." + k + "`"
+        var base_k = strip_dot_num(k);
+        delete node.settings['node.' + k];
+        return "`node."
+          + base_k
+          + "` should be rewritten as `node.attr."
+          + base_k
+          + "`"
       },
       "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html#_node_attribute_settings");
   }
@@ -128,10 +134,11 @@ function NodeSettings() {
       'Host Settings',
       node.settings,
       function(v, k) {
-        if (k.match(/\.host$/)) {
+        var base_k = strip_dot_num(k);
+        if (base_k.match(/\.host$/)) {
           var val = node.settings[k];
           if (val === '_non_loopback_') {
-            return "`" + k + "` no longer accepts `_non_loopback_`"
+            return "`" + base_k + "` no longer accepts `_non_loopback_`"
           }
         }
       },
@@ -144,12 +151,13 @@ function NodeSettings() {
       'Index settings',
       node.settings,
       function(v, k) {
-        if (k.match(/^index\./)
-          && k !== 'index.codec'
-          && k !== 'index.store.fs.fs_lock'
-          && k !== 'index.store.type') {
+        var base_k = strip_dot_num(k);
+        if (base_k.match(/^index\./)
+          && base_k !== 'index.codec'
+          && base_k !== 'index.store.fs.fs_lock'
+          && base_k !== 'index.store.type') {
           delete node.settings[k];
-          return "`" + k + "` can no longer be set in the config file"
+          return "`" + base_k + "` can no longer be set in the config file"
         }
       },
       'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html#_index_level_settings');

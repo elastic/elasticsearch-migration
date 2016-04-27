@@ -13,10 +13,11 @@ function IndexSettings(index) {
       'blue',
       'Removed settings',
       settings,
-      function(v, s) {
-        if (removed[s]) {
-          delete settings[s];
-          return "`" + s + "` is no longer supported"
+      function(v, k) {
+        var base_k = strip_dot_num(k);
+        if (removed[base_k]) {
+          delete settings[k];
+          return "`" + base_k + "` is no longer supported"
         }
       },
       'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html#_translog_settings');
@@ -57,10 +58,15 @@ function IndexSettings(index) {
       'blue',
       'Replaced settings',
       settings,
-      function(v, s) {
-        if (replaced[s]) {
+      function(v, k) {
+        var base_k = strip_dot_num(k);
+        if (replaced[base_k]) {
           delete settings[s];
-          return "`" + s + "` has been superseded by `" + replaced[s] + "`"
+          return "`"
+            + base_k
+            + "` has been superseded by `"
+            + replaced[base_k]
+            + "`"
         }
       },
       'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html');
@@ -73,9 +79,9 @@ function IndexSettings(index) {
       'blue',
       'Built-in similarities cannot be overridden',
       settings,
-      function(v, s) {
-        if (s.match(forbidden)) {
-          return "`" + s + "`"
+      function(v, k) {
+        if (k.match(forbidden)) {
+          return "`" + k + "`"
         }
       },
       'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html#_similarity_settings');
@@ -88,10 +94,12 @@ function IndexSettings(index) {
       'blue',
       'Unknown index settings',
       settings,
-      function(v, s) {
-        if (!_.has(IndexSettings.known_settings, s) && !s.match(group_settings)) {
+      function(v, k) {
+        var base_k = strip_dot_num(k);
+        if (!_.has(IndexSettings.known_settings, base_k)
+          && !base_k.match(group_settings)) {
           return "`"
-            + s
+            + base_k
             + "` will be moved to the `archived` namespace on upgrade"
         }
       },
