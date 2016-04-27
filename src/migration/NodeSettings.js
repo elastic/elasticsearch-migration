@@ -161,6 +161,13 @@ function NodeSettings() {
     log.start_section('node', '`' + node_name + '`');
     var node = nodes[node_name];
 
+    // Shield sets index.queries.cache.type automatically
+    if (_.filter(node.plugins, function(p) {
+      return p.name === 'shield'
+    }).length) {
+      delete node.settings['index.queries.cache.type'];
+    }
+
     node_color = worse(node_color, node_roles(node));
     node_color = worse(node_color, node_attrs(node));
     node_color = worse(node_color, heap_size(node));
@@ -182,7 +189,7 @@ function NodeSettings() {
 
   return Promise
     .all([
-      es.get('/_nodes/settings,os,process,jvm', {
+      es.get('/_nodes/settings,os,process,jvm,plugins', {
         flat_settings : true
       }), es.get('/_nodes/stats/process')
     ])
