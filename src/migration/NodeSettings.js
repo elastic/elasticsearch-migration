@@ -148,6 +148,7 @@ function NodeSettings() {
           && k !== 'index.codec'
           && k !== 'index.store.fs.fs_lock'
           && k !== 'index.store.type') {
+          delete node.settings[k];
           return "`" + k + "` can no longer be set in the config file"
         }
       },
