@@ -59,6 +59,7 @@ ClusterSettings.unknown_settings = function(settings) {
 };
 
 ClusterSettings.renamed_settings = function(settings) {
+
   var renamed = {
     "http.netty.http.blocking_server" : "http.tcp.blocking_server",
     "http.netty.tcp_no_delay" : "http.tcp.no_delay",
@@ -83,7 +84,21 @@ ClusterSettings.renamed_settings = function(settings) {
     "cloud.aws.s3.proxy_port" : "cloud.aws.s3.proxy.port",
     "cloud.azure.storage.account" : "cloud.azure.storage.{my_account_name}.account",
     "cloud.azure.storage.key" : "cloud.azure.storage.{my_account_name}.key",
+    "shield.ssl" : "xpack.security.ssl.enabled",
+    "shield.http.ssl" : "xpack.security.http.ssl.enabled",
+    "shield.ssl.hostname_verification" : "xpack.security.ssl.hostname_verification.enabled",
+    "watcher.actions.pagerduty" : "xpack.notification.pagerduty",
+    "watcher.actions.slack" : "xpack.notification.slack",
+    "watcher.actions.hipchat" : "xpack.notification.hipchat",
+    "watcher.actions.email" : "xpack.notification.email",
+
   };
+
+  function re_replace(k, re, replace) {
+    if (k.match(re)) {
+      return k.replace(re, replace)
+    }
+  }
 
   return check_hash(
     'blue',
@@ -93,6 +108,13 @@ ClusterSettings.renamed_settings = function(settings) {
       if (_.has(renamed, k)) {
         delete settings[k];
         return "`" + k + "` has been renamed to `" + renamed[k] + "`"
+      }
+      var new_k = re_replace(k, /^shield\./, 'xpack.security.')
+        || re_replace(k, /^marvel\./, 'xpack.monitoring.')
+        || re_replace(k, /^watcher\./, 'xpack.watcher.');
+      if (new_k) {
+        delete settings[k];
+        return "`" + k + "` has been renamed to `" + new_k + "`";
       }
     },
     "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html");
