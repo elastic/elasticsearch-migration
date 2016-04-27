@@ -28,10 +28,11 @@ ClusterSettings.unknown_settings = function(settings) {
 
   var group_settings = [
     /^cluster\.routing\.allocation\.(?:require|include|exclude|awareness\.force)\./,
-    /^request\.headers\./,
     /^indices\.analysis\.hunspell\.dictionary\./,
     /^logger\./,
     /^monitor\.jvm\.gc\.collector\./,
+    /^node\.attr\./,
+    /^request\.headers\./,
     /^threadpool\./,
     /^transport\.profiles\./
   ];
