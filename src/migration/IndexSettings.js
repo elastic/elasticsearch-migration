@@ -51,7 +51,8 @@ function IndexSettings(index) {
       "index.cache.query.enable" : "index.requests.cache.enable",
       "indices.cache.query.size" : "indices.requests.cache.size",
       "index.translog.flush_threshold_ops" : "index.translog.flush_threshold_size",
-      "index.cache.query.enable" : "index.requests.cache.enable"
+      "index.cache.query.enable" : "index.requests.cache.enable",
+      "index.analysis.analyzer.default_index" : "index.analysis.analyzer.default"
     };
 
     return check_hash(

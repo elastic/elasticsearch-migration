@@ -145,6 +145,23 @@ function NodeSettings() {
       "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html#_network_settings");
   }
 
+  function default_index_analyzer(node) {
+    return check_hash(
+      'red',
+      'Default Index Analyzer',
+      node.settings,
+      function(v, k) {
+        if (k === "index.analysis.analyzer.default_index") {
+          delete node.settings[k];
+          return "`"
+            + k
+            + "` can no longer be set in the config file, "
+            + "and has been renamed to `index.analysis.analyzer.default`"
+        }
+      },
+      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html#_index_level_settings');
+  }
+
   function index_settings(node) {
     return check_hash(
       'red',
@@ -184,6 +201,7 @@ function NodeSettings() {
     node_color = worse(node_color, min_master_nodes(node));
     node_color = worse(node_color, script_settings(node));
     node_color = worse(node_color, host_settings(node));
+    node_color = worse(node_color, default_index_analyzer(node));
     node_color = worse(node_color, index_settings(node));
     node_color = worse(node_color, ClusterSettings
       .removed_settings(node.settings));
