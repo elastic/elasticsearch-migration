@@ -187,7 +187,7 @@ ES_Error.prototype = Object.create(Error.prototype);
 ES_Error.prototype.constructor = ES_Error;
 "use strict";
 
-function MigrationController(es,log,error) {
+function MigrationController(es, log, error) {
 
 "use strict";
 
@@ -262,7 +262,7 @@ function Logger(log_el,error_el) {
     }
     if (fail.length > 0) {
       start_section('check', check + docs);
-      _.forEach(fail, function(msg) {
+      _.forEach(_.sortedUniq(fail), function(msg) {
         msg = msg.replace(/`([^`]+)`/g, "<code>$1</code>");
         out.append('<li>' + msg + '</li>');
       });
@@ -323,10 +323,11 @@ ClusterSettings.unknown_settings = function(settings) {
 
   var group_settings = [
     /^cluster\.routing\.allocation\.(?:require|include|exclude|awareness\.force)\./,
-    /^request\.headers\./,
     /^indices\.analysis\.hunspell\.dictionary\./,
     /^logger\./,
     /^monitor\.jvm\.gc\.collector\./,
+    /^node\.attr\./,
+    /^request\.headers\./,
     /^threadpool\./,
     /^transport\.profiles\./
   ];
@@ -334,25 +335,29 @@ ClusterSettings.unknown_settings = function(settings) {
     'blue',
     'Unknown settings',
     settings,
-    function(v, s) {
-      if (_.has(ClusterSettings.known_settings, s)) {
+    function(v, k) {
+      var base_k = strip_dot_num(k);
+      if (_.has(ClusterSettings.known_settings, base_k)) {
         return;
       }
       var found = false;
       _.forEach(group_settings, function(regex) {
-        if (s.match(regex)) {
+        if (base_k.match(regex)) {
           found = true;
         }
       })
       if (found) {
         return;
       }
-      return "`" + s + "` will be moved to the `archived` namespace on upgrade"
+      return "`"
+        + base_k
+        + "` will be moved to the `archived` namespace on upgrade"
     },
     'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html');
 };
 
 ClusterSettings.renamed_settings = function(settings) {
+
   var renamed = {
     "http.netty.http.blocking_server" : "http.tcp.blocking_server",
     "http.netty.tcp_no_delay" : "http.tcp.no_delay",
@@ -377,16 +382,38 @@ ClusterSettings.renamed_settings = function(settings) {
     "cloud.aws.s3.proxy_port" : "cloud.aws.s3.proxy.port",
     "cloud.azure.storage.account" : "cloud.azure.storage.{my_account_name}.account",
     "cloud.azure.storage.key" : "cloud.azure.storage.{my_account_name}.key",
+    "shield.ssl" : "xpack.security.ssl.enabled",
+    "shield.http.ssl" : "xpack.security.http.ssl.enabled",
+    "shield.ssl.hostname_verification" : "xpack.security.ssl.hostname_verification.enabled",
+    "watcher.actions.pagerduty" : "xpack.notification.pagerduty",
+    "watcher.actions.slack" : "xpack.notification.slack",
+    "watcher.actions.hipchat" : "xpack.notification.hipchat",
+    "watcher.actions.email" : "xpack.notification.email",
+
   };
+
+  function re_replace(k, re, replace) {
+    if (k.match(re)) {
+      return k.replace(re, replace)
+    }
+  }
 
   return check_hash(
     'blue',
     'Renamed settings',
     settings,
     function(v, k) {
-      if (_.has(renamed, k)) {
+      var base_k = strip_dot_num(k);
+      if (_.has(renamed, base_k)) {
         delete settings[k];
-        return "`" + k + "` has been renamed to `" + renamed[k] + "`"
+        return "`" + base_k + "` has been renamed to `" + renamed[base_k] + "`"
+      }
+      var new_k = re_replace(base_k, /^shield\./, 'xpack.security.')
+        || re_replace(base_k, /^marvel\./, 'xpack.monitoring.')
+        || re_replace(base_k, /^watcher\./, 'xpack.watcher.');
+      if (new_k) {
+        delete settings[base_k];
+        return "`" + base_k + "` has been renamed to `" + new_k + "`";
       }
     },
     "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html");
@@ -416,9 +443,10 @@ ClusterSettings.removed_settings = function(settings) {
     'Removed settings',
     settings,
     function(v, k) {
-      if (_.has(removed, k)) {
+      var base_k = strip_dot_num(k);
+      if (_.has(removed, base_k)) {
         delete settings[k];
-        return "`" + k + "`"
+        return "`" + base_k + "`"
       }
     },
     "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html");
@@ -429,20 +457,50 @@ ClusterSettings.known_settings = {
   "action.destructive_requires_name" : true,
   "action.master.force_local" : true,
   "action.search.shard_count.limit" : true,
+  "base_path" : true,
   "bootstrap.ctrlhandler" : true,
   "bootstrap.mlockall" : true,
   "bootstrap.seccomp" : true,
+  "bucket" : true,
+  "buffer_size" : true,
   "cache.recycler.page.limit.heap" : true,
   "cache.recycler.page.type" : true,
   "cache.recycler.page.weight.bytes" : true,
   "cache.recycler.page.weight.ints" : true,
   "cache.recycler.page.weight.longs" : true,
   "cache.recycler.page.weight.objects" : true,
+  "canned_acl" : true,
+  "chunk_size" : true,
   "client.transport.ignore_cluster_name" : true,
   "client.transport.nodes_sampler_interval" : true,
   "client.transport.ping_timeout" : true,
   "client.transport.sniff" : true,
   "client.type" : true,
+  "cloud.aws.ec2.endpoint" : true,
+  "cloud.aws.ec2.protocol" : true,
+  "cloud.aws.ec2.proxy.host" : true,
+  "cloud.aws.ec2.proxy.port" : true,
+  "cloud.aws.ec2.proxy.username" : true,
+  "cloud.aws.ec2.region" : true,
+  "cloud.aws.ec2.signer" : true,
+  "cloud.aws.protocol" : true,
+  "cloud.aws.proxy.host" : true,
+  "cloud.aws.proxy.port" : true,
+  "cloud.aws.proxy.username" : true,
+  "cloud.aws.region" : true,
+  "cloud.aws.s3.endpoint" : true,
+  "cloud.aws.s3.protocol" : true,
+  "cloud.aws.s3.proxy.host" : true,
+  "cloud.aws.s3.proxy.port" : true,
+  "cloud.aws.s3.proxy.username" : true,
+  "cloud.aws.s3.region" : true,
+  "cloud.aws.s3.signer" : true,
+  "cloud.aws.signer" : true,
+  "cloud.azure.management.cloud.service.name" : true,
+  "cloud.gce.max_wait" : true,
+  "cloud.gce.project_id" : true,
+  "cloud.gce.refresh_interval" : true,
+  "cloud.gce.retry" : true,
   "cluster.blocks.read_only" : true,
   "cluster.indices.close.enable" : true,
   "cluster.info.update.interval" : true,
@@ -470,7 +528,13 @@ ClusterSettings.known_settings = {
   "cluster.routing.allocation.type" : true,
   "cluster.routing.rebalance.enable" : true,
   "cluster.service.slow_task_logging_threshold" : true,
+  "compress" : true,
   "config.ignore_system_properties" : true,
+  "discovery.azure.host.type" : true,
+  "discovery.azure.refresh_interval" : true,
+  "discovery.ec2.any_group" : true,
+  "discovery.ec2.host_type" : true,
+  "discovery.ec2.node_cache_time" : true,
   "discovery.initial_state_timeout" : true,
   "discovery.type" : true,
   "discovery.zen.commit_timeout" : true,
@@ -489,10 +553,12 @@ ClusterSettings.known_settings = {
   "discovery.zen.minimum_master_nodes" : true,
   "discovery.zen.no_master_block" : true,
   "discovery.zen.ping.unicast.concurrent_connects" : true,
+  "discovery.zen.ping.unicast.hosts" : true,
   "discovery.zen.ping_timeout" : true,
   "discovery.zen.publish_diff.enable" : true,
   "discovery.zen.publish_timeout" : true,
   "discovery.zen.send_leave_request" : true,
+  "endpoint" : true,
   "gateway.expected_data_nodes" : true,
   "gateway.expected_master_nodes" : true,
   "gateway.expected_nodes" : true,
@@ -501,6 +567,7 @@ ClusterSettings.known_settings = {
   "gateway.recover_after_master_nodes" : true,
   "gateway.recover_after_nodes" : true,
   "gateway.recover_after_time" : true,
+  "http.bind_host" : true,
   "http.compression" : true,
   "http.compression_level" : true,
   "http.cors.allow-credentials" : true,
@@ -511,6 +578,7 @@ ClusterSettings.known_settings = {
   "http.cors.max-age" : true,
   "http.detailed_errors.enabled" : true,
   "http.enabled" : true,
+  "http.host" : true,
   "http.max_chunk_size" : true,
   "http.max_content_length" : true,
   "http.max_header_size" : true,
@@ -523,6 +591,7 @@ ClusterSettings.known_settings = {
   "http.pipelining" : true,
   "http.pipelining.max_events" : true,
   "http.port" : true,
+  "http.publish_host" : true,
   "http.publish_port" : true,
   "http.reset_cookies" : true,
   "http.tcp.blocking_server" : true,
@@ -547,6 +616,11 @@ ClusterSettings.known_settings = {
   "indices.cache.cleanup_interval" : true,
   "indices.fielddata.cache.size" : true,
   "indices.mapping.dynamic_timeout" : true,
+  "indices.memory.index_buffer_size" : true,
+  "indices.memory.interval" : true,
+  "indices.memory.max_index_buffer_size" : true,
+  "indices.memory.min_index_buffer_size" : true,
+  "indices.memory.shard_inactive_time" : true,
   "indices.queries.cache.count" : true,
   "indices.queries.cache.size" : true,
   "indices.query.query_string.allowLeadingWildcard" : true,
@@ -564,12 +638,18 @@ ClusterSettings.known_settings = {
   "indices.store.throttle.type" : true,
   "indices.ttl.interval" : true,
   "logger.level" : true,
+  "max_retries" : true,
   "monitor.fs.refresh_interval" : true,
   "monitor.jvm.gc.enabled" : true,
   "monitor.jvm.gc.refresh_interval" : true,
   "monitor.jvm.refresh_interval" : true,
   "monitor.os.refresh_interval" : true,
   "monitor.process.refresh_interval" : true,
+  "network.bind_host" : true,
+  "network.breaker.inflight_requests.limit" : true,
+  "network.breaker.inflight_requests.overhead" : true,
+  "network.host" : true,
+  "network.publish_host" : true,
   "network.server" : true,
   "network.tcp.blocking" : true,
   "network.tcp.blocking_client" : true,
@@ -592,18 +672,48 @@ ClusterSettings.known_settings = {
   "node.portsfile" : true,
   "node_id.seed" : true,
   "path.conf" : true,
+  "path.data" : true,
   "path.home" : true,
   "path.logs" : true,
   "path.plugins" : true,
+  "path.repo" : true,
   "path.scripts" : true,
   "path.shared_data" : true,
   "pidfile" : true,
+  "plugin.mandatory" : true,
   "processors" : true,
+  "protocol" : true,
+  "region" : true,
+  "repositories.azure.base_path" : true,
+  "repositories.azure.chunk_size" : true,
+  "repositories.azure.compress" : true,
+  "repositories.azure.container" : true,
+  "repositories.azure.location_mode" : true,
   "repositories.fs.chunk_size" : true,
   "repositories.fs.compress" : true,
   "repositories.fs.location" : true,
+  "repositories.s3.access_key" : true,
+  "repositories.s3.base_path" : true,
+  "repositories.s3.bucket" : true,
+  "repositories.s3.buffer_size" : true,
+  "repositories.s3.canned_acl" : true,
+  "repositories.s3.chunk_size" : true,
+  "repositories.s3.compress" : true,
+  "repositories.s3.endpoint" : true,
+  "repositories.s3.max_retries" : true,
+  "repositories.s3.protocol" : true,
+  "repositories.s3.region" : true,
+  "repositories.s3.secret_key" : true,
+  "repositories.s3.server_side_encryption" : true,
+  "repositories.s3.storage_class" : true,
   "repositories.uri.list_directories" : true,
+  "repositories.url.allowed_urls" : true,
+  "repositories.url.supported_protocols" : true,
   "repositories.url.url" : true,
+  "resource.reload.enabled" : true,
+  "resource.reload.interval.high" : true,
+  "resource.reload.interval.low" : true,
+  "resource.reload.interval.medium" : true,
   "rest.action.multi.allow_explicit_index" : true,
   "script.aggs" : true,
   "script.auto_reload_enabled" : true,
@@ -614,65 +724,146 @@ ClusterSettings.known_settings = {
   "script.engine.expression.file.ingest" : true,
   "script.engine.expression.file.search" : true,
   "script.engine.expression.file.update" : true,
-  "script.engine.expression.stored.aggs" : true,
-  "script.engine.expression.stored.ingest" : true,
-  "script.engine.expression.stored.search" : true,
-  "script.engine.expression.stored.update" : true,
+  "script.engine.expression.file.xpack_watch" : true,
   "script.engine.expression.inline.aggs" : true,
   "script.engine.expression.inline.ingest" : true,
   "script.engine.expression.inline.search" : true,
   "script.engine.expression.inline.update" : true,
+  "script.engine.expression.inline.xpack_watch" : true,
+  "script.engine.expression.stored.aggs" : true,
+  "script.engine.expression.stored.ingest" : true,
+  "script.engine.expression.stored.search" : true,
+  "script.engine.expression.stored.update" : true,
+  "script.engine.expression.stored.xpack_watch" : true,
   "script.engine.groovy.file.aggs" : true,
   "script.engine.groovy.file.ingest" : true,
   "script.engine.groovy.file.search" : true,
   "script.engine.groovy.file.update" : true,
-  "script.engine.groovy.stored.aggs" : true,
-  "script.engine.groovy.stored.ingest" : true,
-  "script.engine.groovy.stored.search" : true,
-  "script.engine.groovy.stored.update" : true,
+  "script.engine.groovy.file.xpack_watch" : true,
   "script.engine.groovy.inline.aggs" : true,
   "script.engine.groovy.inline.ingest" : true,
   "script.engine.groovy.inline.search" : true,
   "script.engine.groovy.inline.update" : true,
+  "script.engine.groovy.inline.xpack_watch" : true,
+  "script.engine.groovy.stored.aggs" : true,
+  "script.engine.groovy.stored.ingest" : true,
+  "script.engine.groovy.stored.search" : true,
+  "script.engine.groovy.stored.update" : true,
+  "script.engine.groovy.stored.xpack_watch" : true,
+  "script.engine.javascript.file.aggs" : true,
+  "script.engine.javascript.file.ingest" : true,
+  "script.engine.javascript.file.search" : true,
+  "script.engine.javascript.file.update" : true,
+  "script.engine.javascript.file.xpack_watch" : true,
+  "script.engine.javascript.inline.aggs" : true,
+  "script.engine.javascript.inline.ingest" : true,
+  "script.engine.javascript.inline.search" : true,
+  "script.engine.javascript.inline.update" : true,
+  "script.engine.javascript.inline.xpack_watch" : true,
+  "script.engine.javascript.stored.aggs" : true,
+  "script.engine.javascript.stored.ingest" : true,
+  "script.engine.javascript.stored.search" : true,
+  "script.engine.javascript.stored.update" : true,
+  "script.engine.javascript.stored.xpack_watch" : true,
+  "script.engine.js.file.aggs" : true,
+  "script.engine.js.file.ingest" : true,
+  "script.engine.js.file.search" : true,
+  "script.engine.js.file.update" : true,
+  "script.engine.js.file.xpack_watch" : true,
+  "script.engine.js.inline.aggs" : true,
+  "script.engine.js.inline.ingest" : true,
+  "script.engine.js.inline.search" : true,
+  "script.engine.js.inline.update" : true,
+  "script.engine.js.inline.xpack_watch" : true,
+  "script.engine.js.stored.aggs" : true,
+  "script.engine.js.stored.ingest" : true,
+  "script.engine.js.stored.search" : true,
+  "script.engine.js.stored.update" : true,
+  "script.engine.js.stored.xpack_watch" : true,
   "script.engine.mustache.file.aggs" : true,
   "script.engine.mustache.file.ingest" : true,
   "script.engine.mustache.file.search" : true,
   "script.engine.mustache.file.update" : true,
-  "script.engine.mustache.stored.aggs" : true,
-  "script.engine.mustache.stored.ingest" : true,
-  "script.engine.mustache.stored.search" : true,
-  "script.engine.mustache.stored.update" : true,
+  "script.engine.mustache.file.xpack_watch" : true,
   "script.engine.mustache.inline.aggs" : true,
   "script.engine.mustache.inline.ingest" : true,
   "script.engine.mustache.inline.search" : true,
   "script.engine.mustache.inline.update" : true,
+  "script.engine.mustache.inline.xpack_watch" : true,
+  "script.engine.mustache.stored.aggs" : true,
+  "script.engine.mustache.stored.ingest" : true,
+  "script.engine.mustache.stored.search" : true,
+  "script.engine.mustache.stored.update" : true,
+  "script.engine.mustache.stored.xpack_watch" : true,
   "script.engine.painless.file.aggs" : true,
   "script.engine.painless.file.ingest" : true,
   "script.engine.painless.file.search" : true,
   "script.engine.painless.file.update" : true,
-  "script.engine.painless.stored.aggs" : true,
-  "script.engine.painless.stored.ingest" : true,
-  "script.engine.painless.stored.search" : true,
-  "script.engine.painless.stored.update" : true,
+  "script.engine.painless.file.xpack_watch" : true,
   "script.engine.painless.inline.aggs" : true,
   "script.engine.painless.inline.ingest" : true,
   "script.engine.painless.inline.search" : true,
   "script.engine.painless.inline.update" : true,
+  "script.engine.painless.inline.xpack_watch" : true,
+  "script.engine.painless.stored.aggs" : true,
+  "script.engine.painless.stored.ingest" : true,
+  "script.engine.painless.stored.search" : true,
+  "script.engine.painless.stored.update" : true,
+  "script.engine.painless.stored.xpack_watch" : true,
+  "script.engine.py.file.aggs" : true,
+  "script.engine.py.file.ingest" : true,
+  "script.engine.py.file.search" : true,
+  "script.engine.py.file.update" : true,
+  "script.engine.py.file.xpack_watch" : true,
+  "script.engine.py.inline.aggs" : true,
+  "script.engine.py.inline.ingest" : true,
+  "script.engine.py.inline.search" : true,
+  "script.engine.py.inline.update" : true,
+  "script.engine.py.inline.xpack_watch" : true,
+  "script.engine.py.stored.aggs" : true,
+  "script.engine.py.stored.ingest" : true,
+  "script.engine.py.stored.search" : true,
+  "script.engine.py.stored.update" : true,
+  "script.engine.py.stored.xpack_watch" : true,
+  "script.engine.python.file.aggs" : true,
+  "script.engine.python.file.ingest" : true,
+  "script.engine.python.file.search" : true,
+  "script.engine.python.file.update" : true,
+  "script.engine.python.file.xpack_watch" : true,
+  "script.engine.python.inline.aggs" : true,
+  "script.engine.python.inline.ingest" : true,
+  "script.engine.python.inline.search" : true,
+  "script.engine.python.inline.update" : true,
+  "script.engine.python.inline.xpack_watch" : true,
+  "script.engine.python.stored.aggs" : true,
+  "script.engine.python.stored.ingest" : true,
+  "script.engine.python.stored.search" : true,
+  "script.engine.python.stored.update" : true,
+  "script.engine.python.stored.xpack_watch" : true,
   "script.file" : true,
   "script.indexed" : true,
   "script.ingest" : true,
   "script.inline" : true,
+  "script.max_size_in_bytes" : true,
   "script.search" : true,
+  "script.stored" : true,
   "script.update" : true,
+  "script.xpack_watch" : true,
   "search.default_keep_alive" : true,
   "search.default_search_timeout" : true,
   "search.keep_alive_interval" : true,
+  "security.dls_fls.enabled" : true,
+  "security.enabled" : true,
   "security.manager.filter_bad_defaults" : true,
+  "server_side_encryption" : true,
+  "storage_class" : true,
+  "transport.bind_host" : true,
   "transport.connections_per_node.bulk" : true,
   "transport.connections_per_node.ping" : true,
   "transport.connections_per_node.recovery" : true,
   "transport.connections_per_node.reg" : true,
   "transport.connections_per_node.state" : true,
+  "transport.host" : true,
   "transport.netty.boss_count" : true,
   "transport.netty.max_composite_buffer_components" : true,
   "transport.netty.max_cumulation_buffer_capacity" : true,
@@ -681,6 +872,7 @@ ClusterSettings.known_settings = {
   "transport.netty.receive_predictor_size" : true,
   "transport.netty.worker_count" : true,
   "transport.ping_schedule" : true,
+  "transport.publish_host" : true,
   "transport.publish_port" : true,
   "transport.service.type" : true,
   "transport.tcp.blocking_client" : true,
@@ -693,11 +885,76 @@ ClusterSettings.known_settings = {
   "transport.tcp.reuse_address" : true,
   "transport.tcp.send_buffer_size" : true,
   "transport.tcp_no_delay" : true,
+  "transport.tracer.exclude" : true,
+  "transport.tracer.include" : true,
   "transport.type" : true,
   "tribe.blocks.metadata" : true,
+  "tribe.blocks.metadata.indices" : true,
+  "tribe.blocks.read.indices" : true,
   "tribe.blocks.write" : true,
+  "tribe.blocks.write.indices" : true,
   "tribe.name" : true,
-  "tribe.on_conflict" : true
+  "tribe.on_conflict" : true,
+  "xpack.graph.enabled" : true,
+  "xpack.monitoring.agent.cluster.state.timeout" : true,
+  "xpack.monitoring.agent.cluster.stats.timeout" : true,
+  "xpack.monitoring.agent.index.recovery.active_only" : true,
+  "xpack.monitoring.agent.index.recovery.timeout" : true,
+  "xpack.monitoring.agent.index.stats.timeout" : true,
+  "xpack.monitoring.agent.indices.stats.timeout" : true,
+  "xpack.monitoring.agent.interval" : true,
+  "xpack.monitoring.enabled" : true,
+  "xpack.monitoring.history.duration" : true,
+  "xpack.security.audit.enabled" : true,
+  "xpack.security.audit.index.bulk_size" : true,
+  "xpack.security.audit.index.flush_interval" : true,
+  "xpack.security.audit.index.queue_max_size" : true,
+  "xpack.security.audit.index.rollover" : true,
+  "xpack.security.audit.logfile.prefix.emit_node_host_address" : true,
+  "xpack.security.audit.logfile.prefix.emit_node_host_name" : true,
+  "xpack.security.audit.logfile.prefix.emit_node_name" : true,
+  "xpack.security.authc.anonymous.authz_exception" : true,
+  "xpack.security.authc.anonymous.username" : true,
+  "xpack.security.authc.native.reload.interval" : true,
+  "xpack.security.authc.native.scroll.keep_alive" : true,
+  "xpack.security.authc.native.scroll.size" : true,
+  "xpack.security.authc.run_as.enabled" : true,
+  "xpack.security.authc.sign_user_header" : true,
+  "xpack.security.authz.store.files.roles" : true,
+  "xpack.security.authz.store.roles.index.reload.interval" : true,
+  "xpack.security.authz.store.roles.index.scroll.keep_alive" : true,
+  "xpack.security.authz.store.roles.index.scroll.size" : true,
+  "xpack.security.dls_fls.enabled" : true,
+  "xpack.security.enabled" : true,
+  "xpack.security.encryption.algorithm" : true,
+  "xpack.security.encryption_key.algorithm" : true,
+  "xpack.security.encryption_key.length" : true,
+  "xpack.security.filter.always_allow_bound_address" : true,
+  "xpack.security.http.filter.enabled" : true,
+  "xpack.security.http.ssl" : true,
+  "xpack.security.http.ssl.client.auth" : true,
+  "xpack.security.http.ssl.enabled" : true,
+  "xpack.security.system_key.file" : true,
+  "xpack.security.transport.filter.enabled" : true,
+  "xpack.security.user" : true,
+  "xpack.watcher.actions.index.default_timeout" : true,
+  "xpack.watcher.enabled" : true,
+  "xpack.watcher.execution.default_throttle_period" : true,
+  "xpack.watcher.execution.scroll.size" : true,
+  "xpack.watcher.execution.scroll.timeout" : true,
+  "xpack.watcher.http.default_connection_timeout" : true,
+  "xpack.watcher.http.default_read_timeout" : true,
+  "xpack.watcher.index.rest.direct_access" : true,
+  "xpack.watcher.input.search.default_timeout" : true,
+  "xpack.watcher.internal.ops.bulk.default_timeout" : true,
+  "xpack.watcher.internal.ops.index.default_timeout" : true,
+  "xpack.watcher.internal.ops.search.default_timeout" : true,
+  "xpack.watcher.shield.encrypt_sensitive_data" : true,
+  "xpack.watcher.start_immediately" : true,
+  "xpack.watcher.transform.search.default_timeout" : true,
+  "xpack.watcher.trigger.schedule.engine" : true,
+  "xpack.watcher.trigger.schedule.ticker.tick_interval" : true,
+  "xpack.watcher.watch.scroll.size" : "0"
 };
 "use strict";
 
@@ -943,17 +1200,19 @@ function IndexSettings(index) {
 
   function removed_settings() {
     var removed = {
-      "index.translog.fs.type" : true
+      "index.translog.fs.type" : true,
+      "index.translog.interval" : true
     };
 
     return check_hash(
       'blue',
       'Removed settings',
       settings,
-      function(v, s) {
-        if (removed[s]) {
-          delete settings[s];
-          return "`" + s + "` is no longer supported"
+      function(v, k) {
+        var base_k = strip_dot_num(k);
+        if (removed[base_k]) {
+          delete settings[k];
+          return "`" + base_k + "` is no longer supported"
         }
       },
       'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html#_translog_settings');
@@ -994,10 +1253,15 @@ function IndexSettings(index) {
       'blue',
       'Replaced settings',
       settings,
-      function(v, s) {
-        if (replaced[s]) {
+      function(v, k) {
+        var base_k = strip_dot_num(k);
+        if (replaced[base_k]) {
           delete settings[s];
-          return "`" + s + "` has been superseded by `" + replaced[s] + "`"
+          return "`"
+            + base_k
+            + "` has been superseded by `"
+            + replaced[base_k]
+            + "`"
         }
       },
       'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html');
@@ -1010,25 +1274,27 @@ function IndexSettings(index) {
       'blue',
       'Built-in similarities cannot be overridden',
       settings,
-      function(v, s) {
-        if (s.match(forbidden)) {
-          return "`" + s + "`"
+      function(v, k) {
+        if (k.match(forbidden)) {
+          return "`" + k + "`"
         }
       },
       'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html#_similarity_settings');
   }
 
   function unknown_settings() {
-    var group_settings = /^index\.(?:analysis|similarity|routing\.allocation\.(?:require|include|exclude))\./;
+    var group_settings = /^index\.(?:marvel|analysis|similarity|routing\.allocation\.(?:require|include|exclude))\./;
 
     return check_hash(
       'blue',
       'Unknown index settings',
       settings,
-      function(v, s) {
-        if (!_.has(IndexSettings.known_settings, s) && !s.match(group_settings)) {
+      function(v, k) {
+        var base_k = strip_dot_num(k);
+        if (!_.has(IndexSettings.known_settings, base_k)
+          && !base_k.match(group_settings)) {
           return "`"
-            + s
+            + base_k
             + "` will be moved to the `archived` namespace on upgrade"
         }
       },
@@ -1260,7 +1526,13 @@ function NodeSettings() {
       'Node attributes move to `attr` namespace',
       node.attributes,
       function(v, k) {
-        return "`node." + k + "` should be rewritten as `node.attr." + k + "`"
+        var base_k = strip_dot_num(k);
+        delete node.settings['node.' + k];
+        return "`node."
+          + base_k
+          + "` should be rewritten as `node.attr."
+          + base_k
+          + "`"
       },
       "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html#_node_attribute_settings");
   }
@@ -1358,10 +1630,11 @@ function NodeSettings() {
       'Host Settings',
       node.settings,
       function(v, k) {
-        if (k.match(/\.host$/)) {
+        var base_k = strip_dot_num(k);
+        if (base_k.match(/\.host$/)) {
           var val = node.settings[k];
           if (val === '_non_loopback_') {
-            return "`" + k + "` no longer accepts `_non_loopback_`"
+            return "`" + base_k + "` no longer accepts `_non_loopback_`"
           }
         }
       },
@@ -1374,11 +1647,13 @@ function NodeSettings() {
       'Index settings',
       node.settings,
       function(v, k) {
-        if (k.match(/^index\./)
-          && k !== 'index.codec'
-          && k !== 'index.store.fs.fs_lock'
-          && k !== 'index.store.type') {
-          return "`" + k + "` can no longer be set in the config file"
+        var base_k = strip_dot_num(k);
+        if (base_k.match(/^index\./)
+          && base_k !== 'index.codec'
+          && base_k !== 'index.store.fs.fs_lock'
+          && base_k !== 'index.store.type') {
+          delete node.settings[k];
+          return "`" + base_k + "` can no longer be set in the config file"
         }
       },
       'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html#_index_level_settings');
@@ -1389,6 +1664,13 @@ function NodeSettings() {
     var node_color = 'green';
     log.start_section('node', '`' + node_name + '`');
     var node = nodes[node_name];
+
+    // Shield sets index.queries.cache.type automatically
+    if (_.filter(node.plugins, function(p) {
+      return p.name === 'shield'
+    }).length) {
+      delete node.settings['index.queries.cache.type'];
+    }
 
     node_color = worse(node_color, node_roles(node));
     node_color = worse(node_color, node_attrs(node));
@@ -1411,7 +1693,7 @@ function NodeSettings() {
 
   return Promise
     .all([
-      es.get('/_nodes/settings,os,process,jvm', {
+      es.get('/_nodes/settings,os,process,jvm,plugins', {
         flat_settings : true
       }), es.get('/_nodes/stats/process')
     ])
@@ -1437,7 +1719,7 @@ function NodeSettings() {
 
 };
 
-  var log = new Logger(log,error);
+  var log = new Logger(log, error);
   var version;
   var global_color = 'green';
 
@@ -1480,6 +1762,10 @@ function NodeSettings() {
       }
     });
     return log.result(color, name, fail, doc);
+  }
+
+  function strip_dot_num(k) {
+    return k.replace(/\.\d+$/, '');
   }
 
   log.header('Checking host: ' + es.host);
