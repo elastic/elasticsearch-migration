@@ -5,7 +5,8 @@ function IndexSettings(index) {
 
   function removed_settings() {
     var removed = {
-      "index.translog.fs.type" : true
+      "index.translog.fs.type" : true,
+      "index.translog.interval" : true
     };
 
     return check_hash(
