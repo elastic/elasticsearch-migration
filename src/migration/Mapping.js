@@ -77,10 +77,14 @@ function Mapping(index) {
         if (_.isObject(mapping)) {
           var props = mapping.properties;
           delete mapping.properties;
-          mapping._name = name;
+          var fields = mapping.fields;
+          delete mapping.fields;
           flat[prefix + name] = mapping;
           if (props) {
             flatten_fields(props, prefix + name + '.')
+          }
+          if (fields) {
+            flatten_fields(fields, prefix + name + '.')
           }
         }
       })
