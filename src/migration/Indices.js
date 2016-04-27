@@ -12,7 +12,8 @@ function Indices() {
   function remove_old_indices() {
     return check_hash(
       'red',
-      'Indices created before v2.0.0 must be reindexed with the Reindex Helper',
+      'Indices created before v2.0.0 must be reindexed with the '
+        + '<a href="#" onclick="global_switch_view(\'reindex\')">Reindex Helper</a>',
       indices,
       function(v, k) {
         if (v.settings.index.version.created < '2000000') {

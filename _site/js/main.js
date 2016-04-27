@@ -1,3 +1,5 @@
+var global_switch_view;
+
 jQuery(function() {
 
 function Client(host, enable_creds) {
@@ -1435,7 +1437,8 @@ IndexSettings.known_settings = {
   function remove_old_indices() {
     return check_hash(
       'red',
-      'Indices created before v2.0.0 must be reindexed with the Reindex Helper',
+      'Indices created before v2.0.0 must be reindexed with the '
+        + '<a href="#" onclick="global_switch_view(\'reindex\')">Reindex Helper</a>',
       indices,
       function(v, k) {
         if (v.settings.index.version.created < '2000000') {
@@ -3078,6 +3081,7 @@ function DeprecationController(es, wrapper, error) {
     switch_view('intro');
 
     els.es_host.val(location.protocol + '//' + location.host);
+    global_switch_view = switch_view;
   }
   init();
 });

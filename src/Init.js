@@ -1,3 +1,5 @@
+var global_switch_view;
+
 jQuery(function() {
 
   require('Client.js');
@@ -130,6 +132,7 @@ jQuery(function() {
     switch_view('intro');
 
     els.es_host.val(location.protocol + '//' + location.host);
+    global_switch_view = switch_view;
   }
   init();
 });
