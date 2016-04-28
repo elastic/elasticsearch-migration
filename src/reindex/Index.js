@@ -18,8 +18,8 @@ function Index(name, info, state, on_change) {
 
   this.get_extra = function() {
     return this.extra
-      || (this.info.state === 'close' && 'Index is closed')
-      || (this.info.health !== 'green' && 'Index is not green')
+      || (this.info.state === 'close' && 'Index is closed, cannot be reindexed')
+      || (this.info.health !== 'green' && 'Index is not green, cannot be reindexed')
       || (this.get_reindex_status() === 'error' && this.state.error)
       || '';
   };

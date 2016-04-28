@@ -59,6 +59,7 @@ function Indices(wrapper) {
       'Replicas',
       'Status',
       'Action',
+      '&#x2139;',
       'Info',
     ];
 
@@ -109,9 +110,10 @@ function Indices(wrapper) {
         index.info.shards,
         index.info.replicas,
         index.status()
-      ])).add(build_action(index.action())).add(td([
-      index.get_extra()
-    ]));
+      ])).add(build_action(index.action())).add(build_reindex_info(index)).add(
+      td([
+        index.get_extra()
+      ]));
   }
 
   function add_td_hover(el) {
@@ -123,7 +125,7 @@ function Indices(wrapper) {
     el.find('td').mouseover(
       function() {
         var td = jQuery(this);
-        if (td.text() === '' || td.find('button').length > 0) {
+        if (td.text() === '' || td.find('button,a').length > 0) {
           return;
         }
         var pos = td.position();
@@ -155,6 +157,14 @@ function Indices(wrapper) {
       html += '<td>' + v + '</td>'
     });
     return html;
+  }
+
+  function build_reindex_info(index) {
+    var a = jQuery('<a href="#" class="info">&#x2139;</a>').click(function(e) {
+      e.preventDefault();
+      return new Reindexer(index).reindex_to_html();
+    });
+    return jQuery('<td></td>').append(a);
   }
 
   function build_action(action) {

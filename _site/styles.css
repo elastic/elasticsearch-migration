@@ -5,11 +5,18 @@ html, body, div, h1, ul, li, a, p {
   line-height: 1.4em;
 }
 
+html {
+  width: 100%;
+  height: 100%;
+}
+
 body {
   color: #777;
   background: white url('images/body_bg.png') repeat-x 0 20px;
   margin: 0;
   padding: 0;
+  width: 100%;
+  height: 100%;
 }
 
 a, a:hover, a:visited {
@@ -259,6 +266,10 @@ th, td {
   color: green;
 }
 
+col.\2139 {
+  width: 2.2%;
+}
+
 col.Status, col.Docs, col.Created {
   width: 10%;
 }
@@ -268,7 +279,7 @@ col.Action, col.Shards, col.Size, col.Version, col.Replicas {
 }
 
 col.Name, col.Info {
-  width: 15.5%;
+  width: 14%;
 }
 
 tr.Red, tr.Yellow, tr.Closed {
@@ -299,8 +310,49 @@ div#error_wrapper {
   max-width: 700px;
 }
 
+/* ----- Reindex Process --------------------------------------------------------------- */
+#reindex_process {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  padding: 10%;
+  box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.97);
+  overflow: clip;
+  z-index: 10000;
+  background: rgba(255, 255, 255, 0.97);
+}
+
+#reindex_content {
+  width: 100%;
+  height: 100%;
+  background: white;
+  overflow: auto;
+  border: 1px solid #ddd;
+  padding: 20px;
+}
+
+#reindex_content a {
+  position: fixed;
+  right: 11%;
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Chrome/Safari/Opera */
+  -khtml-user-select: none; /* Konqueror */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version */
+}
+
+#reindex_content pre.curl {
+  background: #fdfdfd;
+  margin: 0;
+  padding: 10px;
+}
+
 /* ----- Migration Log --------------------------------------------------------------- */
-div#migration_wrapper {
+div #migration_wrapper {
   border: 1px solid #ececec;
   background: #fafafa;
   padding: 10px;
@@ -415,9 +467,11 @@ li.red:before {
 }
 
 #migration_log li.check>ul {
-  padding: 0; list-style-type : disc;
+  padding: 0;
+  list-style-type: disc;
   list-style-position: outside;
-  list-style-type: disc; list-style-position : outside;
+  list-style-type: disc;
+  list-style-position: outside;
   margin: 5px 0 5px 40px;
 }
 
@@ -431,6 +485,10 @@ a.info {
   margin-left: 10px;
   color: #333;
   padding: 1px;
+}
+
+.reindex a.info {
+  margin: 0;
 }
 
 /* ----- Lists ------------------------------------------------------------- */

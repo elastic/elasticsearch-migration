@@ -1,5 +1,6 @@
 <html>
 <head>
+<meta charset="UTF-8">
 <title>Elasticsearch Migration Helper</title>
 <link href="styles.css" media="all" rel="stylesheet" />
 <script type="text/javascript" src="js/bluebird/bluebird.min.js"></script>
@@ -112,7 +113,7 @@
           <li>The old index will be made <b>read-only</b> during
             the reindexing process, after which it will be deleted.
           </li>
-          <li>The handover between the old and new index is <b>not
+          <li>The hand over between the old and new index is <b>not
               atomic</b>. There may be a small window between deleting the
             old index and adding an alias pointing to the new index
             during which neither index is available.
@@ -121,6 +122,11 @@
             indices with status <b><code>green</code></b>. The reindex
             process waits for the new index to turn <code>green</code>
             before completing.
+          </li>
+          <li>In case the automatic reindex process fails for any
+            reason (e.g. bad mappings), the <a href="#" class="info">ℹ</a>
+            button shows the steps required to reindex which you can
+            customise to resolve problems and run manually.
           </li>
         </ul>
       </div>
@@ -186,5 +192,6 @@
     -->
     <div id="depr_wrapper" class="depr"></div>
   </div>
+  <div id="reindex_process" style="display: none"></div>
 </body>
 </html>
