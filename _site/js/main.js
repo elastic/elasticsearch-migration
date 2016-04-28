@@ -1273,7 +1273,8 @@ function IndexSettings(index) {
       "indices.cache.query.size" : "indices.requests.cache.size",
       "index.translog.flush_threshold_ops" : "index.translog.flush_threshold_size",
       "index.cache.query.enable" : "index.requests.cache.enable",
-      "index.analysis.analyzer.default_index" : "index.analysis.analyzer.default"
+      "index.analysis.analyzer.default_index.type" : "index.analysis.analyzer.default.type",
+      "index.analysis.analyzer.default_index.tokenizer" : "index.analysis.analyzer.default.tokenizer",
     };
 
     return check_hash(
@@ -1283,10 +1284,10 @@ function IndexSettings(index) {
       function(v, k) {
         var base_k = strip_dot_num(k);
         if (replaced[base_k]) {
-          delete settings[s];
+          delete settings[k];
           return "`"
             + base_k
-            + "` has been superseded by `"
+            + "` has been replaced by `"
             + replaced[base_k]
             + "`"
         }
@@ -1675,12 +1676,13 @@ function NodeSettings() {
       'Default Index Analyzer',
       node.settings,
       function(v, k) {
-        if (k === "index.analysis.analyzer.default_index") {
+        if (k.match(/^index.analysis.analyzer.default_index/)) {
+          var new_k = k.replace(/^(index.analysis.analyzer.default)_index/,"$1");
           delete node.settings[k];
           return "`"
             + k
             + "` can no longer be set in the config file, "
-            + "and has been renamed to `index.analysis.analyzer.default`"
+            + "and has been renamed to `"+new_k+"`"
         }
       },
       'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html#_index_level_settings');
