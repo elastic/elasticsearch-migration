@@ -52,7 +52,8 @@ function IndexSettings(index) {
       "indices.cache.query.size" : "indices.requests.cache.size",
       "index.translog.flush_threshold_ops" : "index.translog.flush_threshold_size",
       "index.cache.query.enable" : "index.requests.cache.enable",
-      "index.analysis.analyzer.default_index" : "index.analysis.analyzer.default"
+      "index.analysis.analyzer.default_index.type" : "index.analysis.analyzer.default.type",
+      "index.analysis.analyzer.default_index.tokenizer" : "index.analysis.analyzer.default.tokenizer",
     };
 
     return check_hash(
