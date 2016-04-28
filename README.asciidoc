@@ -1,4 +1,4 @@
-== Elasticsearch Migration Plugin v0.17
+== Elasticsearch Migration Plugin v1.18
 
 This plugin will help you to check whether you can upgrade directly to
 Elasticsearch version 2.x, or whether you need to make changes to your data
@@ -27,14 +27,14 @@ To install, run the following command in your Elasticsearch home directory on a 
 
 [source,sh]
 ---------------
-./bin/plugin -i elastic/elasticsearch-migration
+./bin/plugin -i migration -u https://github.com/elastic/elasticsearch-migration/releases/download/v1.18/elasticsearch-migration-1.18.zip
 ---------------
 
 Or the equivalent on a Windows machine:
 
 [source,sh]
 ---------------
-.\bin\plugin -i elastic/elasticsearch-migration
+.\bin\plugin -i migration -u https://github.com/elastic/elasticsearch-migration/releases/download/v1.18/elasticsearch-migration-1.18.zip
 ---------------
 
 === Checking a local server
