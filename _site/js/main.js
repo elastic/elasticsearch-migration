@@ -1892,8 +1892,8 @@ function Index(name, info, state, on_change) {
 
   this.get_extra = function() {
     return this.extra
-      || (this.info.state === 'close' && 'Index is closed')
-      || (this.info.health !== 'green' && 'Index is not green')
+      || (this.info.state === 'close' && 'Index is closed, cannot be reindexed')
+      || (this.info.health !== 'green' && 'Index is not green, cannot be reindexed')
       || (this.get_reindex_status() === 'error' && this.state.error)
       || '';
   };
@@ -2272,6 +2272,7 @@ function Indices(wrapper) {
       'Replicas',
       'Status',
       'Action',
+      '&#x2139;',
       'Info',
     ];
 
@@ -2322,9 +2323,10 @@ function Indices(wrapper) {
         index.info.shards,
         index.info.replicas,
         index.status()
-      ])).add(build_action(index.action())).add(td([
-      index.get_extra()
-    ]));
+      ])).add(build_action(index.action())).add(build_reindex_info(index)).add(
+      td([
+        index.get_extra()
+      ]));
   }
 
   function add_td_hover(el) {
@@ -2336,7 +2338,7 @@ function Indices(wrapper) {
     el.find('td').mouseover(
       function() {
         var td = jQuery(this);
-        if (td.text() === '' || td.find('button').length > 0) {
+        if (td.text() === '' || td.find('button,a').length > 0) {
           return;
         }
         var pos = td.position();
@@ -2368,6 +2370,14 @@ function Indices(wrapper) {
       html += '<td>' + v + '</td>'
     });
     return html;
+  }
+
+  function build_reindex_info(index) {
+    var a = jQuery('<a href="#" class="info">&#x2139;</a>').click(function(e) {
+      e.preventDefault();
+      return new Reindexer(index).reindex_to_html();
+    });
+    return jQuery('<td></td>').append(a);
   }
 
   function build_action(action) {
@@ -2415,10 +2425,26 @@ function Reindexer(index) {
   var src = index.name;
   var dest = src + "-" + version;
 
+  function run_stmt(r) {
+    if (r.log) {
+      console.log(r.log);
+    }
+    return es[r.method](r.path, r.qs, r.body);
+  }
+
   function create_dest_index() {
     if (index.get_reindex_status() !== 'starting') {
       return Promise.resolve()
     }
+
+    return create_dest_index_stmt().then(run_stmt)
+
+    .then(function() {
+      return index.set_reindex_status('index_created')
+    });
+  }
+
+  function create_dest_index_stmt() {
     return es.get('/' + src) //
     .then(function(d) {
       d = d[src];
@@ -2434,17 +2460,17 @@ function Reindexer(index) {
       d.settings.index.refresh_interval = -1;
       d.settings.index.number_of_replicas = 0;
 
+      delete d.settings.index.uuid;
       delete d.settings.index.version;
       delete d.settings.index.creation_date;
       delete d.settings.index.blocks;
       delete d.settings.index.legacy;
-
-      console.log('Creating index `' + dest + '`');
-      return es.put('/' + dest, {}, d)
-
-      .then(function() {
-        return index.set_reindex_status('index_created')
-      });
+      return {
+        log : 'Creating index `' + dest + '`',
+        method : "put",
+        path : '/' + dest,
+        body : d
+      };
     });
   }
 
@@ -2452,9 +2478,18 @@ function Reindexer(index) {
     if (index.get_reindex_status() !== 'index_created') {
       return Promise.resolve()
     }
-    console.log('Setting index `' + src + '` to read-only');
-    return es.put('/' + src + '/_settings', {}, {
-      "index.blocks.write" : true
+
+    return set_src_read_only_stmt().then(run_stmt)
+  }
+
+  function set_src_read_only_stmt() {
+    return Promise.resolve({
+      log : 'Setting index `' + src + '` to read-only',
+      method : 'put',
+      path : '/' + src + '/_settings',
+      body : {
+        "index.blocks.write" : true
+      }
     });
   }
 
@@ -2462,21 +2497,31 @@ function Reindexer(index) {
     if (index.get_reindex_status() !== 'index_created') {
       return Promise.resolve()
     }
-    console.log('Starting reindex');
-    return es.post('/_reindex', {
-      wait_for_completion : false
-    }, {
-      source : {
-        index : src
-      },
-      dest : {
-        index : dest,
-        version_type : "external"
-      }
-    }) //
+    return start_reindex_stmt().then(run_stmt)
+
     .then(function(r) {
       index.state.task_id = r.task;
       return index.set_reindex_status('reindexing');
+    });
+  }
+
+  function start_reindex_stmt() {
+    return Promise.resolve({
+      log : "Starting reindex",
+      method : 'post',
+      path : '/_reindex',
+      qs : {
+        wait_for_completion : false
+      },
+      body : {
+        source : {
+          index : src
+        },
+        dest : {
+          index : dest,
+          version_type : "external"
+        }
+      }
     });
   }
 
@@ -2494,24 +2539,41 @@ function Reindexer(index) {
     });
   }
 
+  function monitor_task_stmt() {
+    return Promise
+      .resolve({
+        log : "Use the task_id from the reindex request above to monitor the reindex status",
+        method : "get",
+        path : "/_tasks/{TASK_ID}",
+        qs : {
+          detailed : true
+        }
+      });
+  }
+
   function check_success() {
     if (index.get_reindex_status() !== 'reindexed') {
       return Promise.resolve();
     }
-    return Promise.all([
-      es.get('/' + src + '/_count'), es.get('/' + dest + '/_count')
-    ]) //
+    var src_count;
+    return check_src_count_stmt().then(run_stmt)
+
+    .then(function(r) {
+      src_count = r.count;
+      return check_dest_count_stmt()
+    }).then(run_stmt)
+
     .then(
-      function(d) {
-        if (d[0].count !== d[1].count) {
+      function(r) {
+        if (r.count !== src_count) {
           throw ('Index `'
             + src
             + '` has `'
-            + d[0].count
+            + src_count
             + '` docs, but index `'
             + dest
             + '` has `'
-            + d[1].count + '` docs');
+            + r.count + '` docs');
         }
         console.log('Indices `'
           + src
@@ -2521,34 +2583,79 @@ function Reindexer(index) {
       });
   }
 
+  function check_src_count_stmt() {
+    return Promise.resolve({
+      log : "Check that `"
+        + src
+        + "` and `"
+        + dest
+        + "` have the same number of documents",
+      method : "get",
+      path : '/' + src + '/_count'
+    });
+
+  }
+
+  function check_dest_count_stmt() {
+    return Promise.resolve({
+      method : "get",
+      path : '/' + dest + '/_count'
+    });
+
+  }
+
   function finalise_dest() {
     if (index.get_reindex_status() !== 'reindexed') {
       return Promise.resolve();
     }
-    var settings = {
-      "index.number_of_replicas" : index.state.replicas,
-      "index.refresh_interval" : index.state.refresh
-    };
+    return finalise_dest_stmt().then(run_stmt)
 
-    console.log('Adding replicas to index `' + dest + '`');
-
-    return es.put('/' + dest + '/_settings', {}, settings) //
     .then(function() {
       console.log('Waiting for index `' + dest + '` to turn green');
       index.set_extra('Waiting for index `' + dest + '` to turn `green`');
       return new MonitorHealth(index, dest)
     })
+  }
 
+  function finalise_dest_stmt() {
+    return Promise.resolve({
+      log : 'Adding replicas to index `' + dest + '`',
+      method : 'put',
+      path : '/' + dest + '/_settings',
+      body : {
+        "index.number_of_replicas" : index.state.replicas,
+        "index.refresh_interval" : index.state.refresh
+      }
+    });
+  }
+
+  function monitor_health_stmt() {
+    return Promise.resolve({
+      log : "Wait for index `" + dest + "` to turn green",
+      method : "get",
+      path : "/_cluster/health/" + dest,
+      qs : {
+        wait_for_status : 'green'
+      }
+    });
   }
 
   function delete_src() {
     if (index.get_reindex_status() !== 'green') {
       return Promise.resolve();
     }
-    console.log('Deleting index `' + src + '`');
-    return es.del('/' + src) //
+    return delete_src_stmt().then(run_stmt)
+
     .then(function() {
       return index.set_reindex_status('src_deleted');
+    });
+  }
+
+  function delete_src_stmt() {
+    return Promise.resolve({
+      log : 'Deleting index `' + src + '`',
+      method : 'del',
+      path : '/' + src
     });
   }
 
@@ -2556,7 +2663,15 @@ function Reindexer(index) {
     if (index.get_reindex_status() !== 'src_deleted') {
       return Promise.resolve();
     }
-    console.log('Adding aliases to index `' + src + '`');
+
+    return add_aliases_to_dest_stmt().then(run_stmt)
+
+    .then(function() {
+      return index.set_reindex_status('finished');
+    });
+  }
+
+  function add_aliases_to_dest_stmt() {
     var actions = [
       {
         add : {
@@ -2573,13 +2688,13 @@ function Reindexer(index) {
         add : v
       });
     });
-
-    return es.post('/_aliases', {}, {
-      actions : actions
-    })
-
-    .then(function() {
-      return index.set_reindex_status('finished');
+    return Promise.resolve({
+      log : 'Adding aliases to index `' + src + '`',
+      method : 'post',
+      path : '/_aliases',
+      body : {
+        actions : actions
+      }
     });
   }
 
@@ -2674,8 +2789,74 @@ function Reindexer(index) {
     .caught(handle_error);
   }
 
+  function reindex_to_html() {
+    var out;
+    function print_stmt(r) {
+      var html = "";
+      if (r.log) {
+        html = '<pre>## ' + r.log + "</pre>\n";
+      }
+      var method;
+      switch (r.method) {
+      case 'get':
+        method = 'GET';
+        break;
+      case 'put':
+        method = 'PUT';
+        break;
+      case 'post':
+        method = 'POST';
+        break;
+      case 'del':
+        method = 'DELETE';
+        break;
+      }
+      var url = es.host + r.path;
+      if (r.qs) {
+        url += '?' + jQuery.param(r.qs);
+      }
+      html += '<pre class="curl">curl -X' + method + " '" + url + '"';
+
+      if (r.body) {
+        html += " -d '\n" + JSON.stringify(r.body, null, 2) + "\n'\n"
+      } else {
+        html += "\n"
+      }
+      ;
+
+      html += "</pre>\n\n";
+      out.append(html);
+    }
+    var close = jQuery('<a href="#">Close</a>').click(function(e) {
+      e.preventDefault();
+      jQuery('#reindex_process').hide()
+    });
+    out = jQuery('#reindex_process').empty().show().append(
+      '<div id="reindex_content"></div>').find('#reindex_content');
+    out.append(close);
+    out.append('<h2>Steps to manually reindex <code>'
+      + src
+      + '</code> to <code>'
+      + dest
+      + '</code></h2>'
+      + "\n");
+
+    return create_dest_index_stmt().then(print_stmt).then(
+      set_src_read_only_stmt).then(print_stmt) //
+    .then(start_reindex_stmt).then(print_stmt) //
+    .then(monitor_task_stmt).then(print_stmt) //
+    .then(check_src_count_stmt).then(print_stmt) //
+    .then(check_dest_count_stmt).then(print_stmt) //
+    .then(finalise_dest_stmt).then(print_stmt) //
+    .then(monitor_health_stmt).then(print_stmt) //
+    .then(delete_src_stmt).then(print_stmt) //
+    .then(add_aliases_to_dest_stmt).then(print_stmt) //
+
+  }
+
   return {
     reindex : reindex,
+    reindex_to_html : reindex_to_html,
     reset : reset
   }
 
