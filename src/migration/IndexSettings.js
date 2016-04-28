@@ -63,10 +63,10 @@ function IndexSettings(index) {
       function(v, k) {
         var base_k = strip_dot_num(k);
         if (replaced[base_k]) {
-          delete settings[s];
+          delete settings[k];
           return "`"
             + base_k
-            + "` has been superseded by `"
+            + "` has been replaced by `"
             + replaced[base_k]
             + "`"
         }
