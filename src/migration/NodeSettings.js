@@ -16,21 +16,33 @@ function NodeSettings() {
       'Node roles',
       node.attributes,
       function(v, k) {
-        if (_.has(roles, k)) {
-          delete node.attributes[k];
-          return roles[k]
-        }
+        return roles[k]
       },
       "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html#_node_types_settings");
   }
 
   function node_attrs(node) {
+    var known = {
+      "local" : true,
+      "mode" : true,
+      "client" : true,
+      "data" : true,
+      "master" : true,
+      "max_local_storage_nodes" : true,
+      "portsfile" : true,
+      "enable_lucene_segment_infos_trace" : true,
+      "name" : true,
+      "add_id_to_custom_path" : true
+    };
     return check_hash(
       'red',
       'Node attributes move to `attr` namespace',
       node.attributes,
       function(v, k) {
         var base_k = strip_dot_num(k);
+        if (known[base_k] || base_k.match(/^attr\./)) {
+          return;
+        }
         delete node.settings['node.' + k];
         return "`node."
           + base_k
