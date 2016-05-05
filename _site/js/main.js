@@ -391,11 +391,7 @@ ClusterSettings.renamed_settings = function(settings) {
     "shield.ssl" : "xpack.security.ssl.enabled",
     "shield.http.ssl" : "xpack.security.http.ssl.enabled",
     "shield.ssl.hostname_verification" : "xpack.security.ssl.hostname_verification.enabled",
-    "watcher.actions.pagerduty" : "xpack.notification.pagerduty",
-    "watcher.actions.slack" : "xpack.notification.slack",
-    "watcher.actions.hipchat" : "xpack.notification.hipchat",
-    "watcher.actions.email" : "xpack.notification.email",
-
+    "watcher.shield.encrypt_sensitive_data" : "xpack.watcher.encrypt_sensitive_data"
   };
 
   function re_replace(k, re, replace) {
@@ -416,7 +412,12 @@ ClusterSettings.renamed_settings = function(settings) {
       }
       var new_k = re_replace(base_k, /^shield\./, 'xpack.security.')
         || re_replace(base_k, /^marvel\./, 'xpack.monitoring.')
-        || re_replace(base_k, /^watcher\./, 'xpack.watcher.');
+        || re_replace(base_k, /^watcher\.http\./, 'xpack.http.')
+        || re_replace(base_k, /^watcher\./, 'xpack.watcher.')
+        || re_replace(
+          base_k,
+          /^watcher.actions.(pagerduty|slack|hipchat|email).service/,
+          "xpack.notification.$1");
       if (new_k) {
         delete settings[base_k];
         return "`" + base_k + "` has been renamed to `" + new_k + "`";
@@ -1541,21 +1542,33 @@ function NodeSettings() {
       'Node roles',
       node.attributes,
       function(v, k) {
-        if (_.has(roles, k)) {
-          delete node.attributes[k];
-          return roles[k]
-        }
+        return roles[k]
       },
       "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html#_node_types_settings");
   }
 
   function node_attrs(node) {
+    var known = {
+      "local" : true,
+      "mode" : true,
+      "client" : true,
+      "data" : true,
+      "master" : true,
+      "max_local_storage_nodes" : true,
+      "portsfile" : true,
+      "enable_lucene_segment_infos_trace" : true,
+      "name" : true,
+      "add_id_to_custom_path" : true
+    };
     return check_hash(
       'red',
       'Node attributes move to `attr` namespace',
       node.attributes,
       function(v, k) {
         var base_k = strip_dot_num(k);
+        if (known[base_k] || base_k.match(/^attr\./)) {
+          return;
+        }
         delete node.settings['node.' + k];
         return "`node."
           + base_k
@@ -1677,12 +1690,16 @@ function NodeSettings() {
       node.settings,
       function(v, k) {
         if (k.match(/^index.analysis.analyzer.default_index/)) {
-          var new_k = k.replace(/^(index.analysis.analyzer.default)_index/,"$1");
+          var new_k = k.replace(
+            /^(index.analysis.analyzer.default)_index/,
+            "$1");
           delete node.settings[k];
           return "`"
             + k
             + "` can no longer be set in the config file, "
-            + "and has been renamed to `"+new_k+"`"
+            + "and has been renamed to `"
+            + new_k
+            + "`"
         }
       },
       'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html#_index_level_settings');
