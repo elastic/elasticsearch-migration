@@ -90,11 +90,7 @@ ClusterSettings.renamed_settings = function(settings) {
     "shield.ssl" : "xpack.security.ssl.enabled",
     "shield.http.ssl" : "xpack.security.http.ssl.enabled",
     "shield.ssl.hostname_verification" : "xpack.security.ssl.hostname_verification.enabled",
-    "watcher.actions.pagerduty" : "xpack.notification.pagerduty",
-    "watcher.actions.slack" : "xpack.notification.slack",
-    "watcher.actions.hipchat" : "xpack.notification.hipchat",
-    "watcher.actions.email" : "xpack.notification.email",
-
+    "watcher.shield.encrypt_sensitive_data" : "xpack.watcher.encrypt_sensitive_data"
   };
 
   function re_replace(k, re, replace) {
@@ -115,7 +111,12 @@ ClusterSettings.renamed_settings = function(settings) {
       }
       var new_k = re_replace(base_k, /^shield\./, 'xpack.security.')
         || re_replace(base_k, /^marvel\./, 'xpack.monitoring.')
-        || re_replace(base_k, /^watcher\./, 'xpack.watcher.');
+        || re_replace(base_k, /^watcher\.http\./, 'xpack.http.')
+        || re_replace(base_k, /^watcher\./, 'xpack.watcher.')
+        || re_replace(
+          base_k,
+          /^watcher.actions.(pagerduty|slack|hipchat|email).service/,
+          "xpack.notification.$1");
       if (new_k) {
         delete settings[base_k];
         return "`" + base_k + "` has been renamed to `" + new_k + "`";
