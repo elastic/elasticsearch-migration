@@ -164,12 +164,16 @@ function NodeSettings() {
       node.settings,
       function(v, k) {
         if (k.match(/^index.analysis.analyzer.default_index/)) {
-          var new_k = k.replace(/^(index.analysis.analyzer.default)_index/,"$1");
+          var new_k = k.replace(
+            /^(index.analysis.analyzer.default)_index/,
+            "$1");
           delete node.settings[k];
           return "`"
             + k
             + "` can no longer be set in the config file, "
-            + "and has been renamed to `"+new_k+"`"
+            + "and has been renamed to `"
+            + new_k
+            + "`"
         }
       },
       'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html#_index_level_settings');
