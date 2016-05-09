@@ -108,7 +108,8 @@ function Index(name, info, state, on_change) {
 
           if (status === 'finished'
             || status === 'src_deleted'
-            || status === 'green') {
+            || status === 'green'
+            || status === 'aliases_added') {
             console.log("Too late to cancel");
             return;
           }

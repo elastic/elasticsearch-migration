@@ -2001,7 +2001,8 @@ function Index(name, info, state, on_change) {
 
           if (status === 'finished'
             || status === 'src_deleted'
-            || status === 'green') {
+            || status === 'green'
+            || status === 'aliases_added') {
             console.log("Too late to cancel");
             return;
           }
@@ -2445,6 +2446,9 @@ function Reindexer(index) {
   var dest = src + "-" + version;
 
   function run_stmt(r) {
+    if (!r) {
+      return;
+    }
     if (r.log) {
       console.log(r.log);
     }
@@ -2659,8 +2663,44 @@ function Reindexer(index) {
     });
   }
 
-  function delete_src() {
+  function move_extra_aliases_to_dest() {
     if (index.get_reindex_status() !== 'green') {
+      return Promise.resolve();
+    }
+
+    return move_extra_aliases_to_dest_stmt().then(run_stmt)
+
+    .then(function() {
+      return index.set_reindex_status('aliases_added');
+    });
+  }
+
+  function move_extra_aliases_to_dest_stmt() {
+    if (_.keys(index.state.aliases).length == 0) {
+      return Promise.resolve();
+    }
+
+    var actions = [];
+
+    _.forEach(index.state.aliases, function(v, k) {
+      v.index = dest;
+      v.alias = k;
+      actions.push({
+        add : v
+      });
+    });
+    return Promise.resolve({
+      log : 'Moving extra aliases to index `' + dest + '`',
+      method : 'post',
+      path : '/_aliases',
+      body : {
+        actions : actions
+      }
+    });
+  }
+
+  function delete_src() {
+    if (index.get_reindex_status() !== 'aliases_added') {
       return Promise.resolve();
     }
     return delete_src_stmt().then(run_stmt)
@@ -2678,19 +2718,19 @@ function Reindexer(index) {
     });
   }
 
-  function add_aliases_to_dest() {
+  function add_name_alias_to_dest() {
     if (index.get_reindex_status() !== 'src_deleted') {
       return Promise.resolve();
     }
 
-    return add_aliases_to_dest_stmt().then(run_stmt)
+    return add_name_alias_to_dest_stmt().then(run_stmt)
 
     .then(function() {
       return index.set_reindex_status('finished');
     });
   }
 
-  function add_aliases_to_dest_stmt() {
+  function add_name_alias_to_dest_stmt() {
     var actions = [
       {
         add : {
@@ -2700,15 +2740,8 @@ function Reindexer(index) {
       }
     ];
 
-    _.forEach(index.state.aliases, function(v, k) {
-      v.index = dest;
-      v.alias = k;
-      actions.push({
-        add : v
-      });
-    });
     return Promise.resolve({
-      log : 'Adding aliases to index `' + src + '`',
+      log : 'Adding `' + src + '` alias to index `' + dest + '`',
       method : 'post',
       path : '/_aliases',
       body : {
@@ -2796,8 +2829,9 @@ function Reindexer(index) {
     .then(monitor_reindex) //
     .then(check_success) //
     .then(finalise_dest) //
+    .then(move_extra_aliases_to_dest) //
     .then(delete_src) //
-    .then(add_aliases_to_dest) //
+    .then(add_name_alias_to_dest) //
     .then(function() {
       if (index.get_reindex_status() === 'cancelled') {
         console.log('Reindexing cancelled');
@@ -2811,6 +2845,9 @@ function Reindexer(index) {
   function reindex_to_html() {
     var out;
     function print_stmt(r) {
+      if (!r) {
+        return;
+      }
       var html = "";
       if (r.log) {
         html = '<pre>## ' + r.log + "</pre>\n";
@@ -2868,8 +2905,9 @@ function Reindexer(index) {
     .then(check_dest_count_stmt).then(print_stmt) //
     .then(finalise_dest_stmt).then(print_stmt) //
     .then(monitor_health_stmt).then(print_stmt) //
+    .then(move_extra_aliases_to_dest_stmt).then(print_stmt) //
     .then(delete_src_stmt).then(print_stmt) //
-    .then(add_aliases_to_dest_stmt).then(print_stmt) //
+    .then(add_name_alias_to_dest_stmt).then(print_stmt) //
 
   }
 
