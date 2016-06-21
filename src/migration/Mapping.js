@@ -84,6 +84,19 @@ function Mapping(index) {
       'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_percolator.html');
   }
 
+  function parent(fields) {
+    return check_hash(
+      'blue',
+      'Parent field no longer accessible in queries',
+      fields,
+      function(mapping, name) {
+        if (name.match(':_parent')) {
+          return name
+        }
+      },
+      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_mapping_changes.html#_literal__parent_literal_field_no_longer_indexed');
+  }
+
   function ip(fields) {
     return check_hash(
       'blue',
@@ -149,6 +162,7 @@ function Mapping(index) {
     color = worse(color, completion_fields(fields));
     color = worse(color, fielddata_regex(fields));
     color = worse(color, field_names_disabled(fields));
+    color = worse(color, parent(fields));
     color = worse(color, source_transform(fields));
     color = worse(color, classic_similarity(fields));
     color = worse(color, percolator(fields));
