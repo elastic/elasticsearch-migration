@@ -131,8 +131,8 @@ function NodeSettings() {
             msg.push('`' + k + '` has been renamed to `' + new_k + '`');
             k = new_k;
           }
-          if (!val.match(/true|false|sandbox/)) {
-            msg.push("`" + k + "` only accepts `true` | `false` | `sandbox`");
+          if (!val.match(/true|false/)) {
+            msg.push("`" + k + "` only accepts `true` | `false`");
           }
           return msg.join("\n");
         }
