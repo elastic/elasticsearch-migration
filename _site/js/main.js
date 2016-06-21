@@ -1033,6 +1033,14 @@ function Plugins() {
     }, 'https://www.elastic.co/guide/en/x-pack/current/index.html');
   }
 
+  function javascript(plugins) {
+    return check_array('blue', 'Javascript plugin', plugins, function(p) {
+      if (p.name === 'lang-javascript') {
+        return "Stored/inline scripts in Javascript should specify `lang:javascript` and file scripts should use `.js` file suffix"
+      }
+    }, 'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_scripting.html#_scripting_engines_now_register_only_a_single_language');
+  }
+
   function deprecated_plugins(plugins) {
     var names = {
       "mapper-attachments" : "The `mapper-attachments` plugin has been deprecated in favour of the `ingest-attachment` plugin",
@@ -1064,6 +1072,7 @@ function Plugins() {
     color = worse(color, renamed_plugins(plugins));
     color = worse(color, x_plugins(plugins));
     color = worse(color, deprecated_plugins(plugins));
+    color = worse(color, javascript(plugins));
 
     return color;
   })
