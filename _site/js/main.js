@@ -1167,6 +1167,19 @@ function Mapping(index) {
       'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_aggregations_changes.html#_literal_ip_range_literal_aggregations');
   }
 
+  function precision_step(fields) {
+    return check_hash(
+      'blue',
+      '`precision_step` no longer supported',
+      fields,
+      function(mapping, name) {
+        if (_.has(mapping,'precision_step')) {
+          return name
+        }
+      },
+      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_mapping_changes.html#_numeric_fields');
+  }
+
   function flatten_mappings(mappings) {
     var flat = {};
 
@@ -1210,6 +1223,7 @@ function Mapping(index) {
     color = worse(color, classic_similarity(fields));
     color = worse(color, percolator(fields));
     color = worse(color, ip(fields));
+    color = worse(color, precision_step(fields));
 
     return color;
   })
