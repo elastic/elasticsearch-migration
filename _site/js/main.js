@@ -1154,6 +1154,19 @@ function Mapping(index) {
       'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_percolator.html');
   }
 
+  function ip(fields) {
+    return check_hash(
+      'blue',
+      'IP field aggregations no longer return numeric `from`/`to` values',
+      fields,
+      function(mapping, name) {
+        if (mapping.type === 'ip') {
+          return name
+        }
+      },
+      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_aggregations_changes.html#_literal_ip_range_literal_aggregations');
+  }
+
   function flatten_mappings(mappings) {
     var flat = {};
 
@@ -1196,6 +1209,7 @@ function Mapping(index) {
     color = worse(color, source_transform(fields));
     color = worse(color, classic_similarity(fields));
     color = worse(color, percolator(fields));
+    color = worse(color, ip(fields));
 
     return color;
   })
@@ -2538,7 +2552,9 @@ function Reindexer(index) {
       },
       body : {
         source : {
-          index : src
+          index : src,
+          sort : "_doc",
+          size : 1000
         },
         dest : {
           index : dest,
