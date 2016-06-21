@@ -16,23 +16,28 @@ function Plugins() {
   }
 
   function removed_plugins(plugins) {
+    var names = {
+      "discovery-multicast" : "The `discovery-multicast` plugin has been removed",
+      "delete-by-query" : "The `delete-by-query` plugin functionality has been moved to core"
+    };
+
     return check_array(
       'yellow',
       'Removed plugins',
       plugins,
       function(p) {
-        if (p.name === 'discovery-multicast') {
-          return p.name
+        if (names[p.name]) {
+          return names[p.name]
         }
       },
-      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_plugins.html#_multicast_plugin_removed');
+      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_plugins.html');
   }
 
   function renamed_plugins(plugins) {
     var names = {
       "cloud-aws" : "The `cloud-aws` plugin has been split into the `discovery-ec2` and `repository-s3` plugins",
       "cloud-azure" : "The `cloud-azure` plugin has been split into the `discovery-azure` and `repository-azure` plugins",
-      "cloud-gce" : "The `cloud-gce` plugin has been renamed to `discovery-gce`",
+      "cloud-gce" : "The `cloud-gce` plugin has been renamed to `discovery-gce`"
     };
 
     return check_array(
