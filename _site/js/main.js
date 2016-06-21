@@ -1277,6 +1277,24 @@ function IndexSettings(index) {
 
   }
 
+  function index_store_type() {
+    var fail = [];
+    if (_.has(settings, [
+      'index.store.type'
+    ]) && settings['index.store.type'] === "default") {
+      fail = [
+        "The default `index.store.type` has changed"
+      ];
+    }
+    return log
+      .result(
+        'blue',
+        "Index store type",
+        fail,
+        "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_fs.html")
+
+  }
+
   function replaced_settings() {
     var replaced = {
       "index.shard.recovery.translog_size" : "indices.recovery.translog_size",
@@ -1352,6 +1370,7 @@ function IndexSettings(index) {
     settings = r[index].settings;
 
     color = worse(color, translog_sync());
+    color = worse(color, index_store_type());
     color = worse(color, removed_settings());
     color = worse(color, replaced_settings());
     color = worse(color, similarity_settings());
