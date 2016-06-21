@@ -95,7 +95,9 @@ function Reindexer(index) {
       },
       body : {
         source : {
-          index : src
+          index : src,
+          sort : "_doc",
+          size : 1000
         },
         dest : {
           index : dest,
