@@ -90,6 +90,8 @@ ClusterSettings.renamed_settings = function(settings) {
     "shield.ssl" : "xpack.security.ssl.enabled",
     "shield.http.ssl" : "xpack.security.http.ssl.enabled",
     "shield.ssl.hostname_verification" : "xpack.security.ssl.hostname_verification.enabled",
+    "watcher.http.default_connection_timeout" : "xpack.http.default_connection_timeout",
+    "watcher.http.default_read_timeout" : "xpack.http.default_read_timeout",
     "watcher.shield.encrypt_sensitive_data" : "xpack.watcher.encrypt_sensitive_data"
   };
 
@@ -589,6 +591,8 @@ ClusterSettings.known_settings = {
   "tribe.name" : true,
   "tribe.on_conflict" : true,
   "xpack.graph.enabled" : true,
+  "xpack.http.default_connection_timeout" : true,
+  "xpack.http.default_read_timeout" : true,
   "xpack.monitoring.agent.cluster.state.timeout" : true,
   "xpack.monitoring.agent.cluster.stats.timeout" : true,
   "xpack.monitoring.agent.index.recovery.active_only" : true,
@@ -632,20 +636,18 @@ ClusterSettings.known_settings = {
   "xpack.security.user" : true,
   "xpack.watcher.actions.index.default_timeout" : true,
   "xpack.watcher.enabled" : true,
+  "xpack.watcher.encrypt_sensitive_data" : true,
   "xpack.watcher.execution.default_throttle_period" : true,
   "xpack.watcher.execution.scroll.size" : true,
   "xpack.watcher.execution.scroll.timeout" : true,
-  "xpack.watcher.http.default_connection_timeout" : true,
-  "xpack.watcher.http.default_read_timeout" : true,
   "xpack.watcher.index.rest.direct_access" : true,
   "xpack.watcher.input.search.default_timeout" : true,
   "xpack.watcher.internal.ops.bulk.default_timeout" : true,
   "xpack.watcher.internal.ops.index.default_timeout" : true,
   "xpack.watcher.internal.ops.search.default_timeout" : true,
-  "xpack.watcher.shield.encrypt_sensitive_data" : true,
   "xpack.watcher.start_immediately" : true,
   "xpack.watcher.transform.search.default_timeout" : true,
   "xpack.watcher.trigger.schedule.engine" : true,
   "xpack.watcher.trigger.schedule.ticker.tick_interval" : true,
-  "xpack.watcher.watch.scroll.size" : "0"
+  "xpack.watcher.watch.scroll.size" : true
 };
