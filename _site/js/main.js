@@ -364,6 +364,7 @@ ClusterSettings.unknown_settings = function(settings) {
 ClusterSettings.renamed_settings = function(settings) {
 
   var renamed = {
+    "bootstrap.mlockall" : "bootstrap.memory_lock",
     "http.netty.http.blocking_server" : "http.tcp.blocking_server",
     "http.netty.tcp_no_delay" : "http.tcp.no_delay",
     "http.netty.tcp_keep_alive" : "http.tcp.keep_alive",
@@ -468,7 +469,7 @@ ClusterSettings.known_settings = {
   "action.search.shard_count.limit" : true,
   "base_path" : true,
   "bootstrap.ctrlhandler" : true,
-  "bootstrap.mlockall" : true,
+  "bootstrap.memory_lock" : true,
   "bootstrap.seccomp" : true,
   "bucket" : true,
   "buffer_size" : true,
