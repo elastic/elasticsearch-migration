@@ -126,9 +126,12 @@ function NodeSettings() {
         if (k.match(/^script\./)) {
           var val = node.settings[k];
           var msg = [];
-          if (k.match(/\.indexed/)) {
-            var new_k = k.replace(/\.indexed/, '.stored');
+          var new_k = k.replace(/\.indexed/, '.stored').replace(
+            '/\.py\b',
+            '.python').replace('\.js\b', '.javascript');
+          if (new_k !== k) {
             msg.push('`' + k + '` has been renamed to `' + new_k + '`');
+            delete node.settings[k];
             k = new_k;
           }
           if (!val.match(/true|false/)) {
