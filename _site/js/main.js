@@ -633,6 +633,7 @@ ClusterSettings.known_settings = {
   "indices.memory.shard_inactive_time" : true,
   "indices.queries.cache.count" : true,
   "indices.queries.cache.size" : true,
+  "indices.query.bool.max_clause_count" : true,
   "indices.query.query_string.allowLeadingWildcard" : true,
   "indices.query.query_string.analyze_wildcard" : true,
   "indices.recovery.internal_action_long_timeout" : true,
@@ -1339,6 +1340,7 @@ function IndexSettings(index) {
       "index.cache.query.enable" : "index.requests.cache.enable",
       "index.analysis.analyzer.default_index.type" : "index.analysis.analyzer.default.type",
       "index.analysis.analyzer.default_index.tokenizer" : "index.analysis.analyzer.default.tokenizer",
+      "index.query.bool.max_clause_count" : "indices.query.bool.max_clause_count"
     };
 
     return check_hash(

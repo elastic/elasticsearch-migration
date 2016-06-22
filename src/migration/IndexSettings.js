@@ -72,6 +72,7 @@ function IndexSettings(index) {
       "index.cache.query.enable" : "index.requests.cache.enable",
       "index.analysis.analyzer.default_index.type" : "index.analysis.analyzer.default.type",
       "index.analysis.analyzer.default_index.tokenizer" : "index.analysis.analyzer.default.tokenizer",
+      "index.query.bool.max_clause_count" : "indices.query.bool.max_clause_count"
     };
 
     return check_hash(
