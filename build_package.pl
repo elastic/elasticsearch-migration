@@ -9,7 +9,7 @@ use Digest::SHA1();
 
 my $version = shift(@ARGV) or die <<"USAGE";
 
-    USAGE: $0 \$Plugin_Version \$ES_Version_1 \$ES_Version_N
+    USAGE: $0 \$Plugin_Version
 
 USAGE
 
@@ -25,7 +25,7 @@ write_file( 'plugin-descriptor.properties', $descriptor );
 
 # Update version in index.html
 my $html = slurp('_site/index.html');
-$html =~ s{<h1>(.+) v[\d.]+</h1>}{<h1>$1 v$version</h1>};
+$html =~ s{<h1>(.+) v\d[-\w.]+</h1>}{<h1>$1 v$version</h1>};
 write_file( '_site/index.html', $html );
 
 # Update version in README.asciidoc
