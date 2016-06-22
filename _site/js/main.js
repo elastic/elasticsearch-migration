@@ -1106,7 +1106,7 @@ function Mapping(index) {
         if (_.has(mapping, [
           'fielddata', 'filter.regex'
         ])) {
-          return name
+          return "`" + name + "`"
         }
       },
       'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_mapping_changes.html#_literal_fielddata_filter_regex_literal');
@@ -1119,7 +1119,7 @@ function Mapping(index) {
       fields,
       function(mapping, name) {
         if (name.match(':_field_names') && _.has(mapping, 'enabled')) {
-          return name
+          return "`" + name + "`"
         }
       },
       'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_search_changes.html#_changes_to_queries');
@@ -1132,7 +1132,7 @@ function Mapping(index) {
       fields,
       function(mapping, name) {
         if (name.match(':transform')) {
-          return name
+          return "`" + name + "`"
         }
       },
       'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_mapping_changes.html#_source_transform_removed');
@@ -1158,7 +1158,7 @@ function Mapping(index) {
       fields,
       function(mapping, name) {
         if (mapping.similarity === 'default') {
-          return name
+          return "`" + name + "`"
         }
       },
       "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html#_similarity_settings");
@@ -1171,7 +1171,7 @@ function Mapping(index) {
       fields,
       function(mapping, name) {
         if (name === '.percolator:query') {
-          return '.percolator'
+          return '`.percolator`'
         }
       },
       'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_percolator.html');
@@ -1184,7 +1184,7 @@ function Mapping(index) {
       fields,
       function(mapping, name) {
         if (name.match(':_parent')) {
-          return name
+          return "`" + name + "`"
         }
       },
       'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_mapping_changes.html#_literal__parent_literal_field_no_longer_indexed');
@@ -1197,7 +1197,7 @@ function Mapping(index) {
       fields,
       function(mapping, name) {
         if (mapping.type === 'ip') {
-          return name
+          return "`" + name + "`"
         }
       },
       'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_aggregations_changes.html#_literal_ip_range_literal_aggregations');
@@ -1209,8 +1209,8 @@ function Mapping(index) {
       '`precision_step` no longer supported',
       fields,
       function(mapping, name) {
-        if (_.has(mapping,'precision_step')) {
-          return name
+        if (_.has(mapping, 'precision_step')) {
+          return "`" + name + "`"
         }
       },
       'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_mapping_changes.html#_numeric_fields');
