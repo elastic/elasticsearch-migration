@@ -58,6 +58,19 @@ function Mapping(index) {
       'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_mapping_changes.html#_source_transform_removed');
   }
 
+  function timestamp_ttl(fields) {
+    return check_hash(
+      'yellow',
+      '`_timestamp` and `_ttl` fields will not be supported on new indices',
+      fields,
+      function(mapping, name) {
+        if (name.match(/:(_timestamp|_ttl)/)) {
+          return "`" + name + "`"
+        }
+      },
+      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_mapping_changes.html#_literal__timestamp_literal_and_literal__ttl_literal');
+  }
+
   function classic_similarity(fields) {
     return check_hash(
       'yellow',
@@ -163,6 +176,7 @@ function Mapping(index) {
     color = worse(color, fielddata_regex(fields));
     color = worse(color, field_names_disabled(fields));
     color = worse(color, parent(fields));
+    color = worse(color, timestamp_ttl(fields));
     color = worse(color, source_transform(fields));
     color = worse(color, classic_similarity(fields));
     color = worse(color, percolator(fields));
