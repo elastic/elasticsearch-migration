@@ -33,7 +33,6 @@ ClusterSettings.unknown_settings = function(settings) {
     /^monitor\.jvm\.gc\.collector\./,
     /^node\.attr\./,
     /^request\.headers\./,
-    /^threadpool\./,
     /^transport\.profiles\./
   ];
   return check_hash(

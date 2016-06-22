@@ -334,7 +334,6 @@ ClusterSettings.unknown_settings = function(settings) {
     /^monitor\.jvm\.gc\.collector\./,
     /^node\.attr\./,
     /^request\.headers\./,
-    /^threadpool\./,
     /^transport\.profiles\./
   ];
   return check_hash(
@@ -1792,6 +1791,36 @@ function NodeSettings() {
       'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html#_index_level_settings');
   }
 
+  function thread_pool(node) {
+    return check_hash(
+      'red',
+      'Thread pool settings',
+      node.settings,
+      function(v, k) {
+        if (!k.match(/^threadpool/)) {
+          return;
+        }
+        if (k.match(/suggest/)) {
+          return "`" + k + "` has been removed"
+        }
+        var new_k = k
+          .replace(/threadpool.watcher/, 'xpack.watcher.thread_pool').replace(
+            /threadpool/,
+            'thread_pool');
+        // fixed
+        if (new_k.match(/\.(index|search|bulk|percolate|watcher)\./)) {
+          new_k = new_k.replace(/\.(capacity|queue)$/, '.queue_size');
+        } else
+        // scaling
+        if (new_k.match(/\.(snapshot|warmer|refresh|listener)\./)) {
+          new_k = new_k.replace(/\.min/, '.core').replace(/.size/, '.max')
+        }
+        delete node.settings[k];
+        return "`" + k + "` has been renamed to `" + new_k + "`"
+      },
+      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html#_threadpool_settings');
+  }
+
   function per_node_checks(node_name) {
 
     var node_color = 'green';
@@ -1815,6 +1844,7 @@ function NodeSettings() {
     node_color = worse(node_color, host_settings(node));
     node_color = worse(node_color, default_index_analyzer(node));
     node_color = worse(node_color, index_settings(node));
+    node_color = worse(node_color, thread_pool(node));
     node_color = worse(node_color, ClusterSettings
       .removed_settings(node.settings));
     node_color = worse(node_color, ClusterSettings
