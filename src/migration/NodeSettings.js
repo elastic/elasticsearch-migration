@@ -112,6 +112,7 @@ function NodeSettings() {
           var val = node.settings[k];
           var msg = [];
           if (k === 'script.default_lang') {
+            delete node.settings[k];
             return '`script.default_lang` has been renamed to `script.legacy.default_lang`.  The new default scripting language is `painless` and cannot be changed.';
           }
           var new_k = k.replace(/\.indexed/, '.stored').replace(
