@@ -36,7 +36,7 @@ function Plugins() {
   function renamed_plugins(plugins) {
     var names = {
       "cloud-aws" : "The `cloud-aws` plugin has been split into the `discovery-ec2` and `repository-s3` plugins",
-      "cloud-azure" : "The `cloud-azure` plugin has been split into the `discovery-azure` and `repository-azure` plugins",
+      "cloud-azure" : "The `cloud-azure` plugin has been split into the `discovery-azure-classic` and `repository-azure` plugins",
       "cloud-gce" : "The `cloud-gce` plugin has been renamed to `discovery-gce`"
     };
 
