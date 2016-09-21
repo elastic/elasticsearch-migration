@@ -261,7 +261,7 @@ ClusterSettings.known_settings = {
   "discovery.zen.minimum_master_nodes" : true,
   "discovery.zen.no_master_block" : true,
   "discovery.zen.ping.unicast.concurrent_connects" : true,
-  "discovery.zen.ping.unicast.hosts" : true,
+  "discovery.zen.ping.unicast.hosts" : true, // Internal setting
   "discovery.zen.ping_timeout" : true,
   "discovery.zen.publish_diff.enable" : true,
   "discovery.zen.publish_timeout" : true,
@@ -274,7 +274,7 @@ ClusterSettings.known_settings = {
   "gateway.recover_after_master_nodes" : true,
   "gateway.recover_after_nodes" : true,
   "gateway.recover_after_time" : true,
-  "http.bind_host" : true,
+  "http.bind_host" : true, // Internal setting
   "http.compression" : true,
   "http.compression_level" : true,
   "http.cors.allow-credentials" : true,
@@ -285,15 +285,15 @@ ClusterSettings.known_settings = {
   "http.cors.max-age" : true,
   "http.detailed_errors.enabled" : true,
   "http.enabled" : true,
-  "http.host" : true,
+  "http.host" : true, // Internal setting
   "http.max_chunk_size" : true,
   "http.max_content_length" : true,
   "http.max_header_size" : true,
   "http.max_initial_line_length" : true,
   "http.netty.max_composite_buffer_components" : true,
   "http.netty.max_cumulation_buffer_capacity" : true,
-  "http.netty.receive_predictor_max" : true,
-  "http.netty.receive_predictor_min" : true,
+  "http.netty.receive_predictor_max" : true, // Internal setting
+  "http.netty.receive_predictor_min" : true, // Internal setting
   "http.netty.worker_count" : true,
   "http.pipelining" : true,
   "http.pipelining.max_events" : true,
@@ -355,11 +355,11 @@ ClusterSettings.known_settings = {
   "monitor.jvm.refresh_interval" : true,
   "monitor.os.refresh_interval" : true,
   "monitor.process.refresh_interval" : true,
-  "network.bind_host" : true,
+  "network.bind_host" : true, // Internal setting
   "network.breaker.inflight_requests.limit" : true,
   "network.breaker.inflight_requests.overhead" : true,
-  "network.host" : true,
-  "network.publish_host" : true,
+  "network.host" : true, // Internal setting
+  "network.publish_host" : true, // Internal setting
   "network.server" : true,
   "network.tcp.blocking" : true,
   "network.tcp.blocking_client" : true,
@@ -382,14 +382,14 @@ ClusterSettings.known_settings = {
   "node.portsfile" : true,
   "node_id.seed" : true,
   "path.conf" : true,
-  "path.data" : true,
+  "path.data" : true, // Internal setting
   "path.home" : true,
   "path.logs" : true,
-  "path.repo" : true,
+  "path.repo" : true, // Internal setting
   "path.scripts" : true,
   "path.shared_data" : true,
   "pidfile" : true,
-  "plugin.mandatory" : true,
+  "plugin.mandatory" : true, // Internal setting
   "processors" : true,
   "repositories.azure.base_path" : true,
   "repositories.azure.chunk_size" : true,
@@ -412,8 +412,8 @@ ClusterSettings.known_settings = {
   "repositories.s3.server_side_encryption" : true,
   "repositories.s3.storage_class" : true,
   "repositories.uri.list_directories" : true,
-  "repositories.url.allowed_urls" : true,
-  "repositories.url.supported_protocols" : true,
+  "repositories.url.allowed_urls" : true, // Internal setting
+  "repositories.url.supported_protocols" : true, // Internal setting
   "repositories.url.url" : true,
   "resource.reload.enabled" : true,
   "resource.reload.interval.high" : true,
@@ -547,13 +547,13 @@ ClusterSettings.known_settings = {
   "security.dls_fls.enabled" : true,
   "security.enabled" : true,
   "security.manager.filter_bad_defaults" : true,
-  "transport.bind_host" : true,
+  "transport.bind_host" : true, // Internal setting
   "transport.connections_per_node.bulk" : true,
   "transport.connections_per_node.ping" : true,
   "transport.connections_per_node.recovery" : true,
   "transport.connections_per_node.reg" : true,
   "transport.connections_per_node.state" : true,
-  "transport.host" : true,
+  "transport.host" : true, // Internal setting
   "transport.netty.boss_count" : true,
   "transport.netty.max_composite_buffer_components" : true,
   "transport.netty.max_cumulation_buffer_capacity" : true,
@@ -562,7 +562,7 @@ ClusterSettings.known_settings = {
   "transport.netty.receive_predictor_size" : true,
   "transport.netty.worker_count" : true,
   "transport.ping_schedule" : true,
-  "transport.publish_host" : true,
+  "transport.publish_host" : true, // Internal setting
   "transport.publish_port" : true,
   "transport.service.type" : true,
   "transport.tcp.blocking_client" : true,
@@ -575,14 +575,14 @@ ClusterSettings.known_settings = {
   "transport.tcp.reuse_address" : true,
   "transport.tcp.send_buffer_size" : true,
   "transport.tcp_no_delay" : true,
-  "transport.tracer.exclude" : true,
-  "transport.tracer.include" : true,
+  "transport.tracer.exclude" : true, // Internal setting
+  "transport.tracer.include" : true, // Internal setting
   "transport.type" : true,
   "tribe.blocks.metadata" : true,
-  "tribe.blocks.metadata.indices" : true,
-  "tribe.blocks.read.indices" : true,
+  "tribe.blocks.metadata.indices" : true, // Internal setting
+  "tribe.blocks.read.indices" : true, // Internal setting
   "tribe.blocks.write" : true,
-  "tribe.blocks.write.indices" : true,
+  "tribe.blocks.write.indices" : true, // Internal setting
   "tribe.name" : true,
   "tribe.on_conflict" : true,
   "xpack.graph.enabled" : true,
