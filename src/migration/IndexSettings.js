@@ -20,7 +20,7 @@ function IndexSettings(index) {
           return "`" + base_k + "` is no longer supported"
         }
       },
-      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html#_translog_settings');
+      'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_settings_changes.html#_translog_settings');
   }
 
   function translog_sync() {
@@ -37,7 +37,7 @@ function IndexSettings(index) {
         'yellow',
         "Translog sync",
         fail,
-        "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html#_translog_settings")
+        "https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_settings_changes.html#_translog_settings")
 
   }
 
@@ -55,7 +55,7 @@ function IndexSettings(index) {
         'blue',
         "Index store type",
         fail,
-        "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_fs.html")
+        "https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_fs.html")
 
   }
 
@@ -90,7 +90,7 @@ function IndexSettings(index) {
             + "`"
         }
       },
-      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html');
+      'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_settings_changes.html');
   }
 
   function similarity_settings() {
@@ -105,7 +105,7 @@ function IndexSettings(index) {
           return "`" + k + "`"
         }
       },
-      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html#_similarity_settings');
+      'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_settings_changes.html#_similarity_settings');
   }
 
   function unknown_settings() {
@@ -124,7 +124,7 @@ function IndexSettings(index) {
             + "` will be moved to the `archived` namespace on upgrade"
         }
       },
-      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html');
+      'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_settings_changes.html');
   }
 
   return es.get('/' + index + '/_settings', {

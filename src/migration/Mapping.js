@@ -14,7 +14,7 @@ function Mapping(index) {
             + "` will not be compatible with new `completion` fields in 5.x"
         }
       },
-      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_suggester.html');
+      'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_suggester.html');
   }
 
   function fielddata_regex(fields) {
@@ -29,7 +29,7 @@ function Mapping(index) {
           return "`" + name + "`"
         }
       },
-      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_mapping_changes.html#_literal_fielddata_filter_regex_literal');
+      'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_mapping_changes.html#_literal_fielddata_filter_regex_literal');
   }
 
   function field_names_disabled(fields) {
@@ -42,7 +42,7 @@ function Mapping(index) {
           return "`" + name + "`"
         }
       },
-      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_search_changes.html#_changes_to_queries');
+      'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_search_changes.html#_changes_to_queries');
   }
 
   function source_transform(fields) {
@@ -55,7 +55,7 @@ function Mapping(index) {
           return "`" + name + "`"
         }
       },
-      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_mapping_changes.html#_source_transform_removed');
+      'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_mapping_changes.html#_source_transform_removed');
   }
 
   function timestamp_ttl(fields) {
@@ -68,7 +68,7 @@ function Mapping(index) {
           return "`" + name + "`"
         }
       },
-      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_mapping_changes.html#_literal__timestamp_literal_and_literal__ttl_literal');
+      'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_mapping_changes.html#_literal__timestamp_literal_and_literal__ttl_literal');
   }
 
   function classic_similarity(fields) {
@@ -81,7 +81,7 @@ function Mapping(index) {
           return "`" + name + "`"
         }
       },
-      "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html#_similarity_settings");
+      "https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_settings_changes.html#_similarity_settings");
   }
 
   function percolator(fields) {
@@ -94,7 +94,7 @@ function Mapping(index) {
           return '`.percolator`'
         }
       },
-      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_percolator.html');
+      'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_percolator.html');
   }
 
   function parent(fields) {
@@ -107,7 +107,7 @@ function Mapping(index) {
           return "`" + name + "`"
         }
       },
-      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_mapping_changes.html#_literal__parent_literal_field_no_longer_indexed');
+      'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_mapping_changes.html#_literal__parent_literal_field_no_longer_indexed');
   }
 
   function ip(fields) {
@@ -120,7 +120,7 @@ function Mapping(index) {
           return "`" + name + "`"
         }
       },
-      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_aggregations_changes.html#_literal_ip_range_literal_aggregations');
+      'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_aggregations_changes.html#_literal_ip_range_literal_aggregations');
   }
 
   function precision_step(fields) {
@@ -133,7 +133,7 @@ function Mapping(index) {
           return "`" + name + "`"
         }
       },
-      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_mapping_changes.html#_numeric_fields');
+      'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_mapping_changes.html#_numeric_fields');
   }
 
   function flatten_mappings(mappings) {

@@ -57,7 +57,7 @@ ClusterSettings.unknown_settings = function(settings) {
         + base_k
         + "` will be moved to the `archived` namespace on upgrade"
     },
-    'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html');
+    'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_settings_changes.html');
 };
 
 ClusterSettings.renamed_settings = function(settings) {
@@ -124,7 +124,7 @@ ClusterSettings.renamed_settings = function(settings) {
         return "`" + base_k + "` has been renamed to `" + new_k + "`";
       }
     },
-    "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html");
+    "https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_settings_changes.html");
 };
 
 ClusterSettings.removed_settings = function(settings) {
@@ -158,7 +158,7 @@ ClusterSettings.removed_settings = function(settings) {
         return "`" + base_k + "`"
       }
     },
-    "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html");
+    "https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_settings_changes.html");
 };
 
 ClusterSettings.known_settings = {

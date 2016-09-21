@@ -21,7 +21,7 @@ function Indices() {
           return '`' + k + '`';
         }
       },
-      "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-5.0.html#_indices_created_before_5_0");
+      "https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking-changes-5.0.html#_indices_created_before_5_0");
   }
 
   function indexed_scripts() {
@@ -35,7 +35,7 @@ function Indices() {
           return "Indexed scripts and templates in the `.scripts` index will need to be recreated as `stored` scripts/templates";
         }
       },
-      "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_scripting.html#_indexed_scripts_and_templates");
+      "https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_scripting.html#_indexed_scripts_and_templates");
   }
 
   function per_index_checks(index_names) {

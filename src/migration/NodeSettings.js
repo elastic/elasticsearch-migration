@@ -18,7 +18,7 @@ function NodeSettings() {
       function(v, k) {
         return roles[k]
       },
-      "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html#_node_types_settings");
+      "https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_settings_changes.html#_node_types_settings");
   }
 
   function node_attrs(node) {
@@ -50,7 +50,7 @@ function NodeSettings() {
           + base_k
           + "`"
       },
-      "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html#_node_attribute_settings");
+      "https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_settings_changes.html#_node_attribute_settings");
   }
 
   function heap_size(node) {
@@ -65,7 +65,7 @@ function NodeSettings() {
         'red',
         'Heap Size',
         fail,
-        'https://www.elastic.co/guide/en/elasticsearch/reference/master/heap-size.html');
+        'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/heap-size.html');
   }
 
   function file_descriptors(node) {
@@ -83,7 +83,7 @@ function NodeSettings() {
         'red',
         'File Descriptors',
         fail,
-        'https://www.elastic.co/guide/en/elasticsearch/reference/master/file-descriptors.html');
+        'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/file-descriptors.html');
   }
 
   function mlockall(node) {
@@ -99,7 +99,7 @@ function NodeSettings() {
         'red',
         'Mlockall',
         fail,
-        'https://www.elastic.co/guide/en/elasticsearch/reference/master/setup-configuration-memory.html');
+        'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/setup-configuration-memory.html');
   }
 
   function min_master_nodes(node) {
@@ -114,7 +114,7 @@ function NodeSettings() {
         'red',
         'Minimum Master Nodes',
         fail,
-        'https://www.elastic.co/guide/en/elasticsearch/reference/master/important-settings.html#minimum_master_nodes');
+        'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/important-settings.html#minimum_master_nodes');
   }
 
   function script_settings(node) {
@@ -140,7 +140,7 @@ function NodeSettings() {
           return msg.join("\n");
         }
       },
-      "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html#_script_mode_settings");
+      "https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_settings_changes.html#_script_mode_settings");
   }
 
   function host_settings(node) {
@@ -157,7 +157,7 @@ function NodeSettings() {
           }
         }
       },
-      "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html#_network_settings");
+      "https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_settings_changes.html#_network_settings");
   }
 
   function default_index_analyzer(node) {
@@ -179,7 +179,7 @@ function NodeSettings() {
             + "`"
         }
       },
-      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html#_index_level_settings');
+      'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_settings_changes.html#_index_level_settings');
   }
 
   function index_settings(node) {
@@ -197,7 +197,7 @@ function NodeSettings() {
           return "`" + base_k + "` can no longer be set in the config file"
         }
       },
-      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html#_index_level_settings');
+      'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_settings_changes.html#_index_level_settings');
   }
 
   function thread_pool(node) {
@@ -227,7 +227,7 @@ function NodeSettings() {
         delete node.settings[k];
         return "`" + k + "` has been renamed to `" + new_k + "`"
       },
-      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html#_threadpool_settings');
+      'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_settings_changes.html#_threadpool_settings');
   }
 
   function per_node_checks(node_name) {

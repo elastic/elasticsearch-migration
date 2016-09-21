@@ -12,7 +12,7 @@ function Plugins() {
           return p.name
         }
       },
-      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_plugins.html#_site_plugins_removed');
+      'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_plugins.html#_site_plugins_removed');
   }
 
   function removed_plugins(plugins) {
@@ -30,7 +30,7 @@ function Plugins() {
           return names[p.name]
         }
       },
-      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_plugins.html');
+      'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_plugins.html');
   }
 
   function renamed_plugins(plugins) {
@@ -49,7 +49,7 @@ function Plugins() {
           return names[p.name]
         }
       },
-      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_plugins.html#_cloud_aws_plugin_changes');
+      'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_plugins.html#_cloud_aws_plugin_changes');
   }
 
   function x_plugins(plugins) {
@@ -73,7 +73,7 @@ function Plugins() {
       if (p.name === 'lang-javascript') {
         return "Stored/inline scripts in Javascript should specify `lang:javascript` and file scripts should use `.js` file suffix"
       }
-    }, 'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_scripting.html#_scripting_engines_now_register_only_a_single_language');
+    }, 'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_scripting.html#_scripting_engines_now_register_only_a_single_language');
   }
 
   function deprecated_plugins(plugins) {
@@ -90,7 +90,7 @@ function Plugins() {
           return names[p.name]
         }
       },
-      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_plugins.html#_mapper_attachments_plugin_deprecated');
+      'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_plugins.html#_mapper_attachments_plugin_deprecated');
   }
 
   return es.get('/_cluster/stats', {
