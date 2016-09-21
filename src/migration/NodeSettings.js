@@ -102,21 +102,6 @@ function NodeSettings() {
         'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/setup-configuration-memory.html');
   }
 
-  function min_master_nodes(node) {
-    var fail = [];
-    if (!_.has(node.settings, "discovery.zen.minimum_master_nodes")) {
-      fail = [
-        '`discovery.zen.minimum_master_nodes` must be set before going into production'
-      ];
-    }
-    return log
-      .result(
-        'red',
-        'Minimum Master Nodes',
-        fail,
-        'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/important-settings.html#minimum_master_nodes');
-  }
-
   function script_settings(node) {
     return check_hash(
       'red',
@@ -248,7 +233,6 @@ function NodeSettings() {
     node_color = worse(node_color, heap_size(node));
     node_color = worse(node_color, file_descriptors(node));
     node_color = worse(node_color, mlockall(node));
-    node_color = worse(node_color, min_master_nodes(node));
     node_color = worse(node_color, script_settings(node));
     node_color = worse(node_color, host_settings(node));
     node_color = worse(node_color, default_index_analyzer(node));
