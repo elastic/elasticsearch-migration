@@ -78,6 +78,8 @@ ClusterSettings.renamed_settings = function(settings) {
     "indices.cache.query.size" : "indices.requests.cache.size",
     "indices.requests.cache.clean_interval" : "indices.cache.clean_interval",
     "indices.fielddata.cache.clean_interval" : "indices.cache.clean_interval",
+    "node.add_id_to_custom_path" : "node.add_lock_id_to_custom_path",
+    "node_id.seed" : "node.id.seed",
     "cluster.routing.allocation.concurrent_recoveries" : "cluster.routing.allocation.node_concurrent_recoveries",
     "cloud.aws.proxy_host" : "cloud.aws.proxy.host",
     "cloud.aws.ec2.proxy_host" : "cloud.aws.ec2.proxy.host",
@@ -90,6 +92,8 @@ ClusterSettings.renamed_settings = function(settings) {
     "shield.ssl" : "xpack.security.ssl.enabled",
     "shield.http.ssl" : "xpack.security.http.ssl.enabled",
     "shield.ssl.hostname_verification" : "xpack.security.ssl.hostname_verification.enabled",
+    "security.dls_fls.enabled" : "xpack.security.dls_fls.enabled",
+    "security.enabled" : "xpack.security.enabled",
     "watcher.http.default_connection_timeout" : "xpack.http.default_connection_timeout",
     "watcher.http.default_read_timeout" : "xpack.http.default_read_timeout",
     "watcher.shield.encrypt_sensitive_data" : "xpack.watcher.encrypt_sensitive_data"
@@ -112,6 +116,7 @@ ClusterSettings.renamed_settings = function(settings) {
         return "`" + base_k + "` has been renamed to `" + renamed[base_k] + "`"
       }
       var new_k = re_replace(base_k, /^shield\./, 'xpack.security.')
+        || re_replace(base_k, /^marvel.agent./, 'xpack.monitoring.collection.')
         || re_replace(base_k, /^marvel\./, 'xpack.monitoring.')
         || re_replace(base_k, /^watcher\.http\./, 'xpack.http.')
         || re_replace(base_k, /^watcher\./, 'xpack.watcher.')
@@ -380,15 +385,15 @@ ClusterSettings.known_settings = {
   "network.tcp.receive_buffer_size" : true,
   "network.tcp.reuse_address" : true,
   "network.tcp.send_buffer_size" : true,
-  "node.add_id_to_custom_path" : true,
+  "node.add_lock_id_to_custom_path" : true,
   "node.data" : true,
   "node.enable_lucene_segment_infos_trace" : true,
+  "node.id.seed" : true,
   "node.ingest" : true,
   "node.master" : true,
   "node.max_local_storage_nodes" : true,
   "node.name" : true,
   "node.portsfile" : true,
-  "node_id.seed" : true,
   "path.conf" : true,
   "path.data" : true, // Internal setting
   "path.home" : true,
@@ -551,8 +556,6 @@ ClusterSettings.known_settings = {
   "search.default_keep_alive" : true,
   "search.default_search_timeout" : true,
   "search.keep_alive_interval" : true,
-  "security.dls_fls.enabled" : true,
-  "security.enabled" : true,
   "security.manager.filter_bad_defaults" : true,
   "transport.bind_host" : true, // Internal setting
   "transport.connections_per_node.bulk" : true,
@@ -594,13 +597,13 @@ ClusterSettings.known_settings = {
   "xpack.graph.enabled" : true,
   "xpack.http.default_connection_timeout" : true,
   "xpack.http.default_read_timeout" : true,
-  "xpack.monitoring.agent.cluster.state.timeout" : true,
-  "xpack.monitoring.agent.cluster.stats.timeout" : true,
-  "xpack.monitoring.agent.index.recovery.active_only" : true,
-  "xpack.monitoring.agent.index.recovery.timeout" : true,
-  "xpack.monitoring.agent.index.stats.timeout" : true,
-  "xpack.monitoring.agent.indices.stats.timeout" : true,
-  "xpack.monitoring.agent.interval" : true,
+  "xpack.monitoring.collection.cluster.state.timeout" : true,
+  "xpack.monitoring.collection.cluster.stats.timeout" : true,
+  "xpack.monitoring.collection.index.recovery.active_only" : true,
+  "xpack.monitoring.collection.index.recovery.timeout" : true,
+  "xpack.monitoring.collection.index.stats.timeout" : true,
+  "xpack.monitoring.collection.indices.stats.timeout" : true,
+  "xpack.monitoring.collection.interval" : true,
   "xpack.monitoring.enabled" : true,
   "xpack.monitoring.history.duration" : true,
   "xpack.security.audit.enabled" : true,
