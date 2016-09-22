@@ -2,6 +2,10 @@
 
 function Mapping(index) {
 
+  function format_name(name) {
+    return name.replace(/^([^\0]+)\0/, "[$1]:");
+  }
+
   function completion_fields(fields) {
     return check_hash(
       'yellow',
@@ -10,7 +14,7 @@ function Mapping(index) {
       function(mapping, name) {
         if (mapping.type === 'completion') {
           return "Completion field `"
-            + name
+            + format_name(name)
             + "` will not be compatible with new `completion` fields in 5.x"
         }
       },
@@ -26,7 +30,7 @@ function Mapping(index) {
         if (_.has(mapping, [
           'fielddata', 'filter.regex'
         ])) {
-          return "`" + name + "`"
+          return "`" + format_name(name) + "`"
         }
       },
       'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_mapping_changes.html#_literal_fielddata_filter_regex_literal');
@@ -39,7 +43,7 @@ function Mapping(index) {
       fields,
       function(mapping, name) {
         if (name.match(':_field_names') && _.has(mapping, 'enabled')) {
-          return "`" + name + "`"
+          return "`" + format_name(name) + "`"
         }
       },
       'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_search_changes.html#_changes_to_queries');
@@ -52,7 +56,7 @@ function Mapping(index) {
       fields,
       function(mapping, name) {
         if (name.match(':transform')) {
-          return "`" + name + "`"
+          return "`" + format_name(name) + "`"
         }
       },
       'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_mapping_changes.html#_source_transform_removed');
@@ -64,8 +68,8 @@ function Mapping(index) {
       '`_timestamp` and `_ttl` fields will not be supported on new indices',
       fields,
       function(mapping, name) {
-        if (name.match(/:(_timestamp|_ttl)/)) {
-          return "`" + name + "`"
+        if (name.match(/\0(_timestamp|_ttl)/)) {
+          return "`" + format_name(name) + "`"
         }
       },
       'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_mapping_changes.html#_literal__timestamp_literal_and_literal__ttl_literal');
@@ -78,7 +82,7 @@ function Mapping(index) {
       fields,
       function(mapping, name) {
         if (mapping.similarity === 'default') {
-          return "`" + name + "`"
+          return "`" + format_name(name) + "`"
         }
       },
       "https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_settings_changes.html#_similarity_settings");
@@ -90,7 +94,7 @@ function Mapping(index) {
       'Percolator type replaced by percolator field',
       fields,
       function(mapping, name) {
-        if (name === '.percolator:query') {
+        if (name === ".percolator\0query") {
           return '`.percolator`'
         }
       },
@@ -103,8 +107,8 @@ function Mapping(index) {
       'Parent field no longer accessible in queries',
       fields,
       function(mapping, name) {
-        if (name.match(':_parent')) {
-          return "`" + name + "`"
+        if (name.match('\0_parent')) {
+          return "`" + format_name(name) + "`"
         }
       },
       'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_mapping_changes.html#_literal__parent_literal_field_no_longer_indexed');
@@ -117,7 +121,7 @@ function Mapping(index) {
       fields,
       function(mapping, name) {
         if (mapping.type === 'ip') {
-          return "`" + name + "`"
+          return "`" + format_name(name) + "`"
         }
       },
       'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_aggregations_changes.html#_literal_ip_range_literal_aggregations');
@@ -130,7 +134,7 @@ function Mapping(index) {
       fields,
       function(mapping, name) {
         if (_.has(mapping, 'precision_step')) {
-          return "`" + name + "`"
+          return "`" + format_name(name) + "`"
         }
       },
       'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_mapping_changes.html#_numeric_fields');
@@ -158,9 +162,9 @@ function Mapping(index) {
     }
 
     _.forEach(mappings, function(mapping, type_name) {
-      flatten_fields(mapping.properties, type_name + ':');
+      flatten_fields(mapping.properties, type_name + "\0");
       delete mapping.properties;
-      flatten_fields(mapping, type_name + ':')
+      flatten_fields(mapping, type_name + "\0")
     });
 
     return flat;
