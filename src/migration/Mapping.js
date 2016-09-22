@@ -6,6 +6,21 @@ function Mapping(index) {
     return name.replace(/^([^\0]+)\0/, "[$1]:");
   }
 
+  function blank_names(fields) {
+    return check_hash(
+      'yellow',
+      'Blank field names',
+      fields,
+      function(mapping, name) {
+        if (name.match(/\0$/) || name.match(/\0.*\.$/)) {
+          return "Blank field `"
+            + format_name(name + '&lt;blank&gt;')
+            + "` will not be accepted in new indices in 5.x"
+        }
+      },
+      'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_mapping_changes.html#_blank_field_names_is_not_supported');
+  }
+
   function completion_fields(fields) {
     return check_hash(
       'yellow',
@@ -176,6 +191,7 @@ function Mapping(index) {
 
   .then(function(r) {
     var fields = flatten_mappings(r[index].mappings);
+    color = worse(color, blank_names(fields));
     color = worse(color, completion_fields(fields));
     color = worse(color, fielddata_regex(fields));
     color = worse(color, field_names_disabled(fields));
