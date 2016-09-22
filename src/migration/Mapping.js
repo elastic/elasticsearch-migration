@@ -6,6 +6,34 @@ function Mapping(index) {
     return '`' + name.replace(/^([^\0]+)\0/, "[$1]:") + '`';
   }
 
+  function mapping_limits(field_stats) {
+    var fail = [];
+    if (field_stats.num_fields > 1000) {
+      fail
+        .push('New indices may not have more than 1000 fields. This index has `'
+          + field_stats.num_fields
+          + '`.');
+    }
+    if (field_stats.max_depth > 20) {
+      fail
+        .push('New indices may not have fields more than 20 levels deep. This index has a maximum depth of `'
+          + field_stats.max_depth
+          + '`.');
+    }
+    if (field_stats.num_nested > 50) {
+      fail
+        .push('New indices may not have more than 50 `nested` fields. This index has `'
+          + field_stats.num_nested
+          + '`.');
+    }
+    return log
+      .result(
+        'yellow',
+        "Field mapping limits in new 5.x indices",
+        fail,
+        'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_mapping_changes.html#_warmers#_field_mapping_limits');
+  }
+
   function blank_names(fields) {
     return check_hash(
       'yellow',
@@ -170,32 +198,50 @@ function Mapping(index) {
 
   function flatten_mappings(mappings) {
     var flat = {};
+    var num_nested = 0;
+    var depth = 0;
+    var max_depth = 0;
+    var num_fields = 0;
 
     function flatten_fields(mappings, prefix) {
+      if (max_depth < ++depth) {
+        max_depth = depth;
+      }
       _.forEach(mappings, function(mapping, name) {
         if (_.isObject(mapping)) {
+          num_fields++;
           var props = mapping.properties;
-          delete mapping.properties;
           var fields = mapping.fields;
-          delete mapping.fields;
           flat[prefix + name] = mapping;
           if (props) {
+            if (mapping.type && mapping.type === 'nested') {
+              num_nested++;
+            }
+            delete mapping.properties;
             flatten_fields(props, prefix + name + '.')
-          }
-          if (fields) {
-            flatten_fields(fields, prefix + name + '.')
+          } else {
+            if (fields) {
+              delete mapping.fields;
+              flatten_fields(fields, prefix + name + '.');
+            }
           }
         }
-      })
+      });
+      depth--;
     }
 
     _.forEach(mappings, function(mapping, type_name) {
-      flatten_fields(mapping.properties, type_name + "\0");
+      var props = mapping.properties;
       delete mapping.properties;
-      flatten_fields(mapping, type_name + "\0")
+      flatten_fields(mapping, type_name + "\0");
+      flatten_fields(props, type_name + "\0");
     });
-
-    return flat;
+    return {
+      fields : flat,
+      num_nested : num_nested,
+      num_fields : num_fields,
+      max_depth : max_depth
+    }
   }
 
   var color = 'green';
@@ -203,7 +249,12 @@ function Mapping(index) {
   return es.get('/' + encodeURIComponent(index) + '/_mapping')
 
   .then(function(r) {
-    var fields = flatten_mappings(r[index].mappings);
+    var field_stats = flatten_mappings(r[index].mappings);
+
+    color = worse(color, mapping_limits(field_stats));
+
+    var fields = field_stats.fields;
+
     color = worse(color, blank_names(fields));
     color = worse(color, completion_fields(fields));
     color = worse(color, fielddata_regex(fields));
