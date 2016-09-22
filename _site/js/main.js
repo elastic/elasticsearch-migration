@@ -358,7 +358,7 @@ ClusterSettings.unknown_settings = function(settings) {
         + base_k
         + "` will be moved to the `archived` namespace on upgrade"
     },
-    'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html');
+    'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_settings_changes.html');
 };
 
 ClusterSettings.renamed_settings = function(settings) {
@@ -379,6 +379,8 @@ ClusterSettings.renamed_settings = function(settings) {
     "indices.cache.query.size" : "indices.requests.cache.size",
     "indices.requests.cache.clean_interval" : "indices.cache.clean_interval",
     "indices.fielddata.cache.clean_interval" : "indices.cache.clean_interval",
+    "node.add_id_to_custom_path" : "node.add_lock_id_to_custom_path",
+    "node_id.seed" : "node.id.seed",
     "cluster.routing.allocation.concurrent_recoveries" : "cluster.routing.allocation.node_concurrent_recoveries",
     "cloud.aws.proxy_host" : "cloud.aws.proxy.host",
     "cloud.aws.ec2.proxy_host" : "cloud.aws.ec2.proxy.host",
@@ -391,6 +393,8 @@ ClusterSettings.renamed_settings = function(settings) {
     "shield.ssl" : "xpack.security.ssl.enabled",
     "shield.http.ssl" : "xpack.security.http.ssl.enabled",
     "shield.ssl.hostname_verification" : "xpack.security.ssl.hostname_verification.enabled",
+    "security.dls_fls.enabled" : "xpack.security.dls_fls.enabled",
+    "security.enabled" : "xpack.security.enabled",
     "watcher.http.default_connection_timeout" : "xpack.http.default_connection_timeout",
     "watcher.http.default_read_timeout" : "xpack.http.default_read_timeout",
     "watcher.shield.encrypt_sensitive_data" : "xpack.watcher.encrypt_sensitive_data"
@@ -413,6 +417,7 @@ ClusterSettings.renamed_settings = function(settings) {
         return "`" + base_k + "` has been renamed to `" + renamed[base_k] + "`"
       }
       var new_k = re_replace(base_k, /^shield\./, 'xpack.security.')
+        || re_replace(base_k, /^marvel.agent./, 'xpack.monitoring.collection.')
         || re_replace(base_k, /^marvel\./, 'xpack.monitoring.')
         || re_replace(base_k, /^watcher\.http\./, 'xpack.http.')
         || re_replace(base_k, /^watcher\./, 'xpack.watcher.')
@@ -425,7 +430,7 @@ ClusterSettings.renamed_settings = function(settings) {
         return "`" + base_k + "` has been renamed to `" + new_k + "`";
       }
     },
-    "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html");
+    "https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_settings_changes.html");
 };
 
 ClusterSettings.removed_settings = function(settings) {
@@ -435,6 +440,8 @@ ClusterSettings.removed_settings = function(settings) {
     "http.netty.host" : true,
     "http.netty.bind_host" : true,
     "http.netty.publish_host" : true,
+    "node.local" : true,
+    "node.mode" : true,
     "path.plugins" : true,
     "security.manager.enabled" : true,
     "indices.recovery.concurrent_small_file_streams" : true,
@@ -445,7 +452,15 @@ ClusterSettings.removed_settings = function(settings) {
     "indices.memory.max_shard_index_buffer_size" : true,
     "max-open-files" : true,
     "netty.gathering" : true,
+    "repositories.uri.list_directories" : true,
+    "transport.service.type" : true,
     "useLinkedTransferQueue" : true,
+    "xpack.security.authc.native.reload.interval" : true,
+    "xpack.security.authz.store.files.roles" : true,
+    "xpack.security.authz.store.roles.index.reload.interval" : true,
+    "xpack.security.http.ssl" : true,
+    "xpack.security.http.ssl.client.auth" : true,
+    "xpack.security.system_key.file" : true
   };
 
   return check_hash(
@@ -459,7 +474,7 @@ ClusterSettings.removed_settings = function(settings) {
         return "`" + base_k + "`"
       }
     },
-    "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html");
+    "https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_settings_changes.html");
 };
 
 ClusterSettings.known_settings = {
@@ -467,21 +482,16 @@ ClusterSettings.known_settings = {
   "action.destructive_requires_name" : true,
   "action.master.force_local" : true,
   "action.search.shard_count.limit" : true,
-  "base_path" : true,
   "bootstrap.ctrlhandler" : true,
   "bootstrap.ignore_system_bootstrap_checks" : true,
   "bootstrap.memory_lock" : true,
   "bootstrap.seccomp" : true,
-  "bucket" : true,
-  "buffer_size" : true,
   "cache.recycler.page.limit.heap" : true,
   "cache.recycler.page.type" : true,
   "cache.recycler.page.weight.bytes" : true,
   "cache.recycler.page.weight.ints" : true,
   "cache.recycler.page.weight.longs" : true,
   "cache.recycler.page.weight.objects" : true,
-  "canned_acl" : true,
-  "chunk_size" : true,
   "client.transport.ignore_cluster_name" : true,
   "client.transport.nodes_sampler_interval" : true,
   "client.transport.ping_timeout" : true,
@@ -535,13 +545,12 @@ ClusterSettings.known_settings = {
   "cluster.routing.allocation.node_concurrent_outgoing_recoveries" : true,
   "cluster.routing.allocation.node_concurrent_recoveries" : true,
   "cluster.routing.allocation.node_initial_primaries_recoveries" : true,
+  "cluster.routing.allocation.same_shard.host" : true,
   "cluster.routing.allocation.snapshot.relocation_enabled" : true,
   "cluster.routing.allocation.total_shards_per_node" : true,
   "cluster.routing.allocation.type" : true,
   "cluster.routing.rebalance.enable" : true,
   "cluster.service.slow_task_logging_threshold" : true,
-  "compress" : true,
-  "config.ignore_system_properties" : true,
   "discovery.azure.deployment.name" : true,
   "discovery.azure.deployment.slot" : true,
   "discovery.azure.endpoint.name" : true,
@@ -568,12 +577,11 @@ ClusterSettings.known_settings = {
   "discovery.zen.minimum_master_nodes" : true,
   "discovery.zen.no_master_block" : true,
   "discovery.zen.ping.unicast.concurrent_connects" : true,
-  "discovery.zen.ping.unicast.hosts" : true,
+  "discovery.zen.ping.unicast.hosts" : true, // Internal setting
   "discovery.zen.ping_timeout" : true,
   "discovery.zen.publish_diff.enable" : true,
   "discovery.zen.publish_timeout" : true,
   "discovery.zen.send_leave_request" : true,
-  "endpoint" : true,
   "gateway.expected_data_nodes" : true,
   "gateway.expected_master_nodes" : true,
   "gateway.expected_nodes" : true,
@@ -582,7 +590,7 @@ ClusterSettings.known_settings = {
   "gateway.recover_after_master_nodes" : true,
   "gateway.recover_after_nodes" : true,
   "gateway.recover_after_time" : true,
-  "http.bind_host" : true,
+  "http.bind_host" : true, // Internal setting
   "http.compression" : true,
   "http.compression_level" : true,
   "http.cors.allow-credentials" : true,
@@ -593,15 +601,15 @@ ClusterSettings.known_settings = {
   "http.cors.max-age" : true,
   "http.detailed_errors.enabled" : true,
   "http.enabled" : true,
-  "http.host" : true,
+  "http.host" : true, // Internal setting
   "http.max_chunk_size" : true,
   "http.max_content_length" : true,
   "http.max_header_size" : true,
   "http.max_initial_line_length" : true,
   "http.netty.max_composite_buffer_components" : true,
   "http.netty.max_cumulation_buffer_capacity" : true,
-  "http.netty.receive_predictor_max" : true,
-  "http.netty.receive_predictor_min" : true,
+  "http.netty.receive_predictor_max" : true, // Internal setting
+  "http.netty.receive_predictor_min" : true, // Internal setting
   "http.netty.worker_count" : true,
   "http.pipelining" : true,
   "http.pipelining.max_events" : true,
@@ -616,6 +624,7 @@ ClusterSettings.known_settings = {
   "http.tcp.send_buffer_size" : true,
   "http.tcp_no_delay" : true,
   "http.type" : true,
+  "http.type.default" : true,
   "index.codec" : true,
   "index.store.fs.fs_lock" : true,
   "index.store.type" : true,
@@ -628,6 +637,7 @@ ClusterSettings.known_settings = {
   "indices.breaker.request.overhead" : true,
   "indices.breaker.request.type" : true,
   "indices.breaker.total.limit" : true,
+  "indices.breaker.type" : true,
   "indices.cache.cleanup_interval" : true,
   "indices.fielddata.cache.size" : true,
   "indices.mapping.dynamic_timeout" : true,
@@ -636,6 +646,7 @@ ClusterSettings.known_settings = {
   "indices.memory.max_index_buffer_size" : true,
   "indices.memory.min_index_buffer_size" : true,
   "indices.memory.shard_inactive_time" : true,
+  "indices.queries.cache.all_segments" : true,
   "indices.queries.cache.count" : true,
   "indices.queries.cache.size" : true,
   "indices.query.bool.max_clause_count" : true,
@@ -654,7 +665,6 @@ ClusterSettings.known_settings = {
   "indices.store.throttle.type" : true,
   "indices.ttl.interval" : true,
   "logger.level" : true,
-  "max_retries" : true,
   "monitor.fs.refresh_interval" : true,
   "monitor.jvm.gc.enabled" : true,
   "monitor.jvm.gc.overhead.debug" : true,
@@ -664,11 +674,11 @@ ClusterSettings.known_settings = {
   "monitor.jvm.refresh_interval" : true,
   "monitor.os.refresh_interval" : true,
   "monitor.process.refresh_interval" : true,
-  "network.bind_host" : true,
+  "network.bind_host" : true, // Internal setting
   "network.breaker.inflight_requests.limit" : true,
   "network.breaker.inflight_requests.overhead" : true,
-  "network.host" : true,
-  "network.publish_host" : true,
+  "network.host" : true, // Internal setting
+  "network.publish_host" : true, // Internal setting
   "network.server" : true,
   "network.tcp.blocking" : true,
   "network.tcp.blocking_client" : true,
@@ -679,29 +689,26 @@ ClusterSettings.known_settings = {
   "network.tcp.receive_buffer_size" : true,
   "network.tcp.reuse_address" : true,
   "network.tcp.send_buffer_size" : true,
-  "node.add_id_to_custom_path" : true,
+  "node.add_lock_id_to_custom_path" : true,
   "node.data" : true,
   "node.enable_lucene_segment_infos_trace" : true,
+  "node.id.seed" : true,
   "node.ingest" : true,
-  "node.local" : true,
+  "node.local_storage" : true,
   "node.master" : true,
   "node.max_local_storage_nodes" : true,
-  "node.mode" : true,
   "node.name" : true,
   "node.portsfile" : true,
-  "node_id.seed" : true,
   "path.conf" : true,
-  "path.data" : true,
+  "path.data" : true, // Internal setting
   "path.home" : true,
   "path.logs" : true,
-  "path.repo" : true,
+  "path.repo" : true, // Internal setting
   "path.scripts" : true,
   "path.shared_data" : true,
   "pidfile" : true,
-  "plugin.mandatory" : true,
+  "plugin.mandatory" : true, // Internal setting
   "processors" : true,
-  "protocol" : true,
-  "region" : true,
   "repositories.azure.base_path" : true,
   "repositories.azure.chunk_size" : true,
   "repositories.azure.compress" : true,
@@ -718,13 +725,14 @@ ClusterSettings.known_settings = {
   "repositories.s3.compress" : true,
   "repositories.s3.endpoint" : true,
   "repositories.s3.max_retries" : true,
+  "repositories.s3.path_style_access" : true,
   "repositories.s3.protocol" : true,
   "repositories.s3.region" : true,
   "repositories.s3.server_side_encryption" : true,
   "repositories.s3.storage_class" : true,
-  "repositories.uri.list_directories" : true,
-  "repositories.url.allowed_urls" : true,
-  "repositories.url.supported_protocols" : true,
+  "repositories.s3.use_throttle_retries" : true,
+  "repositories.url.allowed_urls" : true, // Internal setting
+  "repositories.url.supported_protocols" : true, // Internal setting
   "repositories.url.url" : true,
   "resource.reload.enabled" : true,
   "resource.reload.interval.high" : true,
@@ -735,7 +743,6 @@ ClusterSettings.known_settings = {
   "script.auto_reload_enabled" : true,
   "script.cache.expire" : true,
   "script.cache.max_size" : true,
-  "script.default_lang" : true,
   "script.engine.expression.file" : true,
   "script.engine.expression.file.aggs" : true,
   "script.engine.expression.file.ingest" : true,
@@ -847,7 +854,10 @@ ClusterSettings.known_settings = {
   "script.file" : true,
   "script.ingest" : true,
   "script.inline" : true,
+  "script.legacy.default_lang" : true,
+  "script.max_compilations_per_minute" : true,
   "script.max_size_in_bytes" : true,
+  "script.painless.regex.enabled" : true,
   "script.search" : true,
   "script.stored" : true,
   "script.update" : true,
@@ -855,18 +865,51 @@ ClusterSettings.known_settings = {
   "search.default_keep_alive" : true,
   "search.default_search_timeout" : true,
   "search.keep_alive_interval" : true,
-  "security.dls_fls.enabled" : true,
-  "security.enabled" : true,
   "security.manager.filter_bad_defaults" : true,
-  "server_side_encryption" : true,
-  "storage_class" : true,
-  "transport.bind_host" : true,
+  "thread_pool.bulk.queue_size" : true,
+  "thread_pool.bulk.size" : true,
+  "thread_pool.estimated_time_interval" : true,
+  "thread_pool.fetch_shard_started.core" : true,
+  "thread_pool.fetch_shard_started.keep_alive" : true,
+  "thread_pool.fetch_shard_started.max" : true,
+  "thread_pool.fetch_shard_store.core" : true,
+  "thread_pool.fetch_shard_store.keep_alive" : true,
+  "thread_pool.fetch_shard_store.max" : true,
+  "thread_pool.flush.core" : true,
+  "thread_pool.flush.keep_alive" : true,
+  "thread_pool.flush.max" : true,
+  "thread_pool.force_merge.queue_size" : true,
+  "thread_pool.force_merge.size" : true,
+  "thread_pool.generic.core" : true,
+  "thread_pool.generic.keep_alive" : true,
+  "thread_pool.generic.max" : true,
+  "thread_pool.get.queue_size" : true,
+  "thread_pool.get.size" : true,
+  "thread_pool.index.queue_size" : true,
+  "thread_pool.index.size" : true,
+  "thread_pool.listener.queue_size" : true,
+  "thread_pool.listener.size" : true,
+  "thread_pool.management.core" : true,
+  "thread_pool.management.keep_alive" : true,
+  "thread_pool.management.max" : true,
+  "thread_pool.refresh.core" : true,
+  "thread_pool.refresh.keep_alive" : true,
+  "thread_pool.refresh.max" : true,
+  "thread_pool.search.queue_size" : true,
+  "thread_pool.search.size" : true,
+  "thread_pool.snapshot.core" : true,
+  "thread_pool.snapshot.keep_alive" : true,
+  "thread_pool.snapshot.max" : true,
+  "thread_pool.warmer.core" : true,
+  "thread_pool.warmer.keep_alive" : true,
+  "thread_pool.warmer.max" : true,
+  "transport.bind_host" : true, // Internal setting
   "transport.connections_per_node.bulk" : true,
   "transport.connections_per_node.ping" : true,
   "transport.connections_per_node.recovery" : true,
   "transport.connections_per_node.reg" : true,
   "transport.connections_per_node.state" : true,
-  "transport.host" : true,
+  "transport.host" : true, // Internal setting
   "transport.netty.boss_count" : true,
   "transport.netty.max_composite_buffer_components" : true,
   "transport.netty.max_cumulation_buffer_capacity" : true,
@@ -875,9 +918,8 @@ ClusterSettings.known_settings = {
   "transport.netty.receive_predictor_size" : true,
   "transport.netty.worker_count" : true,
   "transport.ping_schedule" : true,
-  "transport.publish_host" : true,
+  "transport.publish_host" : true, // Internal setting
   "transport.publish_port" : true,
-  "transport.service.type" : true,
   "transport.tcp.blocking_client" : true,
   "transport.tcp.blocking_server" : true,
   "transport.tcp.compress" : true,
@@ -888,45 +930,48 @@ ClusterSettings.known_settings = {
   "transport.tcp.reuse_address" : true,
   "transport.tcp.send_buffer_size" : true,
   "transport.tcp_no_delay" : true,
-  "transport.tracer.exclude" : true,
-  "transport.tracer.include" : true,
+  "transport.tracer.exclude" : true, // Internal setting
+  "transport.tracer.include" : true, // Internal setting
   "transport.type" : true,
+  "transport.type.default" : true,
   "tribe.blocks.metadata" : true,
-  "tribe.blocks.metadata.indices" : true,
-  "tribe.blocks.read.indices" : true,
+  "tribe.blocks.metadata.indices" : true, // Internal setting
+  "tribe.blocks.read.indices" : true, // Internal setting
   "tribe.blocks.write" : true,
-  "tribe.blocks.write.indices" : true,
+  "tribe.blocks.write.indices" : true, // Internal setting
   "tribe.name" : true,
   "tribe.on_conflict" : true,
   "xpack.graph.enabled" : true,
   "xpack.http.default_connection_timeout" : true,
   "xpack.http.default_read_timeout" : true,
-  "xpack.monitoring.agent.cluster.state.timeout" : true,
-  "xpack.monitoring.agent.cluster.stats.timeout" : true,
-  "xpack.monitoring.agent.index.recovery.active_only" : true,
-  "xpack.monitoring.agent.index.recovery.timeout" : true,
-  "xpack.monitoring.agent.index.stats.timeout" : true,
-  "xpack.monitoring.agent.indices.stats.timeout" : true,
-  "xpack.monitoring.agent.interval" : true,
+  "xpack.monitoring.collection.cluster.state.timeout" : true,
+  "xpack.monitoring.collection.cluster.stats.timeout" : true,
+  "xpack.monitoring.collection.index.recovery.active_only" : true,
+  "xpack.monitoring.collection.index.recovery.timeout" : true,
+  "xpack.monitoring.collection.index.stats.timeout" : true,
+  "xpack.monitoring.collection.indices.stats.timeout" : true,
+  "xpack.monitoring.collection.interval" : true,
   "xpack.monitoring.enabled" : true,
   "xpack.monitoring.history.duration" : true,
   "xpack.security.audit.enabled" : true,
   "xpack.security.audit.index.bulk_size" : true,
+  "xpack.security.audit.index.events.emit_request_body" : true,
   "xpack.security.audit.index.flush_interval" : true,
   "xpack.security.audit.index.queue_max_size" : true,
   "xpack.security.audit.index.rollover" : true,
+  "xpack.security.audit.logfile.events.emit_request_body" : true,
   "xpack.security.audit.logfile.prefix.emit_node_host_address" : true,
   "xpack.security.audit.logfile.prefix.emit_node_host_name" : true,
   "xpack.security.audit.logfile.prefix.emit_node_name" : true,
   "xpack.security.authc.anonymous.authz_exception" : true,
   "xpack.security.authc.anonymous.username" : true,
-  "xpack.security.authc.native.reload.interval" : true,
   "xpack.security.authc.native.scroll.keep_alive" : true,
   "xpack.security.authc.native.scroll.size" : true,
+  "xpack.security.authc.reserved_realm.enabled" : true,
   "xpack.security.authc.run_as.enabled" : true,
   "xpack.security.authc.sign_user_header" : true,
-  "xpack.security.authz.store.files.roles" : true,
-  "xpack.security.authz.store.roles.index.reload.interval" : true,
+  "xpack.security.authz.store.roles.index.cache.max_size" : true,
+  "xpack.security.authz.store.roles.index.cache.ttl" : true,
   "xpack.security.authz.store.roles.index.scroll.keep_alive" : true,
   "xpack.security.authz.store.roles.index.scroll.size" : true,
   "xpack.security.dls_fls.enabled" : true,
@@ -936,11 +981,9 @@ ClusterSettings.known_settings = {
   "xpack.security.encryption_key.length" : true,
   "xpack.security.filter.always_allow_bound_address" : true,
   "xpack.security.http.filter.enabled" : true,
-  "xpack.security.http.ssl" : true,
-  "xpack.security.http.ssl.client.auth" : true,
   "xpack.security.http.ssl.enabled" : true,
-  "xpack.security.system_key.file" : true,
   "xpack.security.transport.filter.enabled" : true,
+  "xpack.security.transport.ssl.enabled" : true,
   "xpack.security.user" : true,
   "xpack.watcher.actions.index.default_timeout" : true,
   "xpack.watcher.enabled" : true,
@@ -954,6 +997,9 @@ ClusterSettings.known_settings = {
   "xpack.watcher.internal.ops.index.default_timeout" : true,
   "xpack.watcher.internal.ops.search.default_timeout" : true,
   "xpack.watcher.start_immediately" : true,
+  "xpack.watcher.stop.timeout" : true,
+  "xpack.watcher.thread_pool.queue_size" : true,
+  "xpack.watcher.thread_pool.size" : true,
   "xpack.watcher.transform.search.default_timeout" : true,
   "xpack.watcher.trigger.schedule.engine" : true,
   "xpack.watcher.trigger.schedule.ticker.tick_interval" : true,
@@ -973,7 +1019,7 @@ function Plugins() {
           return p.name
         }
       },
-      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_plugins.html#_site_plugins_removed');
+      'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_plugins.html#_site_plugins_removed');
   }
 
   function removed_plugins(plugins) {
@@ -991,13 +1037,13 @@ function Plugins() {
           return names[p.name]
         }
       },
-      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_plugins.html');
+      'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_plugins.html');
   }
 
   function renamed_plugins(plugins) {
     var names = {
       "cloud-aws" : "The `cloud-aws` plugin has been split into the `discovery-ec2` and `repository-s3` plugins",
-      "cloud-azure" : "The `cloud-azure` plugin has been split into the `discovery-azure` and `repository-azure` plugins",
+      "cloud-azure" : "The `cloud-azure` plugin has been split into the `discovery-azure-classic` and `repository-azure` plugins",
       "cloud-gce" : "The `cloud-gce` plugin has been renamed to `discovery-gce`"
     };
 
@@ -1010,7 +1056,7 @@ function Plugins() {
           return names[p.name]
         }
       },
-      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_plugins.html#_cloud_aws_plugin_changes');
+      'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_plugins.html#_cloud_aws_plugin_changes');
   }
 
   function x_plugins(plugins) {
@@ -1030,11 +1076,16 @@ function Plugins() {
   }
 
   function javascript(plugins) {
-    return check_array('blue', 'Javascript plugin', plugins, function(p) {
-      if (p.name === 'lang-javascript') {
-        return "Stored/inline scripts in Javascript should specify `lang:javascript` and file scripts should use `.js` file suffix"
-      }
-    }, 'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_scripting.html#_scripting_engines_now_register_only_a_single_language');
+    return check_array(
+      'blue',
+      'Javascript plugin',
+      plugins,
+      function(p) {
+        if (p.name === 'lang-javascript') {
+          return "Stored/inline scripts in Javascript should specify `lang:javascript` and file scripts should use `.js` file suffix"
+        }
+      },
+      'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_scripting.html#_scripting_engines_now_register_only_a_single_language');
   }
 
   function deprecated_plugins(plugins) {
@@ -1051,7 +1102,7 @@ function Plugins() {
           return names[p.name]
         }
       },
-      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_plugins.html#_mapper_attachments_plugin_deprecated');
+      'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_plugins.html#_mapper_attachments_plugin_deprecated');
   }
 
   return es.get('/_cluster/stats', {
@@ -1064,9 +1115,11 @@ function Plugins() {
     delete plugins['elasticsearch-migration'];
 
     color = worse(color, site_plugins(plugins));
-    color = worse(color, removed_plugins(plugins));
-    color = worse(color, renamed_plugins(plugins));
-    color = worse(color, x_plugins(plugins));
+    if (!cloud) {
+      color = worse(color, removed_plugins(plugins));
+      color = worse(color, renamed_plugins(plugins));
+      color = worse(color, x_plugins(plugins));
+    }
     color = worse(color, deprecated_plugins(plugins));
     color = worse(color, javascript(plugins));
 
@@ -1082,6 +1135,53 @@ function Indices() {
 
 function Mapping(index) {
 
+  function format_name(name) {
+    return '`' + name.replace(/^([^\0]+)\0/, "[$1]:") + '`';
+  }
+
+  function mapping_limits(field_stats) {
+    var fail = [];
+    if (field_stats.num_fields > 1000) {
+      fail
+        .push('New indices may not have more than 1000 fields. This index has `'
+          + field_stats.num_fields
+          + '`.');
+    }
+    if (field_stats.max_depth > 20) {
+      fail
+        .push('New indices may not have fields more than 20 levels deep. This index has a maximum depth of `'
+          + field_stats.max_depth
+          + '`.');
+    }
+    if (field_stats.num_nested > 50) {
+      fail
+        .push('New indices may not have more than 50 `nested` fields. This index has `'
+          + field_stats.num_nested
+          + '`.');
+    }
+    return log
+      .result(
+        'yellow',
+        "Field mapping limits in new 5.x indices",
+        fail,
+        'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_mapping_changes.html#_warmers#_field_mapping_limits');
+  }
+
+  function blank_names(fields) {
+    return check_hash(
+      'yellow',
+      'Blank field names',
+      fields,
+      function(mapping, name) {
+        if (name.match(/\0$/) || name.match(/\0.*\.$/)) {
+          return "Blank field "
+            + format_name(name + '&lt;blank&gt;')
+            + " will not be accepted in new indices in 5.x"
+        }
+      },
+      'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_mapping_changes.html#_blank_field_names_is_not_supported');
+  }
+
   function completion_fields(fields) {
     return check_hash(
       'yellow',
@@ -1089,12 +1189,12 @@ function Mapping(index) {
       fields,
       function(mapping, name) {
         if (mapping.type === 'completion') {
-          return "Completion field `"
-            + name
-            + "` will not be compatible with new `completion` fields in 5.x"
+          return "Completion field "
+            + format_name(name)
+            + " will not be compatible with new `completion` fields in 5.x"
         }
       },
-      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_suggester.html');
+      'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_suggester.html');
   }
 
   function fielddata_regex(fields) {
@@ -1106,10 +1206,10 @@ function Mapping(index) {
         if (_.has(mapping, [
           'fielddata', 'filter.regex'
         ])) {
-          return "`" + name + "`"
+          return format_name(name)
         }
       },
-      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_mapping_changes.html#_literal_fielddata_filter_regex_literal');
+      'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_mapping_changes.html#_literal_fielddata_filter_regex_literal');
   }
 
   function field_names_disabled(fields) {
@@ -1119,10 +1219,10 @@ function Mapping(index) {
       fields,
       function(mapping, name) {
         if (name.match(':_field_names') && _.has(mapping, 'enabled')) {
-          return "`" + name + "`"
+          return format_name(name)
         }
       },
-      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_search_changes.html#_changes_to_queries');
+      'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_search_changes.html#_changes_to_queries');
   }
 
   function source_transform(fields) {
@@ -1131,11 +1231,11 @@ function Mapping(index) {
       'Source transform has been removed',
       fields,
       function(mapping, name) {
-        if (name.match(':transform')) {
-          return "`" + name + "`"
+        if (name.match('\0transform$')) {
+          return format_name(name)
         }
       },
-      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_mapping_changes.html#_source_transform_removed');
+      'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_mapping_changes.html#_source_transform_removed');
   }
 
   function timestamp_ttl(fields) {
@@ -1144,11 +1244,11 @@ function Mapping(index) {
       '`_timestamp` and `_ttl` fields will not be supported on new indices',
       fields,
       function(mapping, name) {
-        if (name.match(/:(_timestamp|_ttl)/)) {
-          return "`" + name + "`"
+        if (name.match(/\0(_timestamp|_ttl)/)) {
+          return format_name(name)
         }
       },
-      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_mapping_changes.html#_literal__timestamp_literal_and_literal__ttl_literal');
+      'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_mapping_changes.html#_literal__timestamp_literal_and_literal__ttl_literal');
   }
 
   function classic_similarity(fields) {
@@ -1158,10 +1258,23 @@ function Mapping(index) {
       fields,
       function(mapping, name) {
         if (mapping.similarity === 'default') {
-          return "`" + name + "`"
+          return format_name(name)
         }
       },
-      "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html#_similarity_settings");
+      "https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_settings_changes.html#_similarity_settings");
+  }
+
+  function size(fields) {
+    return check_hash(
+      'blue',
+      '`_size` field must be reindexed in 5.x to support aggregations, sorting, or scripting',
+      fields,
+      function(mapping, name) {
+        if (name.match(/\0_size$/)) {
+          return format_name(name)
+        }
+      },
+      'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_plugins.html#_mapper_size_plugin');
   }
 
   function percolator(fields) {
@@ -1170,11 +1283,11 @@ function Mapping(index) {
       'Percolator type replaced by percolator field',
       fields,
       function(mapping, name) {
-        if (name === '.percolator:query') {
+        if (name === ".percolator\0query") {
           return '`.percolator`'
         }
       },
-      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_percolator.html');
+      'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_percolator.html');
   }
 
   function parent(fields) {
@@ -1183,11 +1296,11 @@ function Mapping(index) {
       'Parent field no longer accessible in queries',
       fields,
       function(mapping, name) {
-        if (name.match(':_parent')) {
-          return "`" + name + "`"
+        if (name.match('\0_parent')) {
+          return format_name(name)
         }
       },
-      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_mapping_changes.html#_literal__parent_literal_field_no_longer_indexed');
+      'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_mapping_changes.html#_literal__parent_literal_field_no_longer_indexed');
   }
 
   function ip(fields) {
@@ -1197,10 +1310,10 @@ function Mapping(index) {
       fields,
       function(mapping, name) {
         if (mapping.type === 'ip') {
-          return "`" + name + "`"
+          return format_name(name)
         }
       },
-      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_aggregations_changes.html#_literal_ip_range_literal_aggregations');
+      'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_aggregations_changes.html#_literal_ip_range_literal_aggregations');
   }
 
   function precision_step(fields) {
@@ -1210,48 +1323,72 @@ function Mapping(index) {
       fields,
       function(mapping, name) {
         if (_.has(mapping, 'precision_step')) {
-          return "`" + name + "`"
+          return format_name(name)
         }
       },
-      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_mapping_changes.html#_numeric_fields');
+      'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_mapping_changes.html#_numeric_fields');
   }
 
   function flatten_mappings(mappings) {
     var flat = {};
+    var num_nested = 0;
+    var depth = 0;
+    var max_depth = 0;
+    var num_fields = 0;
 
     function flatten_fields(mappings, prefix) {
+      if (max_depth < ++depth) {
+        max_depth = depth;
+      }
       _.forEach(mappings, function(mapping, name) {
         if (_.isObject(mapping)) {
+          num_fields++;
           var props = mapping.properties;
-          delete mapping.properties;
           var fields = mapping.fields;
-          delete mapping.fields;
           flat[prefix + name] = mapping;
           if (props) {
+            if (mapping.type && mapping.type === 'nested') {
+              num_nested++;
+            }
+            delete mapping.properties;
             flatten_fields(props, prefix + name + '.')
-          }
-          if (fields) {
-            flatten_fields(fields, prefix + name + '.')
+          } else {
+            if (fields) {
+              delete mapping.fields;
+              flatten_fields(fields, prefix + name + '.');
+            }
           }
         }
-      })
+      });
+      depth--;
     }
 
     _.forEach(mappings, function(mapping, type_name) {
-      flatten_fields(mapping.properties, type_name + ':');
+      var props = mapping.properties;
       delete mapping.properties;
-      flatten_fields(mapping, type_name + ':')
+      flatten_fields(mapping, type_name + "\0");
+      flatten_fields(props, type_name + "\0");
     });
-
-    return flat;
+    return {
+      fields : flat,
+      num_nested : num_nested,
+      num_fields : num_fields,
+      max_depth : max_depth
+    }
   }
 
   var color = 'green';
 
-  return es.get('/' + index + '/_mapping')
+  return es.get('/' + encodeURIComponent(index) + '/_mapping')
 
   .then(function(r) {
-    var fields = flatten_mappings(r[index].mappings);
+    var field_stats = flatten_mappings(r[index].mappings);
+
+    color = worse(color, mapping_limits(field_stats));
+
+    var fields = field_stats.fields;
+
+    color = worse(color, blank_names(fields));
     color = worse(color, completion_fields(fields));
     color = worse(color, fielddata_regex(fields));
     color = worse(color, field_names_disabled(fields));
@@ -1260,6 +1397,7 @@ function Mapping(index) {
     color = worse(color, source_transform(fields));
     color = worse(color, classic_similarity(fields));
     color = worse(color, percolator(fields));
+    color = worse(color, size(fields));
     color = worse(color, ip(fields));
     color = worse(color, precision_step(fields));
 
@@ -1272,7 +1410,7 @@ function Mapping(index) {
 function Warmers(index) {
 
   return es
-    .get('/' + index + '/_warmers')
+    .get('/' + encodeURIComponent(index) + '/_warmers')
 
     .then(
       function(r) {
@@ -1282,7 +1420,7 @@ function Warmers(index) {
             'blue',
             'Warmers removed',
             warmers,
-            'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_index_apis.html#_warmers')
+            'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_index_apis.html#_warmers')
       });
 
 };
@@ -1308,7 +1446,7 @@ function IndexSettings(index) {
           return "`" + base_k + "` is no longer supported"
         }
       },
-      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html#_translog_settings');
+      'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_settings_changes.html#_translog_settings');
   }
 
   function translog_sync() {
@@ -1325,7 +1463,7 @@ function IndexSettings(index) {
         'yellow',
         "Translog sync",
         fail,
-        "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html#_translog_settings")
+        "https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_settings_changes.html#_translog_settings")
 
   }
 
@@ -1343,7 +1481,7 @@ function IndexSettings(index) {
         'blue',
         "Index store type",
         fail,
-        "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_fs.html")
+        "https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_fs.html")
 
   }
 
@@ -1378,7 +1516,7 @@ function IndexSettings(index) {
             + "`"
         }
       },
-      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html');
+      'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_settings_changes.html');
   }
 
   function similarity_settings() {
@@ -1393,7 +1531,7 @@ function IndexSettings(index) {
           return "`" + k + "`"
         }
       },
-      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html#_similarity_settings');
+      'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_settings_changes.html#_similarity_settings');
   }
 
   function unknown_settings() {
@@ -1412,10 +1550,10 @@ function IndexSettings(index) {
             + "` will be moved to the `archived` namespace on upgrade"
         }
       },
-      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html');
+      'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_settings_changes.html');
   }
 
-  return es.get('/' + index + '/_settings', {
+  return es.get('/' + encodeURIComponent(index) + '/_settings', {
     flat_settings : true
   })
 
@@ -1534,7 +1672,7 @@ IndexSettings.known_settings = {
           return '`' + k + '`';
         }
       },
-      "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-5.0.html#_indices_created_before_5_0");
+      "https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking-changes-5.0.html#_indices_created_before_5_0");
   }
 
   function indexed_scripts() {
@@ -1548,7 +1686,40 @@ IndexSettings.known_settings = {
           return "Indexed scripts and templates in the `.scripts` index will need to be recreated as `stored` scripts/templates";
         }
       },
-      "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_scripting.html#_indexed_scripts_and_templates");
+      "https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_scripting.html#_indexed_scripts_and_templates");
+  }
+
+  function total_shards() {
+    var total = 0;
+    _.forEach(indices, function(v, k) {
+      total += parseInt(v.settings.index.number_of_shards);
+    });
+    var fail = [];
+    if (total > 1000) {
+      fail
+        .push("In 5.x, a maximum of 1000 shards can be queried in a single request.  This cluster has `"
+          + total
+          + "` primary shards.");
+    }
+    return log
+      .result(
+        'blue',
+        "Total primary shards",
+        fail,
+        "https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_search_changes.html#_search_shard_limit")
+  }
+
+  function index_names() {
+    return check_hash(
+      'yellow',
+      'New indices in 5.x may not begin with `_`, `-`, or `+`',
+      indices,
+      function(v, k) {
+        if (k.match(/^[-_+]/)) {
+          return k
+        }
+      },
+      "https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_index_apis.html#_creating_indices_starting_with_emphasis_emphasis_or_emphasis_emphasis");
   }
 
   function per_index_checks(index_names) {
@@ -1591,7 +1762,8 @@ IndexSettings.known_settings = {
     '/_cluster/state/metadata',
     {
       filter_path : "metadata.indices.*.state,"
-        + "metadata.indices.*.settings.index.version.created"
+        + "metadata.indices.*.settings.index.version.created,"
+        + "metadata.indices.*.settings.index.number_of_shards"
     })
 
   .then(function(r) {
@@ -1601,7 +1773,9 @@ IndexSettings.known_settings = {
     }
     indices = r.metadata.indices;
     indices_color = worse(indices_color, remove_old_indices());
+    indices_color = worse(indices_color, total_shards());
     indices_color = worse(indices_color, indexed_scripts());
+    indices_color = worse(indices_color, index_names());
     return per_index_checks(_.keys(indices).sort());
   })
 
@@ -1630,7 +1804,7 @@ function NodeSettings() {
       function(v, k) {
         return roles[k]
       },
-      "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html#_node_types_settings");
+      "https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_settings_changes.html#_node_types_settings");
   }
 
   function node_attrs(node) {
@@ -1662,7 +1836,7 @@ function NodeSettings() {
           + base_k
           + "`"
       },
-      "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html#_node_attribute_settings");
+      "https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_settings_changes.html#_node_attribute_settings");
   }
 
   function heap_size(node) {
@@ -1677,7 +1851,7 @@ function NodeSettings() {
         'red',
         'Heap Size',
         fail,
-        'https://www.elastic.co/guide/en/elasticsearch/reference/master/heap-size.html');
+        'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/heap-size.html');
   }
 
   function file_descriptors(node) {
@@ -1695,7 +1869,7 @@ function NodeSettings() {
         'red',
         'File Descriptors',
         fail,
-        'https://www.elastic.co/guide/en/elasticsearch/reference/master/file-descriptors.html');
+        'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/file-descriptors.html');
   }
 
   function mlockall(node) {
@@ -1711,22 +1885,7 @@ function NodeSettings() {
         'red',
         'Mlockall',
         fail,
-        'https://www.elastic.co/guide/en/elasticsearch/reference/master/setup-configuration-memory.html');
-  }
-
-  function min_master_nodes(node) {
-    var fail = [];
-    if (!_.has(node.settings, "discovery.zen.minimum_master_nodes")) {
-      fail = [
-        '`discovery.zen.minimum_master_nodes` must be set before going into production'
-      ];
-    }
-    return log
-      .result(
-        'red',
-        'Minimum Master Nodes',
-        fail,
-        'https://www.elastic.co/guide/en/elasticsearch/reference/master/important-settings.html#minimum_master_nodes');
+        'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/setup-configuration-memory.html');
   }
 
   function script_settings(node) {
@@ -1738,6 +1897,10 @@ function NodeSettings() {
         if (k.match(/^script\./)) {
           var val = node.settings[k];
           var msg = [];
+          if (k === 'script.default_lang') {
+            delete node.settings[k];
+            return '`script.default_lang` has been renamed to `script.legacy.default_lang`.  The new default scripting language is `painless` and cannot be changed.';
+          }
           var new_k = k.replace(/\.indexed/, '.stored').replace(
             '/\.py\b',
             '.python').replace('\.js\b', '.javascript');
@@ -1752,7 +1915,7 @@ function NodeSettings() {
           return msg.join("\n");
         }
       },
-      "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html#_script_mode_settings");
+      "https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_settings_changes.html#_script_mode_settings");
   }
 
   function host_settings(node) {
@@ -1769,7 +1932,7 @@ function NodeSettings() {
           }
         }
       },
-      "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html#_network_settings");
+      "https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_settings_changes.html#_network_settings");
   }
 
   function default_index_analyzer(node) {
@@ -1791,7 +1954,7 @@ function NodeSettings() {
             + "`"
         }
       },
-      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html#_index_level_settings');
+      'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_settings_changes.html#_index_level_settings');
   }
 
   function index_settings(node) {
@@ -1809,7 +1972,7 @@ function NodeSettings() {
           return "`" + base_k + "` can no longer be set in the config file"
         }
       },
-      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html#_index_level_settings');
+      'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_settings_changes.html#_index_level_settings');
   }
 
   function thread_pool(node) {
@@ -1839,7 +2002,7 @@ function NodeSettings() {
         delete node.settings[k];
         return "`" + k + "` has been renamed to `" + new_k + "`"
       },
-      'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking_50_settings_changes.html#_threadpool_settings');
+      'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_settings_changes.html#_threadpool_settings');
   }
 
   function per_node_checks(node_name) {
@@ -1855,12 +2018,14 @@ function NodeSettings() {
       delete node.settings['index.queries.cache.type'];
     }
 
+    // Set by by default
+    delete node.settings['config.ignore_system_properties'];
+
     node_color = worse(node_color, node_roles(node));
     node_color = worse(node_color, node_attrs(node));
     node_color = worse(node_color, heap_size(node));
     node_color = worse(node_color, file_descriptors(node));
     node_color = worse(node_color, mlockall(node));
-    node_color = worse(node_color, min_master_nodes(node));
     node_color = worse(node_color, script_settings(node));
     node_color = worse(node_color, host_settings(node));
     node_color = worse(node_color, default_index_analyzer(node));
@@ -1907,6 +2072,7 @@ function NodeSettings() {
   var log = new Logger(log, error);
   var version;
   var global_color = 'green';
+  var cloud = window.location.search==='?cloud';
 
   function worse(old_color, new_color) {
     if (new_color === 'red' || old_color === 'red') {
@@ -1976,6 +2142,9 @@ function NodeSettings() {
   })
 
   .then(function(color) {
+    if (cloud) {
+      return color
+    }
     global_color = process_color(global_color, color);
     log.start_section('top', 'Node Settings');
     return new NodeSettings();
@@ -2060,9 +2229,12 @@ function Index(name, info, state, on_change) {
 
   this.save = function() {
     var name = this.name;
-    return es.put('/' + Index.reindex_index + '/index/' + name, {
-      refresh : true
-    }, this.state)
+    return es.put(
+      '/' + Index.reindex_index + '/index/' + encodeURIComponent(name),
+      {
+        refresh : true
+      },
+      this.state)
 
     .then(function() {
       return on_change(name)
@@ -2071,9 +2243,11 @@ function Index(name, info, state, on_change) {
 
   this.del = function() {
     var name = this.name;
-    return es.del('/' + Index.reindex_index + '/index/' + name, {
-      refresh : true
-    })
+    return es.del(
+      '/' + Index.reindex_index + '/index/' + encodeURIComponent(name),
+      {
+        refresh : true
+      })
 
     .then(function() {
       return on_change(name)
@@ -2588,7 +2762,7 @@ function Reindexer(index) {
   }
 
   function create_dest_index_stmt() {
-    return es.get('/' + src) //
+    return es.get('/' + encodeURIComponent(src)) //
     .then(function(d) {
       d = d[src];
 
@@ -2611,7 +2785,7 @@ function Reindexer(index) {
       return {
         log : 'Creating index `' + dest + '`',
         method : "put",
-        path : '/' + dest,
+        path : '/' + encodeURIComponent(dest),
         body : d
       };
     });
@@ -2629,7 +2803,7 @@ function Reindexer(index) {
     return Promise.resolve({
       log : 'Setting index `' + src + '` to read-only',
       method : 'put',
-      path : '/' + src + '/_settings',
+      path : '/' + encodeURIComponent(src) + '/_settings',
       body : {
         "index.blocks.write" : true
       }
@@ -2680,7 +2854,7 @@ function Reindexer(index) {
 
     return new MonitorTask(index, index.state.task_id).then(function() {
       index.set_reindex_status('reindexed');
-      return es.post('/' + dest + '/_refresh');
+      return es.post('/' + encodeURIComponent(dest) + '/_refresh');
     });
   }
 
@@ -2736,7 +2910,7 @@ function Reindexer(index) {
         + dest
         + "` have the same number of documents",
       method : "get",
-      path : '/' + src + '/_count'
+      path : '/' + encodeURIComponent(src) + '/_count'
     });
 
   }
@@ -2744,7 +2918,7 @@ function Reindexer(index) {
   function check_dest_count_stmt() {
     return Promise.resolve({
       method : "get",
-      path : '/' + dest + '/_count'
+      path : '/' + encodeURIComponent(dest) + '/_count'
     });
 
   }
@@ -2766,7 +2940,7 @@ function Reindexer(index) {
     return Promise.resolve({
       log : 'Adding replicas to index `' + dest + '`',
       method : 'put',
-      path : '/' + dest + '/_settings',
+      path : '/' + encodeURIComponent(dest) + '/_settings',
       body : {
         "index.number_of_replicas" : index.state.replicas,
         "index.refresh_interval" : index.state.refresh
@@ -2778,7 +2952,7 @@ function Reindexer(index) {
     return Promise.resolve({
       log : "Wait for index `" + dest + "` to turn green",
       method : "get",
-      path : "/_cluster/health/" + dest,
+      path : "/_cluster/health/" + encodeURIComponent(dest),
       qs : {
         wait_for_status : 'green'
       }
@@ -2836,7 +3010,7 @@ function Reindexer(index) {
     return Promise.resolve({
       log : 'Deleting index `' + src + '`',
       method : 'del',
-      path : '/' + src
+      path : '/' + encodeURIComponent(src)
     });
   }
 
@@ -2877,8 +3051,8 @@ function Reindexer(index) {
     index.set_extra('');
     return Promise
       .all([ //
-        es.get('/' + src + '/_count'), //
-        es.get('/_cluster/health/' + src, {
+        es.get('/' + encodeURIComponent(src) + '/_count'), //
+        es.get('/_cluster/health/' + encodeURIComponent(src), {
           level : "indices"
         })
       //
@@ -2903,19 +3077,22 @@ function Reindexer(index) {
         })
 
       .then(function() {
-        return es.put('/' + src + '/_settings', {}, {
+        return es.put('/' + encodeURIComponent(src) + '/_settings', {}, {
           "index.blocks.write" : false
         });
       })
 
-      .then(function() {
-        console.log('Deleting index `' + dest + '`');
-        return es.del('/' + dest).caught(ES_Error, function(e) {
-          if (e.status !== 404) {
-            throw (e);
-          }
+      .then(
+        function() {
+          console.log('Deleting index `' + dest + '`');
+          return es.del('/' + encodeURIComponent(dest)).caught(
+            ES_Error,
+            function(e) {
+              if (e.status !== 404) {
+                throw (e);
+              }
+            })
         })
-      })
 
       .lastly(function() {
         index.set_extra('');
@@ -3083,7 +3260,7 @@ function MonitorHealth(index, dest) {
   function wait_for_green(resolve, reject) {
 
     function _wait_for_green() {
-      es.get('/_cluster/health/' + dest, {
+      es.get('/_cluster/health/' + encodeURIComponent(dest), {
         level : 'indices'
       }) //
       .then(
