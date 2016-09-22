@@ -232,6 +232,9 @@ function NodeSettings() {
       delete node.settings['index.queries.cache.type'];
     }
 
+    // Set by by default
+    delete node.settings['config.ignore_system_properties'];
+
     node_color = worse(node_color, node_roles(node));
     node_color = worse(node_color, node_attrs(node));
     node_color = worse(node_color, heap_size(node));

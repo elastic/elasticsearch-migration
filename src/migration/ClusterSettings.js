@@ -135,7 +135,6 @@ ClusterSettings.renamed_settings = function(settings) {
 ClusterSettings.removed_settings = function(settings) {
   var removed = {
     "action.get.realtime" : true,
-    "config.ignore_system_properties" : true,
     "gateway.format" : true,
     "http.netty.host" : true,
     "http.netty.bind_host" : true,
