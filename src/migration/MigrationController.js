@@ -11,6 +11,7 @@ function MigrationController(es, log, error) {
   var log = new Logger(log, error);
   var version;
   var global_color = 'green';
+  var cloud = window.location.search==='?cloud';
 
   function worse(old_color, new_color) {
     if (new_color === 'red' || old_color === 'red') {
@@ -80,6 +81,9 @@ function MigrationController(es, log, error) {
   })
 
   .then(function(color) {
+    if (cloud) {
+      return color
+    }
     global_color = process_color(global_color, color);
     log.start_section('top', 'Node Settings');
     return new NodeSettings();
