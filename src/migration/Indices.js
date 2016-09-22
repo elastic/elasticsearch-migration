@@ -38,6 +38,19 @@ function Indices() {
       "https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_scripting.html#_indexed_scripts_and_templates");
   }
 
+  function index_names() {
+    return check_hash(
+      'yellow',
+      'New indices in 5.x may not begin with `_`, `-`, or `+`',
+      indices,
+      function(v, k) {
+        if (k.match(/^[-_+]/)) {
+          return k
+        }
+      },
+      "https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_index_apis.html#_creating_indices_starting_with_emphasis_emphasis_or_emphasis_emphasis");
+  }
+
   function per_index_checks(index_names) {
 
     function _check() {
@@ -89,6 +102,7 @@ function Indices() {
     indices = r.metadata.indices;
     indices_color = worse(indices_color, remove_old_indices());
     indices_color = worse(indices_color, indexed_scripts());
+    indices_color = worse(indices_color, index_names());
     return per_index_checks(_.keys(indices).sort());
   })
 
