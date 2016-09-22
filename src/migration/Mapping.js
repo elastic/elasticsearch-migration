@@ -103,6 +103,19 @@ function Mapping(index) {
       "https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_settings_changes.html#_similarity_settings");
   }
 
+  function size(fields) {
+    return check_hash(
+      'blue',
+      '`_size` field must be reindexed in 5.x to support aggregations, sorting, or scripting',
+      fields,
+      function(mapping, name) {
+        if (name.match(/\0_size$/)) {
+          return "`" + format_name(name) + "`"
+        }
+      },
+      'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_plugins.html#_mapper_size_plugin');
+  }
+
   function percolator(fields) {
     return check_hash(
       'blue',
@@ -200,6 +213,7 @@ function Mapping(index) {
     color = worse(color, source_transform(fields));
     color = worse(color, classic_similarity(fields));
     color = worse(color, percolator(fields));
+    color = worse(color, size(fields));
     color = worse(color, ip(fields));
     color = worse(color, precision_step(fields));
 
