@@ -3,7 +3,7 @@
 function Warmers(index) {
 
   return es
-    .get('/' + index + '/_warmers')
+    .get('/' + encodeURIComponent(index) + '/_warmers')
 
     .then(
       function(r) {

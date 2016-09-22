@@ -5,7 +5,7 @@ function MonitorHealth(index, dest) {
   function wait_for_green(resolve, reject) {
 
     function _wait_for_green() {
-      es.get('/_cluster/health/' + dest, {
+      es.get('/_cluster/health/' + encodeURIComponent(dest), {
         level : 'indices'
       }) //
       .then(

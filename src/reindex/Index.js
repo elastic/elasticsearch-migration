@@ -47,9 +47,12 @@ function Index(name, info, state, on_change) {
 
   this.save = function() {
     var name = this.name;
-    return es.put('/' + Index.reindex_index + '/index/' + name, {
-      refresh : true
-    }, this.state)
+    return es.put(
+      '/' + Index.reindex_index + '/index/' + encodeURIComponent(name),
+      {
+        refresh : true
+      },
+      this.state)
 
     .then(function() {
       return on_change(name)
@@ -58,9 +61,11 @@ function Index(name, info, state, on_change) {
 
   this.del = function() {
     var name = this.name;
-    return es.del('/' + Index.reindex_index + '/index/' + name, {
-      refresh : true
-    })
+    return es.del(
+      '/' + Index.reindex_index + '/index/' + encodeURIComponent(name),
+      {
+        refresh : true
+      })
 
     .then(function() {
       return on_change(name)

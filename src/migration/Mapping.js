@@ -168,7 +168,7 @@ function Mapping(index) {
 
   var color = 'green';
 
-  return es.get('/' + index + '/_mapping')
+  return es.get('/' + encodeURIComponent(index) + '/_mapping')
 
   .then(function(r) {
     var fields = flatten_mappings(r[index].mappings);

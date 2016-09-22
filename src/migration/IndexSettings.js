@@ -127,7 +127,7 @@ function IndexSettings(index) {
       'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_settings_changes.html');
   }
 
-  return es.get('/' + index + '/_settings', {
+  return es.get('/' + encodeURIComponent(index) + '/_settings', {
     flat_settings : true
   })
 

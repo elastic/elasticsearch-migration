@@ -25,7 +25,7 @@ function Reindexer(index) {
   }
 
   function create_dest_index_stmt() {
-    return es.get('/' + src) //
+    return es.get('/' + encodeURIComponent(src)) //
     .then(function(d) {
       d = d[src];
 
@@ -48,7 +48,7 @@ function Reindexer(index) {
       return {
         log : 'Creating index `' + dest + '`',
         method : "put",
-        path : '/' + dest,
+        path : '/' + encodeURIComponent(dest),
         body : d
       };
     });
@@ -66,7 +66,7 @@ function Reindexer(index) {
     return Promise.resolve({
       log : 'Setting index `' + src + '` to read-only',
       method : 'put',
-      path : '/' + src + '/_settings',
+      path : '/' + encodeURIComponent(src) + '/_settings',
       body : {
         "index.blocks.write" : true
       }
@@ -117,7 +117,7 @@ function Reindexer(index) {
 
     return new MonitorTask(index, index.state.task_id).then(function() {
       index.set_reindex_status('reindexed');
-      return es.post('/' + dest + '/_refresh');
+      return es.post('/' + encodeURIComponent(dest) + '/_refresh');
     });
   }
 
@@ -173,7 +173,7 @@ function Reindexer(index) {
         + dest
         + "` have the same number of documents",
       method : "get",
-      path : '/' + src + '/_count'
+      path : '/' + encodeURIComponent(src) + '/_count'
     });
 
   }
@@ -181,7 +181,7 @@ function Reindexer(index) {
   function check_dest_count_stmt() {
     return Promise.resolve({
       method : "get",
-      path : '/' + dest + '/_count'
+      path : '/' + encodeURIComponent(dest) + '/_count'
     });
 
   }
@@ -203,7 +203,7 @@ function Reindexer(index) {
     return Promise.resolve({
       log : 'Adding replicas to index `' + dest + '`',
       method : 'put',
-      path : '/' + dest + '/_settings',
+      path : '/' + encodeURIComponent(dest) + '/_settings',
       body : {
         "index.number_of_replicas" : index.state.replicas,
         "index.refresh_interval" : index.state.refresh
@@ -215,7 +215,7 @@ function Reindexer(index) {
     return Promise.resolve({
       log : "Wait for index `" + dest + "` to turn green",
       method : "get",
-      path : "/_cluster/health/" + dest,
+      path : "/_cluster/health/" + encodeURIComponent(dest),
       qs : {
         wait_for_status : 'green'
       }
@@ -273,7 +273,7 @@ function Reindexer(index) {
     return Promise.resolve({
       log : 'Deleting index `' + src + '`',
       method : 'del',
-      path : '/' + src
+      path : '/' + encodeURIComponent(src)
     });
   }
 
@@ -314,8 +314,8 @@ function Reindexer(index) {
     index.set_extra('');
     return Promise
       .all([ //
-        es.get('/' + src + '/_count'), //
-        es.get('/_cluster/health/' + src, {
+        es.get('/' + encodeURIComponent(src) + '/_count'), //
+        es.get('/_cluster/health/' + encodeURIComponent(src), {
           level : "indices"
         })
       //
@@ -340,19 +340,22 @@ function Reindexer(index) {
         })
 
       .then(function() {
-        return es.put('/' + src + '/_settings', {}, {
+        return es.put('/' + encodeURIComponent(src) + '/_settings', {}, {
           "index.blocks.write" : false
         });
       })
 
-      .then(function() {
-        console.log('Deleting index `' + dest + '`');
-        return es.del('/' + dest).caught(ES_Error, function(e) {
-          if (e.status !== 404) {
-            throw (e);
-          }
+      .then(
+        function() {
+          console.log('Deleting index `' + dest + '`');
+          return es.del('/' + encodeURIComponent(dest)).caught(
+            ES_Error,
+            function(e) {
+              if (e.status !== 404) {
+                throw (e);
+              }
+            })
         })
-      })
 
       .lastly(function() {
         index.set_extra('');
