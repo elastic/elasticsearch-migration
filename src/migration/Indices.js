@@ -38,6 +38,26 @@ function Indices() {
       "https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_scripting.html#_indexed_scripts_and_templates");
   }
 
+  function total_shards() {
+    var total = 0;
+    _.forEach(indices, function(v, k) {
+      total += parseInt(v.settings.index.number_of_shards);
+    });
+    var fail = [];
+    if (total > 1000) {
+      fail
+        .push("In 5.x, a maximum of 1000 shards can be queried in a single request.  This cluster has `"
+          + total
+          + "` primary shards.");
+    }
+    return log
+      .result(
+        'blue',
+        "Total primary shards",
+        fail,
+        "https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_search_changes.html#_search_shard_limit")
+  }
+
   function index_names() {
     return check_hash(
       'yellow',
@@ -91,7 +111,8 @@ function Indices() {
     '/_cluster/state/metadata',
     {
       filter_path : "metadata.indices.*.state,"
-        + "metadata.indices.*.settings.index.version.created"
+        + "metadata.indices.*.settings.index.version.created,"
+        + "metadata.indices.*.settings.index.number_of_shards"
     })
 
   .then(function(r) {
@@ -101,6 +122,7 @@ function Indices() {
     }
     indices = r.metadata.indices;
     indices_color = worse(indices_color, remove_old_indices());
+    indices_color = worse(indices_color, total_shards());
     indices_color = worse(indices_color, indexed_scripts());
     indices_color = worse(indices_color, index_names());
     return per_index_checks(_.keys(indices).sort());
