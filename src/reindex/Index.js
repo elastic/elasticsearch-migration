@@ -140,7 +140,20 @@ function Index(name, info, state, on_change) {
 
     function queue() {
       return [
-        'Reindex', function() {
+        'Reindex',
+        function() {
+          if (self.name === '.kibana') {
+            var warning = 'Warning: You will need to reindex the .kibana index in order '
+              + 'to upgrade to Elasticsearch 5.x. However, once you have done so, '
+              + 'you will be unable to use Kibana 4.x unless you update kibana.yml to '
+              + 'set: \n\n    kibana_index: .kibana-'
+              + version
+              + '\n\nDo you want to continue?';
+
+            if (!confirm(warning)) {
+              return;
+            }
+          }
           return self.set_reindex_status('queued') //
           .then(function() {
             enqueue(self);
