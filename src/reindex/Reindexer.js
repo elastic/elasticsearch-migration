@@ -433,7 +433,7 @@ function Reindexer(index) {
       if (r.qs) {
         url += '?' + jQuery.param(r.qs);
       }
-      html += '<pre class="curl">curl -X' + method + " '" + url + '"';
+      html += '<pre class="curl">curl -X' + method + " '" + url + "'";
 
       if (r.body) {
         html += " -d '\n" + JSON.stringify(r.body, null, 2) + "\n'\n"
