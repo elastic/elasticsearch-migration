@@ -360,8 +360,11 @@ function Reindexer(index) {
         })
 
       .lastly(function() {
+        error.empty();
         index.set_extra('');
-        return index.set_reindex_status('');
+        index.set_reindex_status('');
+        reindex_next();
+        return;
       })
 
       .caught(handle_error);
