@@ -96,7 +96,8 @@ ClusterSettings.renamed_settings = function(settings) {
     "security.enabled" : "xpack.security.enabled",
     "watcher.http.default_connection_timeout" : "xpack.http.default_connection_timeout",
     "watcher.http.default_read_timeout" : "xpack.http.default_read_timeout",
-    "watcher.shield.encrypt_sensitive_data" : "xpack.watcher.encrypt_sensitive_data"
+    "watcher.shield.encrypt_sensitive_data" : "xpack.watcher.encrypt_sensitive_data",
+    "marvel.agent.enabled": "xpack.monitoring.enabled",
   };
 
   function re_replace(k, re, replace) {
@@ -111,6 +112,9 @@ ClusterSettings.renamed_settings = function(settings) {
     settings,
     function(v, k) {
       var base_k = strip_dot_num(k);
+      if (base_k.match('^marvel.agent.(stats|exporter)\.')) {
+        return;
+      }
       if (_.has(renamed, base_k)) {
         delete settings[k];
         return "`" + base_k + "` has been renamed to `" + renamed[base_k] + "`"
