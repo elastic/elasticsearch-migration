@@ -119,11 +119,12 @@ ClusterSettings.renamed_settings = function(settings) {
         || re_replace(base_k, /^marvel.agent./, 'xpack.monitoring.collection.')
         || re_replace(base_k, /^marvel\./, 'xpack.monitoring.')
         || re_replace(base_k, /^watcher\.http\./, 'xpack.http.')
-        || re_replace(base_k, /^watcher\./, 'xpack.watcher.')
         || re_replace(
           base_k,
           /^watcher.actions.(pagerduty|slack|hipchat|email).service/,
-          "xpack.notification.$1");
+          "xpack.notification.$1")
+        || re_replace(base_k, /^watcher\./, 'xpack.watcher.');
+
       if (new_k) {
         delete settings[base_k];
         return "`" + base_k + "` has been renamed to `" + new_k + "`";
