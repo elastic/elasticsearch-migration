@@ -189,6 +189,22 @@ function NodeSettings() {
       'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_settings_changes.html#_index_level_settings');
   }
 
+  function watcher_thread_pool(node) {
+    return check_hash(
+      'blue',
+      'Watcher thread pool settings',
+      node.settings,
+      function(v, k) {
+        var new_k = k.replace(/threadpool.watcher/, 'xpack.watcher.thread_pool');
+        if (new_k === k) {
+          return;
+        }
+        delete node.settings[k];
+        return "`" + k + "` has been renamed to `" + new_k + "`. (This setting may have been autoset by Watcher, in which case this can be ignored)."
+      },
+      'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_settings_changes.html#_threadpool_settings');
+  }
+
   function thread_pool(node) {
     return check_hash(
       'red',
@@ -201,10 +217,7 @@ function NodeSettings() {
         if (k.match(/suggest/)) {
           return "`" + k + "` has been removed"
         }
-        var new_k = k
-          .replace(/threadpool.watcher/, 'xpack.watcher.thread_pool').replace(
-            /threadpool/,
-            'thread_pool');
+        var new_k = k.replace(/threadpool/, 'thread_pool');
         // fixed
         if (new_k.match(/\.(index|search|bulk|percolate|watcher)\./)) {
           new_k = new_k.replace(/\.(capacity|queue)$/, '.queue_size');
@@ -244,6 +257,7 @@ function NodeSettings() {
     node_color = worse(node_color, host_settings(node));
     node_color = worse(node_color, default_index_analyzer(node));
     node_color = worse(node_color, index_settings(node));
+    node_color = worse(node_color, watcher_thread_pool(node));
     node_color = worse(node_color, thread_pool(node));
     node_color = worse(node_color, ClusterSettings
       .removed_settings(node.settings));
