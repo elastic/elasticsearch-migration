@@ -3,7 +3,7 @@
 function Mapping(index) {
 
   function format_name(name) {
-    return '`' + name.replace(/^([^\0]+)\0/, "[$1]:") + '`';
+    return '`' + name.replace(/^([^\0]+)\0+/, "[$1]:") + '`';
   }
 
   function mapping_limits(field_stats) {
@@ -98,7 +98,7 @@ function Mapping(index) {
       'Source transform has been removed',
       fields,
       function(mapping, name) {
-        if (name.match('\0transform$')) {
+        if (name.match('\0\0transform$')) {
           return format_name(name)
         }
       },
@@ -111,7 +111,7 @@ function Mapping(index) {
       '`_timestamp` and `_ttl` fields will not be supported on new indices',
       fields,
       function(mapping, name) {
-        if (name.match(/\0(_timestamp|_ttl)/)) {
+        if (name.match(/\0\0(_timestamp|_ttl)/)) {
           return format_name(name)
         }
       },
@@ -137,7 +137,7 @@ function Mapping(index) {
       '`_size` field must be reindexed in 5.x to support aggregations, sorting, or scripting',
       fields,
       function(mapping, name) {
-        if (name.match(/\0_size$/)) {
+        if (name.match(/\0\0_size$/)) {
           return format_name(name)
         }
       },
@@ -163,7 +163,7 @@ function Mapping(index) {
       'Parent field no longer accessible in queries',
       fields,
       function(mapping, name) {
-        if (name.match('\0_parent')) {
+        if (name.match('\0\0_parent')) {
           return format_name(name)
         }
       },
@@ -233,7 +233,7 @@ function Mapping(index) {
     _.forEach(mappings, function(mapping, type_name) {
       var props = mapping.properties;
       delete mapping.properties;
-      flatten_fields(mapping, type_name + "\0");
+      flatten_fields(mapping, type_name + "\0\0");
       flatten_fields(props, type_name + "\0");
     });
     return {
