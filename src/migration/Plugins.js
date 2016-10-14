@@ -41,7 +41,7 @@ function Plugins() {
     };
 
     return check_array(
-      'blue',
+      'yellow',
       'Renamed plugins',
       plugins,
       function(p) {
@@ -61,7 +61,7 @@ function Plugins() {
       "watcher" : "The `watcher` plugin is now part of the `x-pack`",
     };
 
-    return check_array('blue', 'X-pack plugins', plugins, function(p) {
+    return check_array('yellow', 'X-pack plugins', plugins, function(p) {
       if (names[p.name]) {
         return names[p.name]
       }
@@ -70,7 +70,7 @@ function Plugins() {
 
   function javascript(plugins) {
     return check_array(
-      'blue',
+      'yellow',
       'Javascript plugin',
       plugins,
       function(p) {
