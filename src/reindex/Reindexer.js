@@ -327,7 +327,7 @@ function Reindexer(index) {
             throw ('Doc count in index `' + src + '` has changed. Not resetting.')
           }
 
-          var health = _.get(r[1], 'indices.' + src + '.status') || 'missing';
+          var health = _.get(r[1], ['indices', src ,'status']) || 'missing';
           if (health !== 'green') {
             throw ('Health of index `'
               + src

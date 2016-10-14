@@ -29,7 +29,10 @@ function Client(host, enable_creds) {
         })
       }
       if (e.responseJSON.error) {
-        throw new ES_Error(method + ' ' + url, e.responseJSON);
+        if (typeof e.responseJSON.error === 'object') {
+          throw new ES_Error(method + ' ' + url, e.responseJSON);
+        }
+        e.responseText = e.responseJSON.error;
       }
     }
 
