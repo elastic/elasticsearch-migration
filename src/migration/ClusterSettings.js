@@ -26,15 +26,12 @@ function ClusterSettings() {
 
 ClusterSettings.unknown_settings = function(settings) {
 
-  var group_settings = [
-    /^cluster\.routing\.allocation\.(?:require|include|exclude|awareness\.force)\./,
-    /^indices\.analysis\.hunspell\.dictionary\./,
-    /^logger\./,
-    /^monitor\.jvm\.gc\.collector\./,
-    /^node\.attr\./,
-    /^request\.headers\./,
-    /^transport\.profiles\./
-  ];
+  var group_settings = _.filter(
+    _.keys(ClusterSettings.known_settings),
+    function(v) {
+      return v.match(/\.$/)
+    });
+
   return check_hash(
     'blue',
     'Unknown settings',
@@ -45,8 +42,8 @@ ClusterSettings.unknown_settings = function(settings) {
         return;
       }
       var found = false;
-      _.forEach(group_settings, function(regex) {
-        if (base_k.match(regex)) {
+      _.forEach(group_settings, function(group_setting) {
+        if (base_k.indexOf(group_setting) === 0) {
           found = true;
         }
       })
@@ -97,7 +94,7 @@ ClusterSettings.renamed_settings = function(settings) {
     "watcher.http.default_connection_timeout" : "xpack.http.default_connection_timeout",
     "watcher.http.default_read_timeout" : "xpack.http.default_read_timeout",
     "watcher.shield.encrypt_sensitive_data" : "xpack.watcher.encrypt_sensitive_data",
-    "marvel.agent.enabled": "xpack.monitoring.enabled",
+    "marvel.agent.enabled" : "xpack.monitoring.enabled",
   };
 
   function re_replace(k, re, replace) {
@@ -187,7 +184,6 @@ ClusterSettings.known_settings = {
   "action.master.force_local" : true,
   "action.search.shard_count.limit" : true,
   "bootstrap.ctrlhandler" : true,
-  "bootstrap.ignore_system_bootstrap_checks" : true,
   "bootstrap.memory_lock" : true,
   "bootstrap.seccomp" : true,
   "cache.recycler.page.limit.heap" : true,
@@ -222,10 +218,12 @@ ClusterSettings.known_settings = {
   "cloud.aws.s3.signer" : true,
   "cloud.aws.signer" : true,
   "cloud.azure.management.cloud.service.name" : true,
+  "cloud.azure.storage." : true,
   "cloud.gce.max_wait" : true,
   "cloud.gce.project_id" : true,
   "cloud.gce.refresh_interval" : true,
   "cloud.gce.retry" : true,
+  "cloud.gce.zone" : true,
   "cloud.node.auto_attributes" : true,
   "cluster.blocks.read_only" : true,
   "cluster.indices.close.enable" : true,
@@ -235,6 +233,7 @@ ClusterSettings.known_settings = {
   "cluster.nodes.reconnect_interval" : true,
   "cluster.routing.allocation.allow_rebalance" : true,
   "cluster.routing.allocation.awareness.attributes" : true,
+  "cluster.routing.allocation.awareness.force." : true,
   "cluster.routing.allocation.balance.index" : true,
   "cluster.routing.allocation.balance.shard" : true,
   "cluster.routing.allocation.balance.threshold" : true,
@@ -245,10 +244,13 @@ ClusterSettings.known_settings = {
   "cluster.routing.allocation.disk.watermark.high" : true,
   "cluster.routing.allocation.disk.watermark.low" : true,
   "cluster.routing.allocation.enable" : true,
+  "cluster.routing.allocation.exclude." : true,
+  "cluster.routing.allocation.include." : true,
   "cluster.routing.allocation.node_concurrent_incoming_recoveries" : true,
   "cluster.routing.allocation.node_concurrent_outgoing_recoveries" : true,
   "cluster.routing.allocation.node_concurrent_recoveries" : true,
   "cluster.routing.allocation.node_initial_primaries_recoveries" : true,
+  "cluster.routing.allocation.require." : true,
   "cluster.routing.allocation.same_shard.host" : true,
   "cluster.routing.allocation.snapshot.relocation_enabled" : true,
   "cluster.routing.allocation.total_shards_per_node" : true,
@@ -261,8 +263,12 @@ ClusterSettings.known_settings = {
   "discovery.azure.host.type" : true,
   "discovery.azure.refresh_interval" : true,
   "discovery.ec2.any_group" : true,
+  "discovery.ec2.availability_zones" : true,
+  "discovery.ec2.groups" : true,
   "discovery.ec2.host_type" : true,
   "discovery.ec2.node_cache_time" : true,
+  "discovery.ec2.tag." : true,
+  "discovery.gce.tags" : true,
   "discovery.initial_state_timeout" : true,
   "discovery.type" : true,
   "discovery.zen.commit_timeout" : true,
@@ -281,7 +287,7 @@ ClusterSettings.known_settings = {
   "discovery.zen.minimum_master_nodes" : true,
   "discovery.zen.no_master_block" : true,
   "discovery.zen.ping.unicast.concurrent_connects" : true,
-  "discovery.zen.ping.unicast.hosts" : true, // Internal setting
+  "discovery.zen.ping.unicast.hosts" : true,
   "discovery.zen.ping_timeout" : true,
   "discovery.zen.publish_diff.enable" : true,
   "discovery.zen.publish_timeout" : true,
@@ -294,7 +300,7 @@ ClusterSettings.known_settings = {
   "gateway.recover_after_master_nodes" : true,
   "gateway.recover_after_nodes" : true,
   "gateway.recover_after_time" : true,
-  "http.bind_host" : true, // Internal setting
+  "http.bind_host" : true,
   "http.compression" : true,
   "http.compression_level" : true,
   "http.cors.allow-credentials" : true,
@@ -305,7 +311,7 @@ ClusterSettings.known_settings = {
   "http.cors.max-age" : true,
   "http.detailed_errors.enabled" : true,
   "http.enabled" : true,
-  "http.host" : true, // Internal setting
+  "http.host" : true,
   "http.max_chunk_size" : true,
   "http.max_content_length" : true,
   "http.max_header_size" : true,
@@ -331,7 +337,9 @@ ClusterSettings.known_settings = {
   "http.type.default" : true,
   "index.codec" : true,
   "index.store.fs.fs_lock" : true,
+  "index.store.preload" : true,
   "index.store.type" : true,
+  "indices.analysis.hunspell.dictionary." : true,
   "indices.analysis.hunspell.dictionary.ignore_case" : true,
   "indices.analysis.hunspell.dictionary.lazy" : true,
   "indices.breaker.fielddata.limit" : true,
@@ -368,8 +376,11 @@ ClusterSettings.known_settings = {
   "indices.store.throttle.max_bytes_per_sec" : true,
   "indices.store.throttle.type" : true,
   "indices.ttl.interval" : true,
+  "license." : true,
+  "logger." : true,
   "logger.level" : true,
   "monitor.fs.refresh_interval" : true,
+  "monitor.jvm.gc.collector." : true,
   "monitor.jvm.gc.enabled" : true,
   "monitor.jvm.gc.overhead.debug" : true,
   "monitor.jvm.gc.overhead.info" : true,
@@ -378,11 +389,11 @@ ClusterSettings.known_settings = {
   "monitor.jvm.refresh_interval" : true,
   "monitor.os.refresh_interval" : true,
   "monitor.process.refresh_interval" : true,
-  "network.bind_host" : true, // Internal setting
+  "network.bind_host" : true,
   "network.breaker.inflight_requests.limit" : true,
   "network.breaker.inflight_requests.overhead" : true,
-  "network.host" : true, // Internal setting
-  "network.publish_host" : true, // Internal setting
+  "network.host" : true,
+  "network.publish_host" : true,
   "network.server" : true,
   "network.tcp.blocking" : true,
   "network.tcp.blocking_client" : true,
@@ -394,6 +405,7 @@ ClusterSettings.known_settings = {
   "network.tcp.reuse_address" : true,
   "network.tcp.send_buffer_size" : true,
   "node.add_lock_id_to_custom_path" : true,
+  "node.attr." : true,
   "node.data" : true,
   "node.enable_lucene_segment_infos_trace" : true,
   "node.id.seed" : true,
@@ -404,15 +416,16 @@ ClusterSettings.known_settings = {
   "node.name" : true,
   "node.portsfile" : true,
   "path.conf" : true,
-  "path.data" : true, // Internal setting
+  "path.data" : true,
   "path.home" : true,
   "path.logs" : true,
-  "path.repo" : true, // Internal setting
+  "path.repo" : true,
   "path.scripts" : true,
   "path.shared_data" : true,
   "pidfile" : true,
-  "plugin.mandatory" : true, // Internal setting
+  "plugin.mandatory" : true,
   "processors" : true,
+  "reindex.remote.whitelist" : true,
   "repositories.azure.base_path" : true,
   "repositories.azure.chunk_size" : true,
   "repositories.azure.compress" : true,
@@ -435,9 +448,10 @@ ClusterSettings.known_settings = {
   "repositories.s3.server_side_encryption" : true,
   "repositories.s3.storage_class" : true,
   "repositories.s3.use_throttle_retries" : true,
-  "repositories.url.allowed_urls" : true, // Internal setting
-  "repositories.url.supported_protocols" : true, // Internal setting
+  "repositories.url.allowed_urls" : true,
+  "repositories.url.supported_protocols" : true,
   "repositories.url.url" : true,
+  "request.headers." : true,
   "resource.reload.enabled" : true,
   "resource.reload.interval.high" : true,
   "resource.reload.interval.low" : true,
@@ -607,13 +621,13 @@ ClusterSettings.known_settings = {
   "thread_pool.warmer.core" : true,
   "thread_pool.warmer.keep_alive" : true,
   "thread_pool.warmer.max" : true,
-  "transport.bind_host" : true, // Internal setting
+  "transport.bind_host" : true,
   "transport.connections_per_node.bulk" : true,
   "transport.connections_per_node.ping" : true,
   "transport.connections_per_node.recovery" : true,
   "transport.connections_per_node.reg" : true,
   "transport.connections_per_node.state" : true,
-  "transport.host" : true, // Internal setting
+  "transport.host" : true,
   "transport.netty.boss_count" : true,
   "transport.netty.max_composite_buffer_components" : true,
   "transport.netty.max_cumulation_buffer_capacity" : true,
@@ -622,7 +636,8 @@ ClusterSettings.known_settings = {
   "transport.netty.receive_predictor_size" : true,
   "transport.netty.worker_count" : true,
   "transport.ping_schedule" : true,
-  "transport.publish_host" : true, // Internal setting
+  "transport.profiles." : true,
+  "transport.publish_host" : true,
   "transport.publish_port" : true,
   "transport.tcp.blocking_client" : true,
   "transport.tcp.blocking_server" : true,
@@ -634,43 +649,61 @@ ClusterSettings.known_settings = {
   "transport.tcp.reuse_address" : true,
   "transport.tcp.send_buffer_size" : true,
   "transport.tcp_no_delay" : true,
-  "transport.tracer.exclude" : true, // Internal setting
-  "transport.tracer.include" : true, // Internal setting
+  "transport.tracer.exclude" : true,
+  "transport.tracer.include" : true,
   "transport.type" : true,
   "transport.type.default" : true,
   "tribe.blocks.metadata" : true,
-  "tribe.blocks.metadata.indices" : true, // Internal setting
-  "tribe.blocks.read.indices" : true, // Internal setting
+  "tribe.blocks.metadata.indices" : true,
+  "tribe.blocks.read.indices" : true,
   "tribe.blocks.write" : true,
-  "tribe.blocks.write.indices" : true, // Internal setting
+  "tribe.blocks.write.indices" : true,
   "tribe.name" : true,
   "tribe.on_conflict" : true,
   "xpack.graph.enabled" : true,
   "xpack.http.default_connection_timeout" : true,
   "xpack.http.default_read_timeout" : true,
+  "xpack.http.proxy." : true,
+  "xpack.http.ssl." : true,
   "xpack.monitoring.collection.cluster.state.timeout" : true,
   "xpack.monitoring.collection.cluster.stats.timeout" : true,
+  "xpack.monitoring.collection.collectors" : true,
   "xpack.monitoring.collection.index.recovery.active_only" : true,
   "xpack.monitoring.collection.index.recovery.timeout" : true,
   "xpack.monitoring.collection.index.stats.timeout" : true,
+  "xpack.monitoring.collection.indices" : true,
   "xpack.monitoring.collection.indices.stats.timeout" : true,
   "xpack.monitoring.collection.interval" : true,
   "xpack.monitoring.enabled" : true,
+  "xpack.monitoring.exporters." : true,
   "xpack.monitoring.history.duration" : true,
+  "xpack.notification.email." : true,
+  "xpack.notification.hipchat." : true,
+  "xpack.notification.pagerduty." : true,
+  "xpack.notification.slack." : true,
   "xpack.security.audit.enabled" : true,
   "xpack.security.audit.index.bulk_size" : true,
+  "xpack.security.audit.index.client." : true,
   "xpack.security.audit.index.events.emit_request_body" : true,
+  "xpack.security.audit.index.events.exclude" : true,
+  "xpack.security.audit.index.events.include" : true,
   "xpack.security.audit.index.flush_interval" : true,
   "xpack.security.audit.index.queue_max_size" : true,
   "xpack.security.audit.index.rollover" : true,
+  "xpack.security.audit.index.settings.index." : true,
   "xpack.security.audit.logfile.events.emit_request_body" : true,
+  "xpack.security.audit.logfile.events.exclude" : true,
+  "xpack.security.audit.logfile.events.include" : true,
   "xpack.security.audit.logfile.prefix.emit_node_host_address" : true,
   "xpack.security.audit.logfile.prefix.emit_node_host_name" : true,
   "xpack.security.audit.logfile.prefix.emit_node_name" : true,
+  "xpack.security.audit.outputs" : true,
   "xpack.security.authc.anonymous.authz_exception" : true,
+  "xpack.security.authc.anonymous.roles" : true,
   "xpack.security.authc.anonymous.username" : true,
   "xpack.security.authc.native.scroll.keep_alive" : true,
   "xpack.security.authc.native.scroll.size" : true,
+  "xpack.security.authc.realms." : true,
   "xpack.security.authc.reserved_realm.enabled" : true,
   "xpack.security.authc.run_as.enabled" : true,
   "xpack.security.authc.sign_user_header" : true,
@@ -684,8 +717,12 @@ ClusterSettings.known_settings = {
   "xpack.security.encryption_key.algorithm" : true,
   "xpack.security.encryption_key.length" : true,
   "xpack.security.filter.always_allow_bound_address" : true,
+  "xpack.security.http.filter.allow" : true,
+  "xpack.security.http.filter.deny" : true,
   "xpack.security.http.filter.enabled" : true,
   "xpack.security.http.ssl.enabled" : true,
+  "xpack.security.transport.filter.allow" : true,
+  "xpack.security.transport.filter.deny" : true,
   "xpack.security.transport.filter.enabled" : true,
   "xpack.security.transport.ssl.enabled" : true,
   "xpack.security.user" : true,
@@ -695,6 +732,7 @@ ClusterSettings.known_settings = {
   "xpack.watcher.execution.default_throttle_period" : true,
   "xpack.watcher.execution.scroll.size" : true,
   "xpack.watcher.execution.scroll.timeout" : true,
+  "xpack.watcher.history.index." : true,
   "xpack.watcher.index.rest.direct_access" : true,
   "xpack.watcher.input.search.default_timeout" : true,
   "xpack.watcher.internal.ops.bulk.default_timeout" : true,
@@ -707,5 +745,7 @@ ClusterSettings.known_settings = {
   "xpack.watcher.transform.search.default_timeout" : true,
   "xpack.watcher.trigger.schedule.engine" : true,
   "xpack.watcher.trigger.schedule.ticker.tick_interval" : true,
-  "xpack.watcher.watch.scroll.size" : true
+  "xpack.watcher.triggered_watches.index." : true,
+  "xpack.watcher.watch.scroll.size" : true,
+  "xpack.watcher.watches.index." : true
 };
