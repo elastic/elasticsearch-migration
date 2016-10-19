@@ -147,7 +147,7 @@ function Mapping(index) {
   function percolator(fields) {
     return check_hash(
       'blue',
-      'Percolator type replaced by percolator field',
+      'Percolator type replaced by percolator field.  Check all percolator queries for use of filters, which were deprecated in 2.0 and removed in 5.0.',
       fields,
       function(mapping, name) {
         if (name === ".percolator\0query") {

@@ -58,7 +58,7 @@ function Plugins() {
       "graph" : "The `graph` plugin is now part of the `x-pack`",
       "marvel-agent" : "The `marvel-agent` plugin is now part of the `x-pack`",
       "shield" : "The `shield` plugin is now part of the `x-pack`",
-      "watcher" : "The `watcher` plugin is now part of the `x-pack`",
+      "watcher" : "The `watcher` plugin is now part of the `x-pack`.  Check existing watches for use of filters, which were deprecated in 2.0 and removed in 5.0.",
     };
 
     return check_array('yellow', 'X-pack plugins', plugins, function(p) {
