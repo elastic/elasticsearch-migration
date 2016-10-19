@@ -142,17 +142,27 @@ function Index(name, info, state, on_change) {
       return [
         'Reindex',
         function() {
+          var warning;
           if (self.name === '.kibana') {
-            var warning = 'Warning: You will need to reindex the .kibana index in order '
+            warning = 'Warning: You will need to reindex the .kibana index in order '
               + 'to upgrade to Elasticsearch 5.x. However, once you have done so, '
               + 'you will be unable to use Kibana 4.x unless you update kibana.yml to '
               + 'set: \n\n    kibana_index: .kibana-'
               + version
               + '\n\nDo you want to continue?';
-
-            if (!confirm(warning)) {
-              return;
-            }
+          }
+          if (self.name === '.watches') {
+            warning = 'Warning: You will need to reindex the .watches index in order '
+              + 'to upgrade to Elasticsearch 5.x. However, once you have done so, '
+              + 'you will be unable to use Watcher in your current cluster.\n\n'
+              + 'The .watches index cannot be reindexed correctly unless Watcher is disabled, '
+              + 'which you can do by adding the following to your elasticsearch.yml files '
+              + 'and restarting your cluster:'
+              + '\n\n    watcher.enabled: false'
+              + '\n\nDo you want to continue?';
+          }
+          if (warning && !confirm(warning)) {
+            return;
           }
           return self.set_reindex_status('queued') //
           .then(function() {
