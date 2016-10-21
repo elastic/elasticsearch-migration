@@ -1,7 +1,7 @@
 == Elasticsearch Migration Helper  v2.0.0
 
 This Elasticsearch Migration Helper plugin helps you to prepare for your
-migration from Elasticsearch 2.3.x to Elasticsearch 5.x. Before starting your
+migration from Elasticsearch 2.3.x and 2.4.x to Elasticsearch 5.x. Before starting your
 migration and before using this plugin, you should backup your data with
 https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-snapshots.html[snapshot/restore].
 
@@ -26,7 +26,7 @@ Deprecation Logging::
   whenever deprecated functionality is used. This tool enables or disables
   deprecation logging on your cluster.
 
-IMPORTANT: It will run on Elasticsearch version 2.3.x only.
+IMPORTANT: It will run on Elasticsearch versions 2.3.x and 2.4.x only.
 
 === Installation
 
@@ -67,4 +67,3 @@ If you use basic AUTH, you will also need to tick the `Enable basic AUTH support
 -----
 http.cors.allow-credentials: true
 -----
-
