@@ -1,4 +1,4 @@
-== Elasticsearch Migration Helper  v2.0.0
+== Elasticsearch Migration Helper  v2.0.1
 
 This Elasticsearch Migration Helper plugin helps you to prepare for your
 migration from Elasticsearch 2.3.x to Elasticsearch 5.x. Before starting your
@@ -34,14 +34,14 @@ To install, run the following command in your Elasticsearch home directory on a 
 
 [source,sh]
 ---------------
-./bin/plugin install https://github.com/elastic/elasticsearch-migration/releases/download/v2.0.0/elasticsearch-migration-2.0.0.zip
+./bin/plugin install https://github.com/elastic/elasticsearch-migration/releases/download/v2.0.1/elasticsearch-migration-2.0.1.zip
 ---------------
 
 Or the equivalent on a Windows machine:
 
 [source,sh]
 ---------------
-.\bin\plugin install https://github.com/elastic/elasticsearch-migration/releases/download/v2.0.0/elasticsearch-migration-2.0.0.zip
+.\bin\plugin install https://github.com/elastic/elasticsearch-migration/releases/download/v2.0.1/elasticsearch-migration-2.0.1.zip
 ---------------
 
 === Checking a local server

@@ -1737,6 +1737,33 @@ IndexSettings.known_settings = {
       "https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_scripting.html#_indexed_scripts_and_templates");
   }
 
+  function shards_per_index() {
+    var min_required_shards = 0;
+    var fail = [];
+    _.forEach(indices, function(v, k) {
+      var shard_count = parseInt(v.settings.index.number_of_shards);
+      if (shard_count > 1024) {
+        fail.push(k + " has " + shard_count + " shards.");
+        if (shard_count > min_required_shards) {
+          min_required_shards = shard_count;
+        }
+      }
+    });
+    if (min_required_shards > 0)
+    {
+      fail.push("<b>At least 1 index has `" + min_required_shards + "` shards.  By default, Elasticsearch 5.0.0 will not start up with"
+      + " any index containing > 1024 shards.  If you wish to upgrade, you will need to start Elasticsearch 5.0.0 by setting"
+      + " <br>`export ES_JAVA_OPTS=\"-Des.index.max_number_of_shards=" + min_required_shards + "\"`"
+      + " <br>first on every node.</b>");
+    }
+    return log
+      .result(
+        'red',
+        'High index shard count',
+        fail,
+        'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/index-modules.html#_static_index_settings');
+  }
+
   function total_shards() {
     var total = 0;
     _.forEach(indices, function(v, k) {
@@ -1823,6 +1850,7 @@ IndexSettings.known_settings = {
     indices_color = worse(indices_color, remove_old_indices());
     indices_color = worse(indices_color, total_shards());
     indices_color = worse(indices_color, indexed_scripts());
+    indices_color = worse(indices_color, shards_per_index());
     indices_color = worse(indices_color, index_names());
     return per_index_checks(_.keys(indices).sort());
   })
