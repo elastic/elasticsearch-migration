@@ -5,7 +5,7 @@ migration from Elasticsearch 2.3.x and 2.4.x to Elasticsearch 5.x. Before starti
 migration and before using this plugin, you should backup your data with
 https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-snapshots.html[snapshot/restore].
 
-Read more about important changes in the https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-5.0.html[Breaking Changes] documentation online.
+Read more about important changes in the https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking-changes-5.0.html[Breaking Changes] documentation online.
 
 This plugin has three tools:
 
