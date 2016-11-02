@@ -94,7 +94,7 @@ function Mapping(index) {
 
   function source_transform(fields) {
     return check_hash(
-      'yellow',
+      'red',
       'Source transform has been removed',
       fields,
       function(mapping, name) {
