@@ -163,6 +163,12 @@ ClusterSettings.renamed_settings = function(settings) {
     settings,
     function(v, k) {
       var base_k = strip_dot_num(k);
+
+      if (cloud && base_k.match(/^marvel\./)) {
+        delete settings[k];
+        return;
+      }
+      // Marvel 1.x settings
       if (base_k.match('^marvel.agent.(stats|exporter)\.')) {
         return;
       }
