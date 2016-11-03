@@ -13,6 +13,10 @@ function ClusterSettings() {
 
       var settings = r.persistent;
       cluster_color = worse(cluster_color, ClusterSettings
+        .watcher_thread_pool(settings));
+      cluster_color = worse(cluster_color, ClusterSettings
+        .thread_pool(settings));
+      cluster_color = worse(cluster_color, ClusterSettings
         .removed_settings(settings));
       cluster_color = worse(cluster_color, ClusterSettings
         .renamed_settings(settings));
@@ -23,6 +27,53 @@ function ClusterSettings() {
     });
 
 };
+
+ClusterSettings.watcher_thread_pool = function(settings) {
+  return check_hash(
+    'blue',
+    'Watcher thread pool settings',
+    settings,
+    function(v, k) {
+      var new_k = k.replace(/threadpool.watcher/, 'xpack.watcher.thread_pool');
+      if (new_k === k) {
+        return;
+      }
+      delete settings[k];
+      return "`"
+        + k
+        + "` has been renamed to `"
+        + new_k
+        + "`. (This setting may have been autoset by Watcher, in which case this can be ignored)."
+    },
+    'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_settings_changes.html#_threadpool_settings');
+}
+
+ClusterSettings.thread_pool = function(settings) {
+  return check_hash(
+    'red',
+    'Thread pool settings',
+    settings,
+    function(v, k) {
+      if (!k.match(/^threadpool/)) {
+        return;
+      }
+      if (k.match(/suggest/)) {
+        return "`" + k + "` has been removed"
+      }
+      var new_k = k.replace(/threadpool/, 'thread_pool');
+      // fixed
+      if (new_k.match(/\.(index|search|bulk|percolate|watcher)\./)) {
+        new_k = new_k.replace(/\.(capacity|queue)$/, '.queue_size');
+      } else
+      // scaling
+      if (new_k.match(/\.(snapshot|warmer|refresh|listener)\./)) {
+        new_k = new_k.replace(/\.min/, '.core').replace(/.size/, '.max')
+      }
+      delete settings[k];
+      return "`" + k + "` has been renamed to `" + new_k + "`"
+    },
+    'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_settings_changes.html#_threadpool_settings');
+}
 
 ClusterSettings.unknown_settings = function(settings) {
 
