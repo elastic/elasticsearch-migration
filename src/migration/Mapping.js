@@ -196,6 +196,22 @@ function Mapping(index) {
       'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_mapping_changes.html#_numeric_fields');
   }
 
+  function geopoint(fields) {
+    return check_hash(
+      'blue',
+      'Geo-point parameters `geohash`, `geohash_prefix`, `geohash_precision`, and `lat_lon` no longer supported',
+      fields,
+      function(mapping, name) {
+        if (_.has(mapping, 'geohash')
+          || _.has(mapping, 'geohash_prefix')
+          || _.has(mapping, 'geohash_precision')
+          || _.has(mapping, 'lat_lon')) {
+          return format_name(name)
+        }
+      },
+      'https://www.elastic.co/guide/en/elasticsearch/reference/current/breaking_50_mapping_changes.html#_literal_geo_point_literal_fields');
+  }
+
   function flatten_mappings(mappings) {
     var flat = {};
     var num_nested = 0;
@@ -267,6 +283,7 @@ function Mapping(index) {
     color = worse(color, size(fields));
     color = worse(color, ip(fields));
     color = worse(color, precision_step(fields));
+    color = worse(color, geopoint(fields));
 
     return color;
   })
