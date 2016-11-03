@@ -240,6 +240,9 @@ function Logger(log_el,error_el) {
     if (typeof e === "string") {
       console.log(e);
       msg = e;
+    } else if (e instanceof ES_Error) {
+      msg = e.toString();
+      console.log(msg);
     } else {
       console.log(e.message, e.stack);
       msg = e.message;
@@ -317,6 +320,10 @@ function ClusterSettings() {
 
       var settings = r.persistent;
       cluster_color = worse(cluster_color, ClusterSettings
+        .watcher_thread_pool(settings));
+      cluster_color = worse(cluster_color, ClusterSettings
+        .thread_pool(settings));
+      cluster_color = worse(cluster_color, ClusterSettings
         .removed_settings(settings));
       cluster_color = worse(cluster_color, ClusterSettings
         .renamed_settings(settings));
@@ -327,6 +334,53 @@ function ClusterSettings() {
     });
 
 };
+
+ClusterSettings.watcher_thread_pool = function(settings) {
+  return check_hash(
+    'blue',
+    'Watcher thread pool settings',
+    settings,
+    function(v, k) {
+      var new_k = k.replace(/threadpool.watcher/, 'xpack.watcher.thread_pool');
+      if (new_k === k) {
+        return;
+      }
+      delete settings[k];
+      return "`"
+        + k
+        + "` has been renamed to `"
+        + new_k
+        + "`. (This setting may have been autoset by Watcher, in which case this can be ignored)."
+    },
+    'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_settings_changes.html#_threadpool_settings');
+}
+
+ClusterSettings.thread_pool = function(settings) {
+  return check_hash(
+    'red',
+    'Thread pool settings',
+    settings,
+    function(v, k) {
+      if (!k.match(/^threadpool/)) {
+        return;
+      }
+      if (k.match(/suggest/)) {
+        return "`" + k + "` has been removed"
+      }
+      var new_k = k.replace(/threadpool/, 'thread_pool');
+      // fixed
+      if (new_k.match(/\.(index|search|bulk|percolate|watcher)\./)) {
+        new_k = new_k.replace(/\.(capacity|queue)$/, '.queue_size');
+      } else
+      // scaling
+      if (new_k.match(/\.(snapshot|warmer|refresh|listener)\./)) {
+        new_k = new_k.replace(/\.min/, '.core').replace(/.size/, '.max')
+      }
+      delete settings[k];
+      return "`" + k + "` has been renamed to `" + new_k + "`"
+    },
+    'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_settings_changes.html#_threadpool_settings');
+}
 
 ClusterSettings.unknown_settings = function(settings) {
 
@@ -390,9 +444,12 @@ ClusterSettings.renamed_settings = function(settings) {
     "cloud.aws.s3.proxy_port" : "cloud.aws.s3.proxy.port",
     "cloud.azure.storage.account" : "cloud.azure.storage.{my_account_name}.account",
     "cloud.azure.storage.key" : "cloud.azure.storage.{my_account_name}.key",
-    "shield.ssl" : "xpack.security.ssl.enabled",
+    "shield.ssl" : "xpack.security.transport.ssl.enabled",
+    "shield.ssl.ciphers" : "xpack.ssl.cipher_suites",
+    "shield.ssl.hostname_verification" : "xpack.ssl.verification_mode",
+    "shield.transport.ssl.client.auth" : "xpack.ssl.client_authentication",
     "shield.http.ssl" : "xpack.security.http.ssl.enabled",
-    "shield.ssl.hostname_verification" : "xpack.security.ssl.hostname_verification.enabled",
+    "shield.http.ssl.client.auth" : "xpack.security.http.ssl.client_authentication",
     "security.dls_fls.enabled" : "xpack.security.dls_fls.enabled",
     "security.enabled" : "xpack.security.enabled",
     "watcher.http.default_connection_timeout" : "xpack.http.default_connection_timeout",
@@ -413,6 +470,12 @@ ClusterSettings.renamed_settings = function(settings) {
     settings,
     function(v, k) {
       var base_k = strip_dot_num(k);
+
+      if (cloud && base_k.match(/^marvel\./)) {
+        delete settings[k];
+        return;
+      }
+      // Marvel 1.x settings
       if (base_k.match('^marvel.agent.(stats|exporter)\.')) {
         return;
       }
@@ -420,7 +483,28 @@ ClusterSettings.renamed_settings = function(settings) {
         delete settings[k];
         return "`" + base_k + "` has been renamed to `" + renamed[base_k] + "`"
       }
-      var new_k = re_replace(base_k, /^shield\./, 'xpack.security.')
+      var new_k = re_replace(
+        base_k,
+        /^transport\.profiles\.([^.]+)\.shield\.ssl\.client.auth/,
+        'transport.profiles.$1.xpack.security.ssl.client_authentication')
+        || re_replace(
+          base_k,
+          /^transport\.profiles\.([^.]+)\.shield\.ssl/,
+          'transport.profiles.$1.xpack.security.ssl.enabled')
+        || re_replace(
+          base_k,
+          /^transport\.profiles\.([^.]+)\.shield\.ciphers/,
+          'transport.profiles.$1.xpack.security.ssl.cipher_suites')
+        || re_replace(
+          base_k,
+          /^transport\.profiles\.([^.]+)\.shield\.hostname_verification/,
+          'transport.profiles.$1.xpack.security.ssl.verification_mode')
+        || re_replace(
+          base_k,
+          /^shield.authc.realms\.([^.]+)\.hostname_verification/,
+          'xpack.security.authc.realms.$1.ssl.verification_mode')
+        || re_replace(base_k, /^shield\.ssl\./, 'xpack.ssl.')
+        || re_replace(base_k, /^shield\./, 'xpack.security.')
         || re_replace(base_k, /^marvel.agent./, 'xpack.monitoring.collection.')
         || re_replace(base_k, /^marvel\./, 'xpack.monitoring.')
         || re_replace(base_k, /^watcher\.http\./, 'xpack.http.')
@@ -458,6 +542,10 @@ ClusterSettings.removed_settings = function(settings) {
     "max-open-files" : true,
     "netty.gathering" : true,
     "repositories.uri.list_directories" : true,
+    "shield.ssl.hostname_verification.resolve_name" : true,
+    "shield.ssl.session.cache_size" : true,
+    "shield.ssl.session.cache_timeout" : true,
+    "shield.ssl.protocol" : true,
     "transport.service.type" : true,
     "useLinkedTransferQueue" : true,
     "xpack.security.authc.native.reload.interval" : true,
@@ -474,7 +562,14 @@ ClusterSettings.removed_settings = function(settings) {
     settings,
     function(v, k) {
       var base_k = strip_dot_num(k);
-      if (_.has(removed, base_k)) {
+      if (_.has(removed, base_k)
+        || base_k
+          .match(/transport\.profiles\.[^.]+\.shield\.session\.cache_size/)
+        || base_k
+          .match(/transport\.profiles\.[^.]+\.shield\.session\.cache_timeout/)
+        || base_k
+          .match(/transport\.profiles\.[^.]+\.shield\.hostname_verification\.resolve_name/)
+        || base_k.match(/transport\.profiles\.[^.]+\.shield.protocol/)) {
         delete settings[k];
         return "`" + base_k + "`"
       }
@@ -1275,7 +1370,7 @@ function Mapping(index) {
 
   function source_transform(fields) {
     return check_hash(
-      'yellow',
+      'red',
       'Source transform has been removed',
       fields,
       function(mapping, name) {
@@ -1377,6 +1472,22 @@ function Mapping(index) {
       'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_mapping_changes.html#_numeric_fields');
   }
 
+  function geopoint(fields) {
+    return check_hash(
+      'blue',
+      'Geo-point parameters `geohash`, `geohash_prefix`, `geohash_precision`, and `lat_lon` no longer supported',
+      fields,
+      function(mapping, name) {
+        if (_.has(mapping, 'geohash')
+          || _.has(mapping, 'geohash_prefix')
+          || _.has(mapping, 'geohash_precision')
+          || _.has(mapping, 'lat_lon')) {
+          return format_name(name)
+        }
+      },
+      'https://www.elastic.co/guide/en/elasticsearch/reference/current/breaking_50_mapping_changes.html#_literal_geo_point_literal_fields');
+  }
+
   function flatten_mappings(mappings) {
     var flat = {};
     var num_nested = 0;
@@ -1448,6 +1559,7 @@ function Mapping(index) {
     color = worse(color, size(fields));
     color = worse(color, ip(fields));
     color = worse(color, precision_step(fields));
+    color = worse(color, geopoint(fields));
 
     return color;
   })
@@ -1540,7 +1652,6 @@ function IndexSettings(index) {
       "index.shard.recovery.file_chunk_size" : "indices.recovery.file_chunk_size",
       "index.shard.recovery.concurrent_streams" : "indices.recovery.concurrent_streams",
       "index.shard.recovery.concurrent_small_file_streams" : "indices.recovery.concurrent_small_file_streams",
-      "index.cache.query.enable" : "index.requests.cache.enable",
       "indices.cache.query.size" : "indices.requests.cache.size",
       "index.translog.flush_threshold_ops" : "index.translog.flush_threshold_size",
       "index.cache.query.enable" : "index.requests.cache.enable",
@@ -1749,12 +1860,16 @@ IndexSettings.known_settings = {
         }
       }
     });
-    if (min_required_shards > 0)
-    {
-      fail.push("<b>At least 1 index has `" + min_required_shards + "` shards.  By default, Elasticsearch 5.0.0 will not start up with"
-      + " any index containing > 1024 shards.  If you wish to upgrade, you will need to start Elasticsearch 5.0.0 by setting"
-      + " <br>`export ES_JAVA_OPTS=\"-Des.index.max_number_of_shards=" + min_required_shards + "\"`"
-      + " <br>first on every node.</b>");
+    if (min_required_shards > 0) {
+      fail
+        .push("<b>At least 1 index has `"
+          + min_required_shards
+          + "` shards.  By default, Elasticsearch 5.0.0 will not start up with"
+          + " any index containing > 1024 shards.  If you wish to upgrade, you will need to start Elasticsearch 5.0.0 by setting"
+          + " <br>`export ES_JAVA_OPTS=\"-Des.index.max_number_of_shards="
+          + min_required_shards
+          + "\"`"
+          + " <br>first on every node.</b>");
     }
     return log
       .result(
@@ -1842,6 +1957,14 @@ IndexSettings.known_settings = {
     })
 
   .then(function(r) {
+    if (_.has(r, [
+      'metadata', 'indices', '.security'
+    ])) {
+      delete r.metadata.indices['.security'];
+      if (_.keys(r.metadata.indices).length === 0) {
+        r = {}
+      }
+    }
     if (!r.metadata) {
       log.log('No indices to check');
       return;
@@ -2051,49 +2174,6 @@ function NodeSettings() {
       'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_settings_changes.html#_index_level_settings');
   }
 
-  function watcher_thread_pool(node) {
-    return check_hash(
-      'blue',
-      'Watcher thread pool settings',
-      node.settings,
-      function(v, k) {
-        var new_k = k.replace(/threadpool.watcher/, 'xpack.watcher.thread_pool');
-        if (new_k === k) {
-          return;
-        }
-        delete node.settings[k];
-        return "`" + k + "` has been renamed to `" + new_k + "`. (This setting may have been autoset by Watcher, in which case this can be ignored)."
-      },
-      'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_settings_changes.html#_threadpool_settings');
-  }
-
-  function thread_pool(node) {
-    return check_hash(
-      'red',
-      'Thread pool settings',
-      node.settings,
-      function(v, k) {
-        if (!k.match(/^threadpool/)) {
-          return;
-        }
-        if (k.match(/suggest/)) {
-          return "`" + k + "` has been removed"
-        }
-        var new_k = k.replace(/threadpool/, 'thread_pool');
-        // fixed
-        if (new_k.match(/\.(index|search|bulk|percolate|watcher)\./)) {
-          new_k = new_k.replace(/\.(capacity|queue)$/, '.queue_size');
-        } else
-        // scaling
-        if (new_k.match(/\.(snapshot|warmer|refresh|listener)\./)) {
-          new_k = new_k.replace(/\.min/, '.core').replace(/.size/, '.max')
-        }
-        delete node.settings[k];
-        return "`" + k + "` has been renamed to `" + new_k + "`"
-      },
-      'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_settings_changes.html#_threadpool_settings');
-  }
-
   function per_node_checks(node_name) {
 
     var node_color = 'green';
@@ -2119,8 +2199,9 @@ function NodeSettings() {
     node_color = worse(node_color, host_settings(node));
     node_color = worse(node_color, default_index_analyzer(node));
     node_color = worse(node_color, index_settings(node));
-    node_color = worse(node_color, watcher_thread_pool(node));
-    node_color = worse(node_color, thread_pool(node));
+    node_color = worse(node_color, ClusterSettings
+      .watcher_thread_pool(node.settings));
+    node_color = worse(node_color, ClusterSettings.thread_pool(node.settings));
     node_color = worse(node_color, ClusterSettings
       .removed_settings(node.settings));
     node_color = worse(node_color, ClusterSettings
