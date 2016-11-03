@@ -422,6 +422,7 @@ li.red:before {
   padding: 0.5em 0 0.5em 0.5em;
   margin: 0em 0 0.5em 0.5em;
   width: 97%;
+  background: lightgrey;
 }
 
 #migration_log li.top ul {
