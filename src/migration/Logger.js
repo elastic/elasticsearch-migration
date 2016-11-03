@@ -40,6 +40,9 @@ function Logger(log_el,error_el) {
     if (typeof e === "string") {
       console.log(e);
       msg = e;
+    } else if (e instanceof ES_Error) {
+      msg = e.toString();
+      console.log(msg);
     } else {
       console.log(e.message, e.stack);
       msg = e.message;
