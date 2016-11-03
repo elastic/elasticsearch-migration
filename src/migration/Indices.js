@@ -50,12 +50,16 @@ function Indices() {
         }
       }
     });
-    if (min_required_shards > 0)
-    {
-      fail.push("<b>At least 1 index has `" + min_required_shards + "` shards.  By default, Elasticsearch 5.0.0 will not start up with"
-      + " any index containing > 1024 shards.  If you wish to upgrade, you will need to start Elasticsearch 5.0.0 by setting"
-      + " <br>`export ES_JAVA_OPTS=\"-Des.index.max_number_of_shards=" + min_required_shards + "\"`"
-      + " <br>first on every node.</b>");
+    if (min_required_shards > 0) {
+      fail
+        .push("<b>At least 1 index has `"
+          + min_required_shards
+          + "` shards.  By default, Elasticsearch 5.0.0 will not start up with"
+          + " any index containing > 1024 shards.  If you wish to upgrade, you will need to start Elasticsearch 5.0.0 by setting"
+          + " <br>`export ES_JAVA_OPTS=\"-Des.index.max_number_of_shards="
+          + min_required_shards
+          + "\"`"
+          + " <br>first on every node.</b>");
     }
     return log
       .result(
