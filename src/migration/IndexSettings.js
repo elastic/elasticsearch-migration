@@ -66,7 +66,6 @@ function IndexSettings(index) {
       "index.shard.recovery.file_chunk_size" : "indices.recovery.file_chunk_size",
       "index.shard.recovery.concurrent_streams" : "indices.recovery.concurrent_streams",
       "index.shard.recovery.concurrent_small_file_streams" : "indices.recovery.concurrent_small_file_streams",
-      "index.cache.query.enable" : "index.requests.cache.enable",
       "indices.cache.query.size" : "indices.requests.cache.size",
       "index.translog.flush_threshold_ops" : "index.translog.flush_threshold_size",
       "index.cache.query.enable" : "index.requests.cache.enable",
