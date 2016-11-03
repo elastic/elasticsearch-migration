@@ -143,6 +143,14 @@ function Indices() {
     })
 
   .then(function(r) {
+    if (_.has(r, [
+      'metadata', 'indices', '.security'
+    ])) {
+      delete r.metadata.indices['.security'];
+      if (_.keys(r.metadata.indices).length === 0) {
+        r = {}
+      }
+    }
     if (!r.metadata) {
       log.log('No indices to check');
       return;
