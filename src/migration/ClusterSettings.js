@@ -137,9 +137,12 @@ ClusterSettings.renamed_settings = function(settings) {
     "cloud.aws.s3.proxy_port" : "cloud.aws.s3.proxy.port",
     "cloud.azure.storage.account" : "cloud.azure.storage.{my_account_name}.account",
     "cloud.azure.storage.key" : "cloud.azure.storage.{my_account_name}.key",
-    "shield.ssl" : "xpack.security.ssl.enabled",
+    "shield.ssl" : "xpack.security.transport.ssl.enabled",
+    "shield.ssl.ciphers" : "xpack.ssl.cipher_suites",
+    "shield.ssl.hostname_verification" : "xpack.ssl.verification_mode",
+    "shield.transport.ssl.client.auth" : "xpack.ssl.client_authentication",
     "shield.http.ssl" : "xpack.security.http.ssl.enabled",
-    "shield.ssl.hostname_verification" : "xpack.security.ssl.hostname_verification.enabled",
+    "shield.http.ssl.client.auth" : "xpack.security.http.ssl.client_authentication",
     "security.dls_fls.enabled" : "xpack.security.dls_fls.enabled",
     "security.enabled" : "xpack.security.enabled",
     "watcher.http.default_connection_timeout" : "xpack.http.default_connection_timeout",
@@ -167,7 +170,28 @@ ClusterSettings.renamed_settings = function(settings) {
         delete settings[k];
         return "`" + base_k + "` has been renamed to `" + renamed[base_k] + "`"
       }
-      var new_k = re_replace(base_k, /^shield\./, 'xpack.security.')
+      var new_k = re_replace(
+        base_k,
+        /^transport\.profiles\.([^.]+)\.shield\.ssl\.client.auth/,
+        'transport.profiles.$1.xpack.security.ssl.client_authentication')
+        || re_replace(
+          base_k,
+          /^transport\.profiles\.([^.]+)\.shield\.ssl/,
+          'transport.profiles.$1.xpack.security.ssl.enabled')
+        || re_replace(
+          base_k,
+          /^transport\.profiles\.([^.]+)\.shield\.ciphers/,
+          'transport.profiles.$1.xpack.security.ssl.cipher_suites')
+        || re_replace(
+          base_k,
+          /^transport\.profiles\.([^.]+)\.shield\.hostname_verification/,
+          'transport.profiles.$1.xpack.security.ssl.verification_mode')
+        || re_replace(
+          base_k,
+          /^shield.authc.realms\.([^.]+)\.hostname_verification/,
+          'xpack.security.authc.realms.$1.ssl.verification_mode')
+        || re_replace(base_k, /^shield\.ssl\./, 'xpack.ssl.')
+        || re_replace(base_k, /^shield\./, 'xpack.security.')
         || re_replace(base_k, /^marvel.agent./, 'xpack.monitoring.collection.')
         || re_replace(base_k, /^marvel\./, 'xpack.monitoring.')
         || re_replace(base_k, /^watcher\.http\./, 'xpack.http.')
@@ -205,6 +229,10 @@ ClusterSettings.removed_settings = function(settings) {
     "max-open-files" : true,
     "netty.gathering" : true,
     "repositories.uri.list_directories" : true,
+    "shield.ssl.hostname_verification.resolve_name" : true,
+    "shield.ssl.session.cache_size" : true,
+    "shield.ssl.session.cache_timeout" : true,
+    "shield.ssl.protocol" : true,
     "transport.service.type" : true,
     "useLinkedTransferQueue" : true,
     "xpack.security.authc.native.reload.interval" : true,
@@ -221,7 +249,14 @@ ClusterSettings.removed_settings = function(settings) {
     settings,
     function(v, k) {
       var base_k = strip_dot_num(k);
-      if (_.has(removed, base_k)) {
+      if (_.has(removed, base_k)
+        || base_k
+          .match(/transport\.profiles\.[^.]+\.shield\.session\.cache_size/)
+        || base_k
+          .match(/transport\.profiles\.[^.]+\.shield\.session\.cache_timeout/)
+        || base_k
+          .match(/transport\.profiles\.[^.]+\.shield\.hostname_verification\.resolve_name/)
+        || base_k.match(/transport\.profiles\.[^.]+\.shield.protocol/)) {
         delete settings[k];
         return "`" + base_k + "`"
       }
