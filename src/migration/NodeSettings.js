@@ -69,7 +69,8 @@ function NodeSettings() {
   }
 
   function file_descriptors(node) {
-    var min = node.os.name === 'Mac OS X' ? 10240 : 65536;
+    var min = node.os.name === 'Mac OS X' ? 10240
+      : node.os.name.match(/Windows/) ? -1 : 65536;
     var fail = [];
     if (node.process.max_file_descriptors < min) {
       fail = [
