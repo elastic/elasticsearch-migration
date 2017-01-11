@@ -98,4 +98,14 @@ Checks
         }
       },
 
+      {
+        name : "Attachement Type",
+        docs : "",
+        color : "yellow",
+        msg : "Fields of type `attachment` will not be accessible until it is reindexed.",
+        check : function(field) {
+          return field.type && field.type === "attachment"
+        }
+      },
+
     ]);
