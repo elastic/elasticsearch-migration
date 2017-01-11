@@ -1,4 +1,4 @@
-== Elasticsearch Migration Plugin v1.18
+== Elasticsearch Migration Plugin v1.19
 
 This plugin will help you to check whether you can upgrade directly to
 Elasticsearch version 2.x, or whether you need to make changes to your data
@@ -95,6 +95,8 @@ This plugin will check cluster settings and each index for the following:
 ** Custom configured `_timestamp` field.
 ** Use of type-level default analyzer settings.
 ** Use of reserved field names.
+** Use of `.percolator` type
+** Use of `attachment` field
 
 * *Field mapping*:
 ** Fields with the same name in different types with conflicting mappings.
