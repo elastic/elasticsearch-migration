@@ -21,7 +21,7 @@
       <div class="intro">
         <p>
           This Elasticsearch Migration Helper plugin helps you to
-          prepare for your migration from <b>Elasticsearch 2.3.x or 2.4.x</b>
+          prepare for your migration from <b>Elasticsearch 2.x</b>
           to <b>Elasticsearch 5.x.</b> Before starting your migration
           and <b>before using this plugin</b>, you should backup your
           data with <a
@@ -41,24 +41,24 @@
           </dt>
           <dd>Runs a series of checks on your cluster, nodes, and
             indices and alerts you to any known problems that need to
-            be rectified before upgrading.</dd>
+            be rectified before upgrading. <b>Works in Elasticsearch 2.x</b>.</dd>
           <dt>
             <a href="#" id="reindex_switch">Reindex Helper</a>:
           </dt>
           <dd>Indices created before v2.0.0 need to be reindexed
             before they can be used in Elasticsearch 5.x. The reindex
-            helper upgrades old indices at the click of a button.</dd>
+            helper upgrades old indices at the click of a button.
+            <b>Works in Elasticsearch 2.3.x and 2.4.x only.</b>
+            </dd>
           <dt>
             <a href="#" id="depr_switch">Deprecation Logging</a>:
           </dt>
           <dd>Elasticsearch comes with a deprecation logger which
             will log a message whenever deprecated functionality is
             used. This tool enables or disables deprecation logging on
-            your cluster.</dd>
+            your cluster. <b>Deprecation logging is available in 
+            Elasticsearch 2.4.x only</b>.</dd>
         </dl>
-        <p>
-          It will run on Elasticsearch version <b>2.3.x</b> or <b>2.4.x</b> only.
-        </p>
       </div>
       <!--
         MIGRATION TOOL

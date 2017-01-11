@@ -76,7 +76,7 @@ function ReindexController(es, wrapper, error) {
   es.get_version().then(function(v) {
     version = v;
     if (v.lt('2.3.*') || v.gt('2.*')) {
-      throw ('This plugin only works with Elasticsearch versions 2.3.0 - 2.x')
+      throw ('The Reindex Helper only works with Elasticsearch versions 2.3.0 - 2.4.x')
     }
     return new Indices(wrapper);
   }).caught(show_error);

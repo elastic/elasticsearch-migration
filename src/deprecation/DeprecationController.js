@@ -126,8 +126,8 @@ function DeprecationController(es, wrapper, error) {
   console.log('Connecting to: ' + es.host);
 
   es.get_version().then(function(v) {
-    if (v.lt('2.3.*') || v.gt('2.*')) {
-      throw ('This plugin only works with Elasticsearch versions 2.3.0 - 2.x')
+    if (v.lt('2.4.*') || v.gt('2.*')) {
+      throw ('Deprecation Logging is only available in Elasticsearch versions 2.4.x')
     }
     return get_status();
   }).caught(show_error);

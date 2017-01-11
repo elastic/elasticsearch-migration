@@ -64,8 +64,8 @@ function MigrationController(es, log, error) {
 
   .then(function(v) {
     version = v;
-    if (version.lt('2.3.*') || version.gt('2.*')) {
-      throw ('This plugin only works with Elasticsearch versions 2.3.0 - 2.x')
+    if (version.lt('2.0.*') || version.gt('2.*')) {
+      throw ('The Cluster Checkup only works with Elasticsearch versions 2.0.0 - 2.x')
     }
   })
 
