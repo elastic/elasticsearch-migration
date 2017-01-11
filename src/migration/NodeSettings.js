@@ -221,7 +221,11 @@ function NodeSettings() {
     node_color = worse(node_color, ClusterSettings
       .removed_settings(node.settings));
     node_color = worse(node_color, ClusterSettings
+      .removed_xpack_settings(node.settings));
+    node_color = worse(node_color, ClusterSettings
       .renamed_settings(node.settings));
+    node_color = worse(node_color, ClusterSettings
+      .renamed_xpack_settings(node.settings));
     node_color = worse(node_color, ClusterSettings
       .unknown_settings(node.settings));
 

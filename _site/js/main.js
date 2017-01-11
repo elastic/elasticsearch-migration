@@ -326,7 +326,11 @@ function ClusterSettings() {
       cluster_color = worse(cluster_color, ClusterSettings
         .removed_settings(settings));
       cluster_color = worse(cluster_color, ClusterSettings
+        .removed_xpack_settings(settings));
+      cluster_color = worse(cluster_color, ClusterSettings
         .renamed_settings(settings));
+      cluster_color = worse(cluster_color, ClusterSettings
+        .renamed_xpack_settings(settings));
       cluster_color = worse(cluster_color, ClusterSettings
         .unknown_settings(settings));
 
@@ -352,7 +356,7 @@ ClusterSettings.watcher_thread_pool = function(settings) {
         + new_k
         + "`. (This setting may have been autoset by Watcher, in which case this can be ignored)."
     },
-    'https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_settings_changes.html#_threadpool_settings');
+    'https://www.elastic.co/guide/en/x-pack/current/_migrating_from_watcher.html');
 }
 
 ClusterSettings.thread_pool = function(settings) {
@@ -443,7 +447,33 @@ ClusterSettings.renamed_settings = function(settings) {
     "cloud.aws.ec2.proxy_port" : "cloud.aws.ec2.proxy.port",
     "cloud.aws.s3.proxy_port" : "cloud.aws.s3.proxy.port",
     "cloud.azure.storage.account" : "cloud.azure.storage.{my_account_name}.account",
-    "cloud.azure.storage.key" : "cloud.azure.storage.{my_account_name}.key",
+    "cloud.azure.storage.key" : "cloud.azure.storage.{my_account_name}.key"
+  };
+
+  function re_replace(k, re, replace) {
+    if (k.match(re)) {
+      return k.replace(re, replace)
+    }
+  }
+
+  return check_hash(
+    'red',
+    'Renamed settings',
+    settings,
+    function(v, k) {
+      var base_k = strip_dot_num(k);
+
+      if (_.has(renamed, base_k)) {
+        delete settings[k];
+        return "`" + base_k + "` has been renamed to `" + renamed[base_k] + "`"
+      }
+    },
+    "https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_settings_changes.html");
+};
+
+ClusterSettings.renamed_xpack_settings = function(settings) {
+
+  var renamed = {
     "shield.ssl" : "xpack.security.transport.ssl.enabled",
     "shield.ssl.ciphers" : "xpack.ssl.cipher_suites",
     "shield.ssl.hostname_verification" : "xpack.ssl.verification_mode",
@@ -466,7 +496,7 @@ ClusterSettings.renamed_settings = function(settings) {
 
   return check_hash(
     'red',
-    'Renamed settings',
+    'Renamed X-Pack settings',
     settings,
     function(v, k) {
       var base_k = strip_dot_num(k);
@@ -519,7 +549,7 @@ ClusterSettings.renamed_settings = function(settings) {
         return "`" + base_k + "` has been renamed to `" + new_k + "`";
       }
     },
-    "https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_settings_changes.html");
+    "https://www.elastic.co/guide/en/x-pack/5.0/migrating-to-xpack.html");
 };
 
 ClusterSettings.removed_settings = function(settings) {
@@ -532,7 +562,6 @@ ClusterSettings.removed_settings = function(settings) {
     "node.local" : true,
     "node.mode" : true,
     "path.plugins" : true,
-    "security.manager.enabled" : true,
     "indices.recovery.concurrent_small_file_streams" : true,
     "indices.recovery.concurrent_file_streams" : true,
     "indices.requests.cache.concurrency_level" : true,
@@ -542,12 +571,31 @@ ClusterSettings.removed_settings = function(settings) {
     "max-open-files" : true,
     "netty.gathering" : true,
     "repositories.uri.list_directories" : true,
+    "useLinkedTransferQueue" : true
+  };
+
+  return check_hash(
+    'blue',
+    'Removed settings',
+    settings,
+    function(v, k) {
+      var base_k = strip_dot_num(k);
+      if (_.has(removed, base_k)) {
+        delete settings[k];
+        return "`" + base_k + "`"
+      }
+    },
+    "https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_settings_changes.html");
+};
+
+ClusterSettings.removed_xpack_settings = function(settings) {
+  var removed = {
+    "security.manager.enabled" : true,
     "shield.ssl.hostname_verification.resolve_name" : true,
     "shield.ssl.session.cache_size" : true,
     "shield.ssl.session.cache_timeout" : true,
     "shield.ssl.protocol" : true,
     "transport.service.type" : true,
-    "useLinkedTransferQueue" : true,
     "xpack.security.authc.native.reload.interval" : true,
     "xpack.security.authz.store.files.roles" : true,
     "xpack.security.authz.store.roles.index.reload.interval" : true,
@@ -558,7 +606,7 @@ ClusterSettings.removed_settings = function(settings) {
 
   return check_hash(
     'blue',
-    'Removed settings',
+    'Removed X-Pack settings',
     settings,
     function(v, k) {
       var base_k = strip_dot_num(k);
@@ -574,7 +622,7 @@ ClusterSettings.removed_settings = function(settings) {
         return "`" + base_k + "`"
       }
     },
-    "https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_settings_changes.html");
+    "https://www.elastic.co/guide/en/x-pack/current/migrating-to-xpack.html");
 };
 
 ClusterSettings.known_settings = {
@@ -2206,7 +2254,11 @@ function NodeSettings() {
     node_color = worse(node_color, ClusterSettings
       .removed_settings(node.settings));
     node_color = worse(node_color, ClusterSettings
+      .removed_xpack_settings(node.settings));
+    node_color = worse(node_color, ClusterSettings
       .renamed_settings(node.settings));
+    node_color = worse(node_color, ClusterSettings
+      .renamed_xpack_settings(node.settings));
     node_color = worse(node_color, ClusterSettings
       .unknown_settings(node.settings));
 
