@@ -59,9 +59,9 @@ Checks
 
       {
         name : "Fields with dots",
-        docs : "https://www.elastic.co/guide/en/elasticsearch/reference/2.0/breaking_20_mapping_changes.html#_field_names_may_not_contain_dots",
-        color : "red",
-        msg : "Dots in field names lead to ambiguous field resolution",
+        docs : "https://www.elastic.co/guide/en/elasticsearch/reference/2.4/dots-in-names.html",
+        color : "yellow",
+        msg : "Dots in field names can lead to ambiguous field resolution. Elasticsearch 2.4.0 and above have an option to accept dots in field names, as long as the field does not conflict with existing mappings.",
         check : function(field, name) {
           return name.match(/\\\./)
 
