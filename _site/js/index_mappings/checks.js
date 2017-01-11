@@ -28,6 +28,17 @@ Checks
       },
 
       {
+        name : "Percolator",
+        docs : "",
+        color : "red",
+        msg : "Indices with the percolator type cannot be upgraded.",
+
+        check : function(mapping, name) {
+          return name === '.percolator';
+        }
+      },
+
+      {
         name : "Field: `_id`",
         docs : "https://www.elastic.co/guide/en/elasticsearch/reference/2.0/breaking_20_mapping_changes.html#migration-meta-fields",
         color : "blue",
@@ -35,8 +46,8 @@ Checks
           + "Importantly, it will not be possible to extract the `_id` value "
           + "from a `path`",
 
-        check : function(mapping) {
-          return mapping._id && Object.keys(mapping._id).length;
+        check : function(mapping, name) {
+          return mapping._id && Object.keys(mapping._id).length && name !== '.percolator';
         }
       },
 
