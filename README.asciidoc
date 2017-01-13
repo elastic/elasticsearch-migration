@@ -27,14 +27,14 @@ To install, run the following command in your Elasticsearch home directory on a 
 
 [source,sh]
 ---------------
-./bin/plugin -i migration -u https://github.com/elastic/elasticsearch-migration/releases/download/v1.18/elasticsearch-migration-1.18.zip
+./bin/plugin -i migration -u https://github.com/elastic/elasticsearch-migration/releases/download/v1.19/elasticsearch-migration-1.19.zip
 ---------------
 
 Or the equivalent on a Windows machine:
 
 [source,sh]
 ---------------
-.\bin\plugin -i migration -u https://github.com/elastic/elasticsearch-migration/releases/download/v1.18/elasticsearch-migration-1.18.zip
+.\bin\plugin -i migration -u https://github.com/elastic/elasticsearch-migration/releases/download/v1.19/elasticsearch-migration-1.19.zip
 ---------------
 
 === Checking a local server
