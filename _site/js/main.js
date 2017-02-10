@@ -2038,6 +2038,19 @@ function NodeSettings() {
   var nodes_color = 'green';
   var nodes;
 
+  function jvm_version(node) {
+    var jvm_version = node.jvm.version;
+    if (jvm_version >= "1.8.0") {
+      return;
+    }
+    return log.result('red', 'Java Version', [
+      "Java version 8 (1.8.0) or above is required. Current version: `"
+        + jvm_version
+        + "`"
+    ], '');
+
+  }
+
   function node_roles(node) {
     var roles = {
       "data" : null,
@@ -2102,8 +2115,8 @@ function NodeSettings() {
   }
 
   function file_descriptors(node) {
-    var min = node.os.name === 'Mac OS X' ? 10240
-      : node.os.name.match(/Windows/) ? -1 : 65536;
+    var min = node.os.name === 'Mac OS X' ? 10240 : node.os.name
+      .match(/Windows/) ? -1 : 65536;
     var fail = [];
     if (node.process.max_file_descriptors < min) {
       fail = [
@@ -2239,6 +2252,7 @@ function NodeSettings() {
     // Set by by default
     delete node.settings['config.ignore_system_properties'];
 
+    node_color = worse(node_color, jvm_version(node));
     node_color = worse(node_color, node_roles(node));
     node_color = worse(node_color, node_attrs(node));
     node_color = worse(node_color, heap_size(node));
