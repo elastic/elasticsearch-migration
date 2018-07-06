@@ -5,6 +5,7 @@ function Indices(wrapper) {
 
   function on_change(name) {
     var index = indices[name];
+
     var row = jQuery('#' + name_to_id(name));
     if (index.get_reindex_status() === 'finished') {
       delete indices[name];
@@ -21,7 +22,7 @@ function Indices(wrapper) {
   }
 
   function name_to_id(name) {
-    return 'index_' + name.replace(/[. ]/g, '_');
+    return 'index_' + name.replace(/[. &]/g, '_');
   }
 
   function init_queue() {
