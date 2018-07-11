@@ -1,0 +1,497 @@
+/* ----- General rules ----------------------------------------------------- */
+html, body, div, h1, ul, li, a, p {
+  font-family: Open Sans, Helvetica, Arial, sans-serif;
+  font-weight: normal;
+  line-height: 1.4em;
+}
+
+html {
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  color: #777;
+  background: white url('images/body_bg.png') repeat-x 0 20px;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+}
+
+a, a:hover, a:visited {
+  color: #31beb1;
+}
+
+a {
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* ----- Body and intro ---------------------------------------------------- */
+div#body {
+  max-width: 900px;
+  margin: 10px auto;
+  padding-top: 90px;
+  background: transparent url('images/elastic.jpeg') 0px 0px no-repeat;
+}
+
+h1 {
+  color: white;
+  font-size: 32px;
+  text-align: left;
+  font-family: Gibson-Regular, Arial, Helvetica, sans-serif;
+  height: 32px;
+  margin-bottom: 60px;
+}
+
+#blurb {
+  border: 1px solid #40d6ca;
+  border-radius: 0px 10px 0 10px;
+  padding: 15px 25px 15px 15px;
+  position: relative;
+  margin-bottom: 30px;
+}
+
+#blurb h2 {
+  margin: 1em 0 0.5em 0;
+}
+
+#blurb p, #blurb li {
+  line-height: 1.4em;
+}
+
+#blurb_button {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: #40d6ca;
+  color: white;
+  border: 1px solid #40d6ca;
+  border-top: 1px solid white;
+  font-size: 1em;
+  border-radius: 0 0 5px 5px;
+  margin: -1px -1px 0 0;
+  z-index: 10000;
+  cursor: pointer;
+  border-radius: 0 0 5px 5px;
+}
+
+#intro_switch {
+  float: right;
+  margin-top: 1em;
+  font-weight: bold;
+}
+
+b {
+  color: #555;
+}
+
+code {
+  color: #555;
+  font-family: Consolas, Menlo, 'DejaVu Sans Mono',
+    'Bitstream Vera Sans Mono', monospace;
+  background: #eee;
+  padding: 2px 1px;
+}
+
+#breaking {
+  color: black;
+  text-align: center;
+  padding: 1em;
+  background: #f5f5f5;
+  border: 1px solid #e2e2e2;
+}
+
+dt {
+  font-weight: bold
+}
+
+dd {
+  margin-bottom: 1em;
+}
+
+/* ----- Form -------------------------------------------------------------- */
+#main_form {
+  max-width: 735px;
+  margin: 15px 5px 15px 0px;
+}
+
+#creds_label {
+  font-size: 90%;
+  margin-left: 0.5em;
+}
+
+#main_form input[type=text], #main_form button {
+  font-size: 100%;
+  padding: 0.25em 0.5em;
+  margin-right: 0;
+  border: 1px solid #ccc;
+  border-radius: 0.25em;
+  width: 63%;
+  top: -1px;
+}
+
+#main_form button {
+  background: url("images/go.png") no-repeat right 50% #31beb1;
+  cursor: pointer;
+  border: none;
+  color: white;
+  padding: 0.4em 1em;
+  line-height: 1em;
+  height: 2em;
+  border-radius: 35px;
+  margin-left: 1%;
+  width: 35%;
+}
+
+#main_form button:focus {
+  outline: none;
+}
+
+/* ----- Deprecation --------------------------------------------------------------- */
+#depr_wrapper {
+  border: 1px solid #ececec;
+  background: #fafafa;
+  padding: 10px;
+  margin: 10px 0;
+  position: relative;
+}
+
+#depr_wrapper h2 {
+  background: #666;
+  font-size: 1.2em;
+  color: white;
+  padding: 0.5em 0 0.5em 0.5em;
+  margin: 1em 0 1em 0.5em;
+  width: 97%;
+}
+
+#depr_wrapper a {
+  display: block;
+  margin: 15px 20px;
+  color: #666;
+}
+
+#depr_wrapper a:hover {
+  text-decoration: none;
+  color: black;
+}
+
+#depr_wrapper a:before, #depr_status:before {
+  content: "\2022";
+  font-size: 3em;
+  vertical-align: top;
+  margin-right: 5px;
+}
+
+#depr_wrapper a.enable:before, #depr_status.green:before {
+  color: #95c73d;
+}
+
+#depr_status.yellow:before {
+  color: #f3bb19;
+}
+
+#depr_wrapper a.disable:before, #depr_status.red:before {
+  color: #c33;
+}
+
+/* ----- Reindex table --------------------------------------------------------------- */
+#reindex_wrapper {
+  position: relative;
+}
+
+table {
+  table-layout: fixed;
+  margin-bottom: 5em;
+  width: 100%;
+}
+
+th {
+  text-align: left;
+  color: white;
+  cursor: pointer;
+  background: #555;
+}
+
+th:before {
+  font-family: Consolas, Menlo, 'DejaVu Sans Mono',
+    'Bitstream Vera Sans Mono', monospace;
+  font-size: 0.8em;
+}
+
+th.asc:before {
+  content: "\2191";
+}
+
+th.desc:before {
+  content: "\2193";
+}
+
+th, td {
+  font-family: Consolas, Menlo, 'DejaVu Sans Mono',
+    'Bitstream Vera Sans Mono', monospace;
+  white-space: nowrap;
+  vertical-align: top;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  margin-right: 2px;
+  padding: 2px;
+  font-size: 0.9em;
+  table-layout: fixed;
+}
+
+#td_detail {
+  font-family: Consolas, Menlo, 'DejaVu Sans Mono',
+    'Bitstream Vera Sans Mono', monospace;
+  position: absolute;
+  display: block;
+  width: auto;
+  height: auto;
+  background: white;
+  padding: 10px;
+  outline: 4px solid #eee;
+  white-space: normal;
+  overflow: auto;
+  text-overflow: initial;
+}
+
+#no_indices {
+  font-size: 1.2em;
+  margin-left: 1em;
+  color: green;
+}
+
+col.\2139 {
+  width: 2.2%;
+}
+
+col.Status, col.Docs, col.Created {
+  width: 10%;
+}
+
+col.Action, col.Shards, col.Size, col.Version, col.Replicas {
+  width: 7.75%;
+}
+
+col.Name, col.Info {
+  width: 14%;
+}
+
+tr.Red, tr.Yellow, tr.Closed {
+  background: #eee;
+}
+
+tr.Red {
+  background: rgb(255, 244, 244);
+}
+
+tr.Yellow {
+  background: rgb(254, 255, 244);
+}
+
+tr.Reindexing td {
+  color: green;
+}
+
+tr.Error td {
+  color: red;
+}
+
+/* ----- Reindex Log wrapper --------------------------------------------------------------- */
+div#error_wrapper {
+  padding: 10px;
+  margin-bottom: 1em;
+  color: red;
+  max-width: 700px;
+}
+
+/* ----- Reindex Process --------------------------------------------------------------- */
+#reindex_process {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  padding: 10%;
+  box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.97);
+  overflow: clip;
+  z-index: 10000;
+  background: rgba(255, 255, 255, 0.97);
+}
+
+#reindex_content {
+  width: 100%;
+  height: 100%;
+  background: white;
+  overflow: auto;
+  border: 1px solid #ddd;
+  padding: 20px;
+}
+
+#reindex_content a {
+  position: fixed;
+  right: 11%;
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Chrome/Safari/Opera */
+  -khtml-user-select: none; /* Konqueror */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version */
+}
+
+#reindex_content pre.curl {
+  background: #fdfdfd;
+  margin: 0;
+  padding: 10px;
+}
+
+/* ----- Migration Log --------------------------------------------------------------- */
+div #migration_wrapper {
+  border: 1px solid #ececec;
+  background: #fafafa;
+  padding: 10px;
+  margin: 10px 0;
+  position: relative;
+}
+
+div#show_hide_green {
+  color: #999;
+  font-size: 80%;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+#migration_log.no_green .green {
+  display: none;
+}
+
+#migration_log.no_green .header, #migration_log.no_green .top {
+  display: block;
+}
+
+#migration_log .header {
+  background: #666;
+  font-size: 1.2em;
+  color: white;
+  padding: 0.5em 0 0.5em 0.5em;
+  margin: 1em 0 0.5em 0.5em;
+  width: 97%;
+}
+
+#colors, #migration_log ul {
+  padding: 0;
+  margin: 0 0 5px 0;
+  list-style-type: none;
+}
+
+#colors li:before, #migration_log li:before {
+  content: "\2022";
+  font-size: 3em;
+  vertical-align: top;
+  margin-right: 5px;
+}
+
+li.green:before {
+  color: #95c73d;
+}
+
+li.blue:before {
+  color: #748cd2;
+}
+
+li.yellow:before {
+  color: #f3bb19;
+}
+
+li.red:before {
+  color: #c33;
+}
+
+#migration_log li.top>span {
+  display: block;
+  padding: 5px;
+  font-size: 1.2em;
+  color: white;
+  padding: 0.5em 0 0.5em 0.5em;
+  margin: 0em 0 0.5em 0.5em;
+  width: 97%;
+  background: lightgrey;
+}
+
+#migration_log li.top ul {
+  padding-left: 20px;
+}
+
+#migration_log li.top:before {
+  content: ""
+}
+
+#migration_log li.top.green>span {
+  background: #95c73d;
+}
+
+#migration_log li.top.blue>span {
+  background: #748CD2;
+}
+
+#migration_log li.top.yellow>span {
+  background: #f3bb19;
+}
+
+#migration_log li.top.red>span {
+  background: #c33;
+}
+
+#migration_log li.node>span, #migration_log li.index>span {
+  display: inline-block;
+  border: 1px solid #ddd;
+  color: #333;
+  font-weight: bold;
+  padding: 5px;
+  margin: -5px 0 5px 0;
+}
+
+#migration_log li.node  ul, #migration_log li.index  ul {
+  padding-left: 30px;
+}
+
+#migration_log li.check>ul>li:before {
+  content: "";
+  margin: 0;
+}
+
+#migration_log li.check>ul {
+  padding: 0;
+  list-style-type: disc;
+  list-style-position: outside;
+  list-style-type: disc;
+  list-style-position: outside;
+  margin: 5px 0 5px 40px;
+}
+
+#migration_log li.node, #migration_log li.index {
+  margin-top: 15px;
+}
+
+a.info {
+  background: white;
+  border: 1px solid #ddd;
+  margin-left: 10px;
+  color: #333;
+  padding: 1px;
+}
+
+.reindex a.info {
+  margin: 0;
+}
+
+/* ----- Lists ------------------------------------------------------------- */
+
+/* ----- List items -------------------------------------------------------- */

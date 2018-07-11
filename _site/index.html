@@ -1,0 +1,197 @@
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Elasticsearch Migration Helper</title>
+<link href="styles.css" media="all" rel="stylesheet" />
+<script type="text/javascript" src="js/bluebird/bluebird.min.js"></script>
+<script type="text/javascript" src="js/jquery/jquery-1.12.3.min.js"></script>
+<script type="text/javascript" src="js/tablesorter/tablesorter.min.js"></script>
+<script type="text/javascript" src="js/lodash/lodash.min.js"></script>
+<script type="text/javascript" src="js/main.js"></script>
+</head>
+<body>
+  <div id="body">
+    <h1>Elasticsearch Migration Helper v2.0.4</h1>
+    <div id="blurb">
+      <button id="blurb_button">Hide</button>
+      <a href="#" id="intro_switch">&#x2190; Home</a>
+      <!--
+        INTRO
+      -->
+      <div class="intro">
+        <p>
+          This Elasticsearch Migration Helper plugin helps you to
+          prepare for your migration from <b>Elasticsearch 2.x</b>
+          to <b>Elasticsearch 5.x.</b> Before starting your migration
+          and <b>before using this plugin</b>, you should backup your
+          data with <a
+            href="https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-snapshots.html"
+            target="_blank"
+          >snapshot/restore</a>.
+        </p>
+        <p id="breaking">
+          Read more about important changes in the <a
+            href="https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking-changes-5.0.html"
+          >Breaking Changes</a> documentation online.
+        </p>
+        <p>This plugin has three tools:</p>
+        <dl>
+          <dt>
+            <a href="#" id="migration_switch">Cluster Checkup</a>:
+          </dt>
+          <dd>Runs a series of checks on your cluster, nodes, and
+            indices and alerts you to any known problems that need to
+            be rectified before upgrading. <b>Works in Elasticsearch 2.x</b>.</dd>
+          <dt>
+            <a href="#" id="reindex_switch">Reindex Helper</a>:
+          </dt>
+          <dd>Indices created before v2.0.0 need to be reindexed
+            before they can be used in Elasticsearch 5.x. The reindex
+            helper upgrades old indices at the click of a button.
+            <b>Works in Elasticsearch 2.3.x and 2.4.x only.</b>
+            </dd>
+          <dt>
+            <a href="#" id="depr_switch">Deprecation Logging</a>:
+          </dt>
+          <dd>Elasticsearch comes with a deprecation logger which
+            will log a message whenever deprecated functionality is
+            used. This tool enables or disables deprecation logging on
+            your cluster. <b>Deprecation logging is available in 
+            Elasticsearch 2.4.x only</b>.</dd>
+        </dl>
+      </div>
+      <!--
+        MIGRATION TOOL
+      -->
+      <div class="migration">
+        <h2>Cluster Checkup</h2>
+        <p>This tool will run a series of checks against your
+          Elasticsearch cluster to determine whether you can upgrade
+          directly to Elasticsearch version 5.x, or whether you will
+          need to make changes to your data before doing so.</p>
+        <p>Each check is given a color:</p>
+        <ul id="colors">
+          <li class="green">Everything is OK.</li>
+          <li class="blue">An advisory note that something has
+            changed. No action needed.</li>
+          <li class="yellow">You can upgrade directly, but you
+            are using deprecated functionality which will not be
+            available in version 5.x.</li>
+          <li class="red">You cannot upgrade without fixing this
+            problem.</li>
+        </ul>
+      </div>
+      <!--
+        REINDEX TOOL
+      -->
+      <div class="reindex">
+        <h2>Reindex Helper</h2>
+        <p>
+          Indices created before <b>Elasticsearch 2.0</b> need to be
+          reindexed in order to be usable by <b>Elasticsearch 5.0</b>
+          and above. This tool will help you to identify and reindex
+          old indices.
+        </p>
+        <p>
+          This tool works with Elasticsearch versions <b>2.3.x and
+            2.4.x</b> only.
+        </p>
+        <p>
+          <b>Important:</b>
+        </p>
+        <ul>
+          <li><b>Back up your indices before reindexing your
+              data.</b></li>
+          <li>Indices will be reindexed to a new index called <code>{name}-{version}</code>,
+            where <code>version</code> is the version of
+            Elasticsearch, e.g. <code>my_index-2.3.0</code>.
+          </li>
+          <li>The alias <code>{name}</code> will be added to the
+            new index, along with any other aliases that previously
+            pointed to the old index.
+          </li>
+          <li>The old index will be made <b>read-only</b> during
+            the reindexing process, after which it will be deleted.
+          </li>
+          <li>The hand over between the old and new index is <b>not
+              atomic</b>. There may be a small window between deleting the
+            old index and adding an alias pointing to the new index
+            during which neither index is available.
+          </li>
+          <li>This tool will only function with <b>open</b>
+            indices with status <b><code>green</code></b>. The reindex
+            process waits for the new index to turn <code>green</code>
+            before completing.
+          </li>
+          <li>In case the automatic reindex process fails for any
+            reason (e.g. bad mappings), the <a href="#" class="info">ℹ</a>
+            button shows the steps required to reindex which you can
+            customise to resolve problems and run manually.
+          </li>
+        </ul>
+      </div>
+      <!--
+        DEPRECATION LOGGER
+      -->
+      <div class="depr">
+        <h2>Deprecation Logging</h2>
+        <p>While the Cluster Checker is useful for spotting
+          deprecated configurations, it can only check data that is
+          stored in the cluster. It can't detect the use of deprecated
+          query time syntax.</p>
+        <p>Elasticsearch comes with deprecation logging which,
+          when enabled, will write a log message whenever a deprecated
+          feature is used. This can produce a lot of log messages
+          which is why deprecation logging is not enabled by default.</p>
+        <p>This tool can be used to enable or disable deprecation
+          logging on all nodes in the cluster.</p>
+        <p>
+          Deprecation logs can be found in the logs directory, in the
+          file named <code>elasticsearch_deprecation.log</code>
+        </p>
+      </div>
+      <!--
+        FORM
+      -->
+      <form id="main_form">
+        <div>
+          <input type="text" name="es_host" id="es_host"
+            value="http://localhost:9200"
+          />
+          <button class="migration">Run checks now</button>
+          <button class="reindex">List old indices</button>
+          <button class="depr">Check status</button>
+          <label id="creds_label" for="enable_creds"> Enable
+            basic AUTH support </label> <input type="checkbox"
+            name="enable_creds" id="enable_creds"
+          />
+        </div>
+      </form>
+    </div>
+    <!--
+        ERROR LOG
+    -->
+    <div id="error_wrapper"></div>
+    <!--
+        MIGRATION OUTPUT
+    -->
+    <div id="migration_wrapper" class="migration">
+      <div id="show_hide_green">
+        <label for="show_green"> Show green test results </label> <input
+          type="checkbox" name="show_green" id="show_green"
+        />
+      </div>
+      <div id="migration_log" class="no_green"></div>
+    </div>
+    <!--
+        REINDEX OUTPUT
+    -->
+    <div id="reindex_wrapper" class="reindex"></div>
+    <!--
+        DEPRECATION OUTPUT
+    -->
+    <div id="depr_wrapper" class="depr"></div>
+  </div>
+  <div id="reindex_process" style="display: none"></div>
+</body>
+</html>
