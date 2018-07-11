@@ -21,7 +21,7 @@ function Indices(wrapper) {
   }
 
   function name_to_id(name) {
-    return 'index_' + name.replace(/[. ]/g, '_');
+      return 'index_' + name.replace(/[. &]/g, '_');
   }
 
   function init_queue() {
