@@ -1,3 +1,4 @@
+
 == Elasticsearch Migration Helper  v2.4
 
 This Elasticsearch Migration Helper plugin helps you to prepare for your
@@ -67,3 +68,15 @@ If you use basic AUTH, you will also need to tick the `Enable basic AUTH support
 -----
 http.cors.allow-credentials: true
 -----
+=======
+== Elasticsearch Migration Helper
+
+This plugin will help you to check whether you can upgrade directly to the
+next major version of Elasticsearch, or whether you need to make changes to
+your data and cluster before doing so.
+
+It is available in two versions:
+
+* https://github.com/elastic/elasticsearch-migration/tree/2.x[For upgrading from Elasticsearch 2.x to Elasticsearch 5.x]
+* https://github.com/elastic/elasticsearch-migration/tree/1.x[For upgrading from Elasticsearch 1.x to Elasticsearch 2.x]
+
